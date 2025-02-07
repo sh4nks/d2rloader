@@ -1,0 +1,61 @@
+[project]
+name = "d2rloader"
+version = "0.1.0"
+dependencies = [
+  "loguru>=0.7.3",
+  "psutil>=6.1.1",
+  "pydantic>=2.10.6",
+  "PySide6",
+  "pywin32>=308",
+  "wmi>=1.5.1",
+]
+requires-python = ">=3.8"
+authors = [
+  {name = "sh4nks", email = ""},
+]
+maintainers = [
+  {name = "sh4nks", email = ""}
+]
+description = "Diablo 2 Resurrected Multi Loader"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICEN[CS]E.*"]
+keywords = ["d2r", "qt", "diablo", "loader"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[dependency-groups]
+dev = [
+  "ruff",
+  "ipython"
+]
+
+[project.urls]
+Homepage = "https://github.com/sh4nks/d2r-loader"
+Documentation = "https://github.com/sh4nks/d2r-loader"
+Repository = "https://github.com/sh4nks/d2r-loader"
+"Bug Tracker" = "https://github.com/sh4nks/d2r-loader/issues"
+Changelog = "https://github.com/sh4nks/d2r-loader/blob/master/CHANGELOG.md"
+
+[project.scripts]
+d2rloader = "d2rloader.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.mypy]
+plugins = ['pydantic.mypy', 'keyof.mypy_plugin']
+
+[tool.basedpyright]
+include = ["d2rloader"]
+exclude = ["**/node_modules", "**/__pycache__"]
+defineConstant = { DEBUG = true }
+reportIgnoreCommentWithoutRule = false
+reportMissingImports = "error"
+reportMissingTypeStubs = false
+reportUnusedCallResult = false
+reportAny = false
+reportExplicitAny = false
