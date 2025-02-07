@@ -12,7 +12,7 @@ The basic stuff works for launching multiple instances but I have a couple of fe
 - TZ/DClone Tracker
 - aaand maybe something like the settings switcher from Diablo2Loader (lets see how much spare time I have for gaming and coding after winter is over)
 
-![Screenshot](./screenshot "D2R Loader screenshot")
+![Screenshot](./screenshot.png "D2R Loader screenshot")
 
 # License
 
