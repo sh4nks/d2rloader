@@ -31,6 +31,9 @@ dev = [
   "ruff",
   "ipython"
 ]
+release = [
+  "pyinstaller"
+]
 
 [project.urls]
 Homepage = "https://github.com/sh4nks/d2r-loader"

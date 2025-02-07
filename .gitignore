@@ -5,3 +5,6 @@ venv
 *.json
 *.exe
 *.log
+build
+dist
+*.spec
