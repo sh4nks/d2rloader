@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QMessageBox,
     QPushButton,
     QStyleFactory,
     QDialogButtonBox,
@@ -135,20 +134,6 @@ class SettingDialogWidget(QDialog):
             if len(dialog.selectedFiles()) > 0:
                 button.setText(dialog.selectedFiles()[0])
                 setattr(self.setting, setting_key, dialog.selectedFiles()[0])
-
-        if setting_key == "accounts_path":
-            QMessageBox.critical(
-                self,
-                "Account Path Changed",
-                (
-                    "<center>"
-                    "The <strong>application must be restarted</strong> in order for the accounts to be reloaded."
-                    "<br />"
-                    "Until then, all account changes will be saved to the <strong>previous location</strong>!"
-                    "</center>"
-                ),
-                QMessageBox.StandardButton.Ok,
-            )
 
     def _get_setting_value(self, setting_key: str) -> str:
         return getattr(self.setting, setting_key)

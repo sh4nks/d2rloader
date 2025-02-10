@@ -1,65 +1,61 @@
-import functools
 import os
 import re
 import subprocess
 from time import sleep
-import winreg
 
-import win32api
-import win32con
-import win32crypt
-import win32gui
-import win32pdhutil
+import psutil
 from loguru import logger
-from PySide6.QtCore import QObject, QProcess, Signal, Slot
+from PySide6.QtCore import QObject, QThreadPool, Signal
 
-from d2rloader.models.account import Account, Region
+from d2rloader.constants import UPDATE_HANDLE
+from d2rloader.core.process_utils import change_window_title
+from d2rloader.core.regedit import (
+    is_changed_web_token,
+    protect_data,
+    update_region_value,
+    update_web_token_value,
+)
+from d2rloader.core.worker import Worker
+from d2rloader.models.account import Account
 from d2rloader.models.setting import Setting
 
-REG_BATTLE_NET_PATH = (
-    "SOFTWARE\\Blizzard Entertainment\\Battle.net\\Launch Options\\OSI"
-)
 
-ENTROPY = bytes([0xc8, 0x76, 0xf4, 0xae, 0x4c, 0x95, 0x2e, 0xfe, 0xf2, 0xfa, 0x0f, 0x54, 0x19, 0xc0, 0x9c,0x43])
-
-WINDOW_TITLE_FORMAT = "{0} ({1})"
-
-UPDATE_HANDLE = "DiabloII Check For Other Instances"
+class ProcessingError(Exception):
+    pass
 
 
-# TODO: Move this off of the mainloop to not block the GUI
 class ProcessManager(QObject):
-    process_finished: Signal = Signal(Account, int)
+    process_finished: Signal = Signal(bool, Account, int)
     process_error: Signal = Signal(Account, str)
 
-    def __init__(self, settings: Setting) -> None:
+    def __init__(self, parent: QObject, settings: Setting) -> None:
         super().__init__()
         self.settings: Setting = settings
+        self.threadpool = QThreadPool()
         self.handle: HandleManager = HandleManager(self.settings)
+        self.threadpool: QThreadPool = QThreadPool()
 
-    def start_instance(self, qprocess: QProcess, account: Account):
+    def start(self, account: Account):
+        worker = Worker(self._start_instance, account)
+        worker.signals.error.connect(self._handle_worker_error)
+        worker.signals.success.connect(self._handle_worker_success)
+        self.threadpool.start(worker)
+
+    def _handle_worker_error(self, err: tuple[ProcessingError, str]):
+        msg, *_ = err[0].args
+        logger.error(f"Could not start instance due to: {msg}")
+        self.process_error.emit(None, msg)
+
+    def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
+        logger.info(f"Instance started and user logged in: {result[0]}")
+        self.process_finished.emit(result[0], result[1], result[2])
+
+    def _start_instance(self, account: Account):
+        logger.debug("_start_instance")
         cmd = os.path.join(self.settings.game_path, "D2R.exe")
 
-        if not os.path.exists(cmd):
-            msg = f"Could not find 'D2R.exe' in '{self.settings.game_path}'"
-            logger.error(msg)
-            self.process_error.emit(account, msg)
-            return
-
-        # TODO: Implement password based authentication
-        if account.token is None:
-            msg = "Token-based authentication is selected but no token was provided."
-            logger.error(msg)
-            self.process_error.emit(account, msg)
-            self.process_error.disconnect()
-            return
-
-        protected_token: bytes | None = protect_data(account.token)
-        if protected_token is None:
-            msg = "Could not encrypt token"
-            logger.error(msg)
-            self.process_error.emit(account, msg)
-            self.process_error.disconnect()
+        protected_token: bytes | None = self._validate_start(cmd, account)
+        if not protected_token:
             return
 
         update_region_value(account.region)
@@ -70,17 +66,41 @@ class ProcessManager(QObject):
             params = [param.strip() for param in account.params.split(" ")]
 
         self.handle.kill(silent=True)
-        qprocess.started.connect(
-            functools.partial(self._process_start_finished, protected_token, account, qprocess)
-        )
-        qprocess.start(self.settings.game_path + "/D2R.exe", params)
-        qprocess.waitForStarted(5000)
+        try:
+            proc = subprocess.Popen([cmd, *params])
+            logger.trace(f"Launching instance: {[cmd, *params]}")
+        except OSError | ValueError as e:
+            logger.error(e)
+            raise ProcessingError(f"Error occured during executing {cmd}", e)
 
-    @Slot()  # pyright:ignore
-    def _process_start_finished(self, token: bytes, account: Account, qprocess: QProcess):
-        logger.debug(f"process id: {qprocess.processId()}")
+        logger.debug(f"{proc.pid}")
+        if proc.pid:
+            return self._handle_instance_start(protected_token, account, proc.pid)
+
+        raise ProcessingError("No PID returned")
+
+    def _validate_start(self, cmd: str, account: Account):
+        if not os.path.exists(cmd):
+            raise ProcessingError(
+                f"Could not find 'D2R.exe' in '{self.settings.game_path}'"
+            )
+
+        # TODO: Implement password based authentication
+        if account.token is None:
+            raise ProcessingError(
+                "Token-based authentication is selected but no token was provided."
+            )
+
+        protected_token: bytes | None = protect_data(account.token)
+        if protected_token is None:
+            raise ProcessingError("Could not encrypt token")
+
+        return protected_token
+
+    def _handle_instance_start(self, token: bytes, account: Account, pid: int):
+        logger.debug(f"process id: {pid}")
         sleep(1)  # give D2R a chance to start
-        change_window_title(account, qprocess.processId())
+        change_window_title(account, pid)
         sleep(0.5)
         self.handle.kill()
         logged_in = False
@@ -93,18 +113,19 @@ class ProcessManager(QObject):
             counter += wait_time
             sleep(wait_time)
 
-            if timeout == counter:
+            if timeout == counter or not psutil.pid_exists(pid):
                 break
 
-        logger.debug(
-            f"Waited for {counter} seconds till until log in ({logged_in}) or timeout."
-        )
+        sleep(0.5)  # make sure pid exists
+        if psutil.pid_exists(pid):
+            logger.debug(
+                f"Waited for {counter} seconds till until log in ({logged_in}) or timeout."
+            )
+            return logged_in, account, pid
 
-        if logged_in:
-            self.process_finished.emit(account, qprocess.processId())
-        else:
-            self.process_finished.emit(None, qprocess.processId())
-        self.process_finished.disconnect()
+        raise ProcessingError(
+            f"Instance closed or killed - pid {pid} doesn't exist anymore"
+        )
 
 
 class HandleManager:
@@ -161,95 +182,5 @@ class HandleManager:
             if not silent:
                 logger.error(f"Couldn't kill handle: {result.stdout}")
             return False
+        logger.info(f"Killed handle '{UPDATE_HANDLE}' for pid {process.get('d2pid')}")
         return True
-
-
-def change_window_title(account: Account, pid: int):
-    win32gui.EnumWindows(window_title_callback, account)
-
-
-def window_title_callback(hwnd: int, account: Account):
-    title = win32gui.GetWindowText(hwnd)
-
-    if title == "Diablo II: Resurrected":
-        window_title = WINDOW_TITLE_FORMAT.format(
-            account.username, account.region.value
-        )
-        logger.debug(f"Setting Window Handle '{hwnd}' to '{window_title}'")
-        # fmt: off
-        win32gui.SetWindowText(
-            hwnd,  # pyright: ignore
-            WINDOW_TITLE_FORMAT.format(account.username, account.region.value),
-        )
-        # fmt: on
-
-
-def kill_process_by_name(procname: str):
-    try:
-        win32pdhutil.GetPerformanceAttributes("Process", "ID Process", procname)
-    except:
-        pass
-
-    pids: list[int] = win32pdhutil.FindPerformanceAttributesByName(procname)
-
-    try:
-        pids.remove(win32api.GetCurrentProcessId())
-    except ValueError:
-        pass
-
-    if len(pids) == 0:
-        logger.error(f"Can't find {procname}")
-        return
-
-    for pid in pids:
-        logger.info(f"Killing {procname} with pid {pid}")
-        kill_process_by_pid(pid)
-
-
-def kill_process_by_pid(pid: int):
-    handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, 0, pid)
-    win32api.TerminateProcess(handle, 0)
-    win32api.CloseHandle(handle)
-
-
-def protect_data(token: str):
-    protected_token: bytes = win32crypt.CryptProtectData(bytes(token, "utf-8"), None, ENTROPY)
-    return protected_token or None
-
-
-def update_region_value(value: Region):
-    shortcode = value.value.split(".")[0].upper()  # eu.actual.battle.net -> EU
-    with winreg.OpenKey(
-        winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
-    ) as key:
-        logger.debug(f"Setting REGION to: {shortcode}")
-        try:
-            winreg.SetValueEx(key, "REGION", 1, winreg.REG_SZ, shortcode)
-        except Exception as e:
-            logger.error(f"Couldn't set registry key 'REGION' to '{shortcode}'", e)
-            raise e
-
-def update_web_token_value(value: bytes):
-    with winreg.OpenKey(
-        winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
-    ) as key:
-        try:
-            winreg.SetValueEx(key, "WEB_TOKEN", 1, winreg.REG_BINARY, value)
-        except Exception as e:
-            logger.error("Couldn't set registry key 'WEB_TOKEN'", e)
-            raise e
-
-def is_changed_web_token(previous_value: bytes):
-    with winreg.OpenKey(
-        winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ
-    ) as key:
-        try:
-            value = winreg.QueryValueEx(key, "WEB_TOKEN")
-        except Exception as e:
-            logger.error("Couldn't read registry key 'WEB_TOKEN'", e)
-            raise e
-
-        if not value:
-            return False
-
-        return value[0] != previous_value

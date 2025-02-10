@@ -4,17 +4,20 @@ import sys
 import signal
 
 import PySide6
+from PySide6 import QtCore
 from PySide6.QtCore import Slot
 
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QHBoxLayout,
+    QLayout,
     QMainWindow,
     QMenu,
     QMessageBox,
     QPushButton,
     QStyleFactory,
+    QVBoxLayout,
     QWidget,
     QGridLayout,
 )
@@ -23,6 +26,7 @@ from PySide6.QtGui import QAction
 
 from d2rloader.core.core import D2RLoaderState
 from d2rloader.core.storage import StorageType
+from d2rloader.ui.info_tab import InfoTabsWidget
 from d2rloader.ui.setting_dialog import SettingDialogWidget
 from d2rloader.ui.table import D2RLoaderTableWidget
 
@@ -32,12 +36,19 @@ class MainWidget(QWidget):
         super().__init__()
         self.state: D2RLoaderState = state
         main_layout = QGridLayout(self)
+
         self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(state)
+        self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(state)
+
         top_layout = self.create_top_layout()
         main_layout.addLayout(top_layout, 0, 0, 1, 2)
 
         table_layout = self.create_table_layout()
         main_layout.addLayout(table_layout, 1, 0, 1, 2)
+        main_layout.setRowStretch(1, 7)
+
+        info_layout = self.create_console_layout()
+        main_layout.addLayout(info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom)
 
     def create_top_layout(self):
         top_layout = QHBoxLayout()
@@ -62,11 +73,16 @@ class MainWidget(QWidget):
         table_layout.addWidget(self.table_widget)
         return table_layout
 
+    def create_console_layout(self):
+        console_layout = QVBoxLayout()
+        console_layout.addWidget(self.info_tab_widget)
+        return console_layout
 
 class MainWindow(QMainWindow):
     def __init__(self, state: D2RLoaderState):
         super().__init__()
         self.state: D2RLoaderState = state
+        self.state.register_process_manager(self)
 
         self.main_widget: MainWidget = MainWidget(state)
         self.setWindowTitle("D2RLoader")
@@ -134,14 +150,18 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_settings(self):
         settings_dialog = SettingDialogWidget(self, self.state.settings.data)
+        prev_accounts_path = self.state.settings.data.accounts_path
         if settings_dialog.exec():
-            print(settings_dialog.data)
             self.state.settings.update(settings_dialog.data)
+            if prev_accounts_path != settings_dialog.data.accounts_path:
+                self.state.accounts.load()
+                self.main_widget.table_widget.reload_table()
 
     @Slot()
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self)
-        self.state.accounts.load(filename)
+        self.state.settings.set(accounts_path=filename)
+        self.state.accounts.load()
         self.main_widget.table_widget.reload_table()
 
     @Slot()

@@ -54,7 +54,7 @@ class BaseService(Generic[T]):
     def delete(self, index: int):
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         self.data.pop(index)
-        self.storage.save(self._state, self.storage_type)
+        self.storage.save(self._state, self.storage_type, self.path)
 
     def load(self):
         self._state = cast(list[T], self.storage.load(self.storage_type, self.path))

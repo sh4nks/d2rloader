@@ -1,5 +1,4 @@
 import pathlib
-import os
 import enum
 from typing import Any
 
