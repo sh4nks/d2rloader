@@ -1,0 +1,27 @@
+name: Package Application with Pyinstaller
+
+on:
+  push:
+    tags:
+      - "v*"
+      
+permissions:
+  contents: write
+  
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Package Application
+      uses: JackMcKew/pyinstaller-action-windows@main
+      with:
+        path: d2rloader
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Diablo II Loader
+        path: src/dist/windows
