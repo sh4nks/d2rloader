@@ -51,7 +51,6 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        logger.debug("_start_instance")
         cmd = os.path.join(self.settings.game_path, "D2R.exe")
 
         protected_token: bytes | None = self._validate_start(cmd, account)
@@ -73,7 +72,6 @@ class ProcessManager(QObject):
             logger.error(e)
             raise ProcessingError(f"Error occured during executing {cmd}", e)
 
-        logger.debug(f"{proc.pid}")
         if proc.pid:
             return self._handle_instance_start(protected_token, account, proc.pid)
 
@@ -98,7 +96,7 @@ class ProcessManager(QObject):
         return protected_token
 
     def _handle_instance_start(self, token: bytes, account: Account, pid: int):
-        logger.debug(f"process id: {pid}")
+        logger.trace(f"process id: {pid}")
         sleep(1)  # give D2R a chance to start
         change_window_title(account, pid)
         sleep(0.5)

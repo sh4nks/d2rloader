@@ -9,7 +9,7 @@ class D2RLoader:
         self.ui: D2RLoaderUI = D2RLoaderUI(self.state)
 
     def run(self):
-        logger.debug(f"{self.state}")
+        logger.trace(f"{self.state}")
         self.ui.run()
 
 

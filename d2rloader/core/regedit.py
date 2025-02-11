@@ -22,7 +22,7 @@ def update_region_value(value: Region):
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
     ) as key:
-        logger.debug(f"Setting REGION to: {shortcode}")
+        logger.trace(f"Setting REGION to: {shortcode}")
         try:
             winreg.SetValueEx(key, "REGION", 1, winreg.REG_SZ, shortcode)
         except Exception as e:

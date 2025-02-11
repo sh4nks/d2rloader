@@ -29,7 +29,7 @@ from d2rloader.core.storage import StorageType
 from d2rloader.ui.info_tab import InfoTabsWidget
 from d2rloader.ui.setting_dialog import SettingDialogWidget
 from d2rloader.ui.table import D2RLoaderTableWidget
-
+from loguru import logger
 
 class MainWidget(QWidget):
     def __init__(self, state: D2RLoaderState):
@@ -50,8 +50,13 @@ class MainWidget(QWidget):
         info_layout = self.create_console_layout()
         main_layout.addLayout(info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom)
 
+        self._register_logger_output_panel()
+
     def create_top_layout(self):
         top_layout = QHBoxLayout()
+
+        refresh_button = QPushButton("Refresh")
+        top_layout.addWidget(refresh_button)
 
         top_layout.addStretch(1)
         add_button = QPushButton("Add")
@@ -77,6 +82,11 @@ class MainWidget(QWidget):
         console_layout = QVBoxLayout()
         console_layout.addWidget(self.info_tab_widget)
         return console_layout
+
+    def _register_logger_output_panel(self):
+        fmt = "{time:YYYY-MM-DD HH:mm:ss} | <level>{level: <8}</level> - <level>{message}</level>"
+        logger.add(self.info_tab_widget.application_output.output.emit, format=fmt, level="DEBUG")
+
 
 class MainWindow(QMainWindow):
     def __init__(self, state: D2RLoaderState):
@@ -190,5 +200,6 @@ class D2RLoaderUI:
         if self.ui is None or self.ui_app is None:
             raise Exception("UI has not been initialized.")
         self.ui.show()
+        logger.info("D2RLoader started")
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(self.ui_app.exec())
