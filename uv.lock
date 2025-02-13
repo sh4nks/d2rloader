@@ -121,7 +121,7 @@ dependencies = [
     { name = "pyinstaller" },
     { name = "pyside6", version = "6.6.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pyside6", version = "6.8.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "pywin32" },
+    { name = "pywin32", marker = "sys_platform == 'win32'" },
 ]
 
 [package.dev-dependencies]
@@ -143,7 +143,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "pyinstaller", specifier = ">=6.11.1" },
     { name = "pyside6" },
-    { name = "pywin32", specifier = ">=308" },
+    { name = "pywin32", marker = "sys_platform == 'win32'", specifier = ">=308" },
 ]
 
 [package.metadata.requires-dev]

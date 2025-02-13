@@ -13,8 +13,15 @@ The basic stuff works for launching multiple instances but I have a couple of fe
 - TZ/DClone Tracker
 - aaand maybe something like the settings switcher from Diablo2Loader (lets see how much spare time I have for gaming and coding after winter is over)
 
+
+Running on Windows
+
 ![Screenshot](./screenshot.png "D2R Loader screenshot")
 
+
+Running on Linux
+
+![Screenshot](./screenshot_linux.png "D2R Loader screenshot")
 
 # How To Run This
 
