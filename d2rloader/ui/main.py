@@ -3,8 +3,18 @@ import os
 import sys
 import signal
 
+import PySide6.QtAsyncio as QtAsyncio
+
+try:
+    from ctypes import windll  # Only exists on Windows.
+    d2rloader_id = 'com.github.sh4nks.d2rloader'
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(d2rloader_id)
+except ImportError:
+    pass
+
 import PySide6
 from PySide6 import QtCore
+from PySide6 import QtGui
 from PySide6.QtCore import Slot
 
 from PySide6.QtWidgets import (
@@ -24,6 +34,7 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtGui import QAction
 
+from d2rloader.constants import BASE_DIR
 from d2rloader.core.core import D2RLoaderState
 from d2rloader.core.storage import StorageType
 from d2rloader.ui.info_tab import InfoTabsWidget
@@ -56,6 +67,7 @@ class MainWidget(QWidget):
         top_layout = QHBoxLayout()
 
         refresh_button = QPushButton("Refresh")
+        refresh_button.clicked.connect(self.info_tab_widget.update_info)
         top_layout.addWidget(refresh_button)
 
         top_layout.addStretch(1)
@@ -190,6 +202,7 @@ class D2RLoaderUI:
 
     def init_ui(self, state: D2RLoaderState):
         self.ui_app = QApplication(sys.argv)
+        self.ui_app.setWindowIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'd2rloader.ico')))
         if state.settings.data.theme:
             QApplication.setStyle(QStyleFactory.create(state.settings.data.theme))
 
@@ -200,6 +213,10 @@ class D2RLoaderUI:
         if self.ui is None or self.ui_app is None:
             raise Exception("UI has not been initialized.")
         self.ui.show()
+
         logger.info("D2RLoader started")
+        # cant use QtAsyncio yet due to:
+        # NotImplementedError('QAsyncioEventLoop.getaddrinfo() is not implemented yet')
+        # qtasyncio_run(keep_running=True, quit_qapp=True, handle_sigint=True)
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(self.ui_app.exec())

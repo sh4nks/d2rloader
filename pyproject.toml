@@ -2,12 +2,13 @@
 name = "d2rloader"
 version = "0.1.0"
 dependencies = [
+  "httpx>=0.28.1",
   "loguru>=0.7.3",
   "psutil>=6.1.1",
   "pydantic>=2.10.6",
+  "pyinstaller>=6.11.1",
   "PySide6",
   "pywin32>=308",
-  "wmi>=1.5.1",
 ]
 requires-python = ">=3.8"
 authors = [

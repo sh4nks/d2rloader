@@ -16,3 +16,8 @@ class D2RLoader:
 def main():
     app = D2RLoader()
     app.run()
+
+
+if __name__ == "__main__":
+    app = D2RLoader()
+    app.run()

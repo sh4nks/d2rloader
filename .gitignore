@@ -7,4 +7,3 @@ venv
 *.log
 build
 dist
-*.spec

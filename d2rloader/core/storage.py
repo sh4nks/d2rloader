@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from d2rloader.core import BASE_DIR
+from d2rloader.constants import BASE_DIR
 from d2rloader.models.account import Account
 from d2rloader.models.setting import Setting
 
