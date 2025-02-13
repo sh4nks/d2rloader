@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from loguru import logger
 
 from d2rloader.models.setting import Setting
 from d2rloader.ui.utils.utils import init_widget
@@ -150,6 +151,7 @@ class SettingDialogWidget(QDialog):
             return result
 
         default_style_name = parent.style().objectName().lower()
+        logger.debug(f"Current theme: {default_style_name}")
         for style in QStyleFactory.keys():
             if style.lower() == default_style_name:
                 result.insert(0, style)

@@ -15,7 +15,6 @@ from PySide6.QtWidgets import (
 from loguru import logger
 
 from d2rloader.core.core import D2RLoaderState
-from d2rloader.core.process_utils import kill_process_by_pid
 from d2rloader.models.account import Account, AuthMethod, Region
 from d2rloader.ui.account_dialog import AccountDialogWidget
 
@@ -242,13 +241,13 @@ class D2RLoaderTableWidget(QTableWidget):
 
     def process_kill(self, account: Account, button: QPushButton):
         pid = getattr(self._processes, account.username, None)
-        if pid is not None:
+        if pid is None or self._state.process_manager is None:
+            logger.error("Stopping D2R.exe failed - PID not found!")
+        else:
             logger.info(
                 f"Stopping D2R.exe [{self._processes[account.username]}] - {account.username} ({account.region})"
             )
-            kill_process_by_pid(self._processes[account.username][1])
-        else:
-            logger.error("Stopping D2R.exe failed - PID not found!")
+            self._state.process_manager.kill(0)
 
     @Slot()  # pyright: ignore
     def process_finished(self, button: QPushButton, logged_in: bool, account: Account | None, pid: int):
