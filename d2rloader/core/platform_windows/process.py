@@ -8,16 +8,17 @@ from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from d2rloader.constants import UPDATE_HANDLE
-from d2rloader.core.process_windows.utils import change_window_title
-from d2rloader.core.regedit import (
+from d2rloader.core.worker import Worker
+from d2rloader.models.account import Account
+from d2rloader.models.setting import Setting
+
+from .utils import change_window_title
+from .regedit import (
     is_changed_web_token,
     protect_data,
     update_region_value,
     update_web_token_value,
 )
-from d2rloader.core.worker import Worker
-from d2rloader.models.account import Account
-from d2rloader.models.setting import Setting
 
 
 class ProcessingError(Exception):

@@ -34,7 +34,7 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtGui import QAction
 
-from d2rloader.constants import BASE_DIR
+from d2rloader.constants import BASE_DIR, ICON_PATH
 from d2rloader.core.core import D2RLoaderState
 from d2rloader.core.storage import StorageType
 from d2rloader.ui.info_tab import InfoTabsWidget
@@ -150,16 +150,13 @@ class MainWindow(QMainWindow):
         import importlib.metadata
 
         version_string = importlib.metadata.version("d2rloader")
-        install_path = os.path.abspath(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        )
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
         qt_version = f"{PySide6.__version__}"
         about_content = f"""
             <center>
             <h3>Diablo 2 Resurrected Loader</h3>
             <br />
-            <b>Install Path: </b> {install_path} <br /><br />
+            <b>Install Path: </b> {BASE_DIR} <br /><br />
             <b>Version: </b> {version_string}<br />
             <b>Python: </b> {python_version}, <b>Qt: </b> {qt_version}<br />
             <b>Source Code: </b> <a href="https://github.com/sh4nks/d2r-loader">Link</a><br />
@@ -202,7 +199,7 @@ class D2RLoaderUI:
 
     def init_ui(self, state: D2RLoaderState):
         self.ui_app = QApplication(sys.argv)
-        self.ui_app.setWindowIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'd2rloader.ico')))
+        self.ui_app.setWindowIcon(QtGui.QIcon(ICON_PATH))
         if state.settings.data.theme:
             QApplication.setStyle(QStyleFactory.create(state.settings.data.theme))
 

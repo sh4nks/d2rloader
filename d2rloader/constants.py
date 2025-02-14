@@ -1,7 +1,25 @@
 import os
+import sys
 
-BASE_DIR: str = os.path.join(
-    os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    BASE_DIR: str = os.path.join(  # pyright: ignore
+        os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    )
+else:
+    BASE_DIR: str = os.path.join(  # pyright: ignore
+        os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    )
+
+ICON_PATH = os.path.join(
+    os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "d2rloader.ico"
+)
+
+
+CONFIG_BASE_DIR = os.path.join(
+    os.environ.get("APPDATA")
+    or os.environ.get("XDG_CONFIG_HOME")
+    or os.path.join(os.environ["HOME"], ".config"),
+    "d2rloader",
 )
 
 UPDATE_HANDLE = "DiabloII Check For Other Instances"
@@ -34,10 +52,6 @@ ENTROPY = bytes(
 WINDOW_TITLE_FORMAT = "{0} ({1})"
 
 D2R_PROCESS_TITLE = "Diablo II: Resurrected"
-
-DCLONE_MAPPING = {
-
-}
 
 DIABLO_LEVELS = {
     "1": "Rogue Encampment",

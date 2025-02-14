@@ -1,6 +1,6 @@
 import sys
 
 if sys.platform == 'linux':
-    from .process_linux.manager import ProcessManager
+    from .platform_linux.process import ProcessManager
 else:
-    from .process_windows.manager import ProcessManager  # noqa: F401
+    from .platform_windows.process import ProcessManager  # noqa: F401
