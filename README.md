@@ -32,6 +32,14 @@ Running on Linux
 5. ``uv run d2rloader``
 6. Check it out and configure it properly via the GUI :)
 
+# Linux Pre-requisites:
+
+- Lutris
+- Install Diablo 2 Resurrected via Lutris (Battle.Net). You can also point to a D2R installation in Battle.Net
+- Unfortunately only Password Auth is supported for Linux due to the way token generation works by using the Windows DBAPI. I'd happliy make Token auth available if someone could point me in the right direction.
+ - If you get "We couldn't verify your account with that information", try changing your password and retry again. This worked for me at least.
+- Handle64.exe is not needed on Linux as we are working with different WINEPREFIXES to solve this problem :-)
+- Select your prefered WINEPREFIX location otherwise a default one will be set to $XDG_CONFIG_DIRS/d2rloader/wineprefixes
 
 # License
 

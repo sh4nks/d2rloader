@@ -7,7 +7,8 @@ import PySide6.QtAsyncio as QtAsyncio
 
 try:
     from ctypes import windll  # Only exists on Windows.
-    d2rloader_id = 'com.github.sh4nks.d2rloader'
+
+    d2rloader_id = "com.github.sh4nks.d2rloader"
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(d2rloader_id)
 except ImportError:
     pass
@@ -42,6 +43,7 @@ from d2rloader.ui.setting_dialog import SettingDialogWidget
 from d2rloader.ui.table import D2RLoaderTableWidget
 from loguru import logger
 
+
 class MainWidget(QWidget):
     def __init__(self, state: D2RLoaderState):
         super().__init__()
@@ -59,7 +61,9 @@ class MainWidget(QWidget):
         main_layout.setRowStretch(1, 7)
 
         info_layout = self.create_console_layout()
-        main_layout.addLayout(info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom)
+        main_layout.addLayout(
+            info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom
+        )
 
         self._register_logger_output_panel()
 
@@ -97,7 +101,11 @@ class MainWidget(QWidget):
 
     def _register_logger_output_panel(self):
         fmt = "{time:YYYY-MM-DD HH:mm:ss} | <level>{level: <8}</level> - <level>{message}</level>"
-        logger.add(self.info_tab_widget.application_output.output.emit, format=fmt, level="DEBUG")
+        logger.add(
+            self.info_tab_widget.application_output.output.emit,
+            format=fmt,
+            level="DEBUG",
+        )
 
 
 class MainWindow(QMainWindow):

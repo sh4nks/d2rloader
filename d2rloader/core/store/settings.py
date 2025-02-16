@@ -11,15 +11,13 @@ class SettingService:
         self.load()
 
         if self._current_setting is None:
-            self._current_setting = Setting(
-                theme="", game_path="", handle_path=""
-            )
+            self._current_setting = Setting(theme="", game_path="", handle_path="")
 
     @property
     def data(self) -> Setting:
         return self._current_setting
 
-    def set(self, **kwargs: Any): # pyright: ignore
+    def set(self, **kwargs: Any):  # pyright: ignore
         for key, value in kwargs.items():
             setattr(self._current_setting, key, value)
 
@@ -32,4 +30,6 @@ class SettingService:
         self._storage.save(self._current_setting, type=StorageType.Setting)
 
     def load(self, path: str | None = None):
-        self._current_setting = cast(Setting, self._storage.load(StorageType.Setting, path))
+        self._current_setting = cast(
+            Setting, self._storage.load(StorageType.Setting, path)
+        )

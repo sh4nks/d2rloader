@@ -30,7 +30,10 @@ class D2RLoaderState:
     def _setup_logger(self):
         if self.settings.data.log_file:
             logger.remove()
-            logger.add(pathlib.Path(BASE_DIR, "d2rloader.log"), level=self.settings.data.log_level.upper())
-        elif self.settings.data.log_level.upper() != 'DEBUG':
+            logger.add(
+                pathlib.Path(BASE_DIR, "d2rloader.log"),
+                level=self.settings.data.log_level.upper(),
+            )
+        elif self.settings.data.log_level.upper() != "DEBUG":
             logger.remove()
             logger.add(sys.stderr, level=self.settings.data.log_level)

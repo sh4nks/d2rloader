@@ -45,7 +45,9 @@ class StorageService:
         elif type == StorageType.Setting:
             settings = self.SETTINGS_PATH
         else:
-            raise NotImplementedError(f"StorageType {type} is not implemented in path finding")
+            raise NotImplementedError(
+                f"StorageType {type} is not implemented in path finding"
+            )
         return settings
 
     def get_storage_content_json(self, content: Any, type: StorageType):

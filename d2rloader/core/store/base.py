@@ -9,7 +9,9 @@ T = TypeVar("T", bound="BaseModel")
 class BaseService(Generic[T]):
     _state: list[T] | None = []
 
-    def __init__(self, storage: StorageService, type: StorageType, path: str | None = None):
+    def __init__(
+        self, storage: StorageService, type: StorageType, path: str | None = None
+    ):
         self.storage_type: StorageType = type
         self.storage: StorageService = storage
         self.path: str | None = path
