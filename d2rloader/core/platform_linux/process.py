@@ -55,7 +55,7 @@ class ProcessManager(QObject):
                     logger.trace(
                         f"Launching instance: {lutris.start_script_path, account.params}"
                     )
-                    proc = subprocess.Popen([lutris.start_script_path], stderr=logfile)
+                    proc = subprocess.Popen(["sh", lutris.start_script_path], stderr=logfile)
                     return None, account, proc.pid
             except OSError | ValueError as e:
                 logger.error(e)
