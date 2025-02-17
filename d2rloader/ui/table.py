@@ -248,12 +248,12 @@ class D2RLoaderTableWidget(QTableWidget):
 
         if pid is None or self._state.process_manager is None:
             logger.error("Stopping D2R.exe failed - PID not found!")
-            self.change_buttons_state(button, "start")
         else:
             logger.info(
                 f"Stopping D2R.exe [{self._processes[account.username]}] - {account.username} ({account.region})"
             )
             self._state.process_manager.kill(pid)
+        self.change_buttons_state(button, "start")
 
     @Slot()  # pyright: ignore
     def process_finished(

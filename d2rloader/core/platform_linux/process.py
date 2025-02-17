@@ -35,7 +35,7 @@ class ProcessManager(QObject):
         logger.info(f"Killing instance with pid: {pid}")
         os.kill(pid, signal.SIGKILL)
 
-    def _handle_worker_error(self, err: tuple[ProcessingError, str]):
+    def _handle_worker_error(self, err: tuple[Exception, str]):
         logger.debug(err)
         msg, *_ = err[0].args
         logger.error(f"Could not start instance due to: {msg}")
@@ -52,12 +52,12 @@ class ProcessManager(QObject):
         if lutris.save_start_script():
             try:
                 with open(lutris.start_script_log_path, "w") as logfile:
-                    logger.trace(
+                    logger.debug(
                         f"Launching instance: {lutris.start_script_path, account.params}"
                     )
                     proc = subprocess.Popen(["sh", lutris.start_script_path], stderr=logfile)
                     return None, account, proc.pid
-            except OSError | ValueError as e:
+            except Exception as e:
                 logger.error(e)
                 raise ProcessingError(
                     f"Error occured during executing {lutris.start_script_path}", e
