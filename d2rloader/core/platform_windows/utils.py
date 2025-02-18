@@ -5,6 +5,7 @@ import win32pdhutil
 from loguru import logger
 
 from d2rloader.constants import D2R_PROCESS_TITLE, WINDOW_TITLE_FORMAT
+from d2rloader.core.exception import ProcessingError
 from d2rloader.models.account import Account
 
 
@@ -46,6 +47,9 @@ def kill_process_by_name(procname: str):
 
 
 def kill_process_by_pid(pid: int):
-    handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, 0, pid)
-    win32api.TerminateProcess(handle, 0)
-    win32api.CloseHandle(handle)
+    try:
+        handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, 0, pid)
+        win32api.TerminateProcess(handle, 0)
+        win32api.CloseHandle(handle)
+    except Exception:
+        raise ProcessingError(f"Couldn't kill pid {pid}")

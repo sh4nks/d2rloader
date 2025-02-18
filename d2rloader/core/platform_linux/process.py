@@ -5,14 +5,11 @@ import subprocess
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
+from d2rloader.core.exception import ProcessingError
 from d2rloader.core.platform_linux.lutris import LutrisManager
 from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account, AuthMethod
 from d2rloader.models.setting import Setting
-
-
-class ProcessingError(Exception):
-    pass
 
 
 class ProcessManager(QObject):

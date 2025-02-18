@@ -8,21 +8,19 @@ from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from d2rloader.constants import UPDATE_HANDLE
+from d2rloader.core.exception import ProcessingError
 from d2rloader.core.worker import Worker
-from d2rloader.models.account import Account
+from d2rloader.models.account import Account, AuthMethod
 from d2rloader.models.setting import Setting
 
-from .utils import change_window_title
+from .utils import change_window_title, kill_process_by_pid
 from .regedit import (
+    get_web_token,
     is_changed_web_token,
     protect_data,
     update_region_value,
     update_web_token_value,
 )
-
-
-class ProcessingError(Exception):
-    pass
 
 
 class ProcessManager(QObject):
@@ -37,7 +35,7 @@ class ProcessManager(QObject):
         self.threadpool: QThreadPool = QThreadPool()
 
     def kill(self, pid: int):
-        pass
+        kill_process_by_pid(pid)
 
     def start(self, account: Account):
         worker = Worker(self._start_instance, account)
@@ -57,37 +55,34 @@ class ProcessManager(QObject):
     def _start_instance(self, account: Account):
         cmd = os.path.join(self.settings.game_path, "D2R.exe")
 
-        protected_token: bytes | None = self._validate_start(cmd, account)
-        if not protected_token:
-            return
-
-        update_region_value(account.region)
-        update_web_token_value(protected_token)
-
-        params: list[str] = []
-        if account.params is not None:
-            params = [param.strip() for param in account.params.split(" ")]
-
-        self.handle.kill(silent=True)
-        try:
-            proc = subprocess.Popen([cmd, *params])
-            logger.trace(f"Launching instance: {[cmd, *params]}")
-        except OSError | ValueError as e:
-            logger.error(e)
-            raise ProcessingError(f"Error occured during executing {cmd}", e)
-
-        if proc.pid:
-            return self._handle_instance_start(protected_token, account, proc.pid)
-
-        raise ProcessingError("No PID returned")
-
-    def _validate_start(self, cmd: str, account: Account):
         if not os.path.exists(cmd):
             raise ProcessingError(
                 f"Could not find 'D2R.exe' in '{self.settings.game_path}'"
             )
 
-        # TODO: Implement password based authentication
+        params: list[str] = []
+        if account.params is not None:
+            params = [param.strip() for param in account.params.split(" ")]
+
+        if account.auth_method == AuthMethod.Token:
+            self._process_auth_token(account, params)
+        elif account.auth_method == AuthMethod.Password:
+            self._process_auth_password(account, params)
+
+        self.handle.kill(silent=True)
+        try:
+            proc = subprocess.Popen([cmd, *params])
+            logger.debug(f"Launching using auth method {account.auth_method.value} instance: {[cmd, *params]}")
+        except OSError | ValueError as e:
+            logger.error(e)
+            raise ProcessingError(f"Error occured during executing {cmd}", e)
+
+        if proc.pid:
+            return self._handle_instance_start(account, proc.pid)
+
+        raise ProcessingError("No PID returned")
+
+    def _process_auth_token(self, account: Account, params: list[str]):
         if account.token is None:
             raise ProcessingError(
                 "Token-based authentication is selected but no token was provided."
@@ -97,19 +92,35 @@ class ProcessManager(QObject):
         if protected_token is None:
             raise ProcessingError("Could not encrypt token")
 
-        return protected_token
+        update_region_value(account.region)
+        update_web_token_value(protected_token)
+        params.extend(["-uid", "osi"])
 
-    def _handle_instance_start(self, token: bytes, account: Account, pid: int):
+    def _process_auth_password(self, account: Account, params: list[str]):
+        if not account.password:
+            raise ProcessingError(
+                "Password-based authentication is selected but no password was provided."
+            )
+
+        params.extend(["-username", account.username, "-password", account.password,"-adress", account.region.value])
+
+    def _handle_instance_start(self, account: Account, pid: int):
         logger.trace(f"process id: {pid}")
         sleep(1)  # give D2R a chance to start
         change_window_title(account, pid)
         sleep(0.5)
         self.handle.kill()
+
+        if account.auth_method == AuthMethod.Password:
+            return True, account, pid
+
         logged_in = False
 
         timeout = 300  # abort after waiting for 5 minutes
         counter = 0
         wait_time = 0.5
+
+        token = get_web_token()
         while not logged_in:
             logged_in = is_changed_web_token(token)
             counter += wait_time

@@ -41,6 +41,21 @@ def update_web_token_value(value: bytes):
             raise e
 
 
+def get_web_token() -> bytes:
+    with winreg.OpenKey(
+        winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ
+    ) as key:
+        try:
+            value = winreg.QueryValueEx(key, "WEB_TOKEN")
+        except Exception as e:
+            logger.error("Couldn't read registry key 'WEB_TOKEN'", e)
+            raise e
+
+        if not value:
+            return b""
+
+        return value[0]
+
 def is_changed_web_token(previous_value: bytes):
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ

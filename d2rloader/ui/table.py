@@ -226,6 +226,13 @@ class D2RLoaderTableWidget(QTableWidget):
             logger.error("ProcessManager not registered!")
             return
 
+        # try to disconnect previous signals before adding a new one
+        try:
+            self._state.process_manager.process_finished.disconnect()
+            self._state.process_manager.process_error.disconnect()
+        except Exception:
+            pass
+
         self.change_buttons_state(button, "stop")
         button.setText("Starting...")
         button.setDisabled(True)
@@ -250,9 +257,14 @@ class D2RLoaderTableWidget(QTableWidget):
             logger.error("Stopping D2R.exe failed - PID not found!")
         else:
             logger.info(
-                f"Stopping D2R.exe [{self._processes[account.username]}] - {account.username} ({account.region})"
+                f"Stopping D2R.exe with PID {self._processes[account.username][1]} - {account.username} ({account.region})"
             )
-            self._state.process_manager.kill(pid)
+            try:
+                self._state.process_manager.kill(pid)
+            except Exception:
+                logger.error(f"Couldn't kill pid {pid}")
+
+        del self._processes[account.username]
         self.change_buttons_state(button, "start")
 
     @Slot()  # pyright: ignore
@@ -271,8 +283,6 @@ class D2RLoaderTableWidget(QTableWidget):
         button.setDisabled(False)
 
         self._processes[account.username] = (logged_in, pid)
-
-        print(self._processes)
 
     @Slot()  # pyright: ignore
     def process_error(self, button: QPushButton, account: Account, msg: str):
