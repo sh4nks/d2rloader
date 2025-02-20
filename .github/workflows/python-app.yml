@@ -23,7 +23,20 @@ jobs:
     - name: Make PyInstaller Package
       run: uv run pyinstaller D2RLoader.spec --noconfirm
 
-    - uses: actions/upload-artifact@v4
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.6
       with:
-        name: D2RLoader
-        path: src/dist/*
+        type: 'zip'
+        filename: 'D2RLoader.windows.zip'
+        path: 'dist/D2RLoader'
+
+    - name: Add release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "D2RLoader.windows.zip"
+        artifactErrorsFailBuild: true
+        allowUpdates: true
+        generateReleaseNotes: true
+        omitBodyDuringUpdate: true
+        omitDraftDuringUpdate: true
+        replacesArtifacts: true
