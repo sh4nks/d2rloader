@@ -7,21 +7,23 @@ on:
       
 permissions:
   contents: write
-  
+
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Package Application
-      uses: JackMcKew/pyinstaller-action-windows@main
+    - name: Install the latest version of uv and set the python version
+      uses: astral-sh/setup-uv@v5
       with:
-        path: d2rloader
+        python-version: 3.13
+
+    - name: Make PyInstaller Package
+      run: uv run pyinstaller D2RLoader.spec --noconfirm
 
     - uses: actions/upload-artifact@v4
       with:
-        name: Diablo II Loader
-        path: src/dist/windows
+        name: D2RLoader
+        path: src/dist/*
