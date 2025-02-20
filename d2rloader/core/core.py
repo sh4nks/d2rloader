@@ -4,7 +4,7 @@ from typing import override
 
 from PySide6.QtCore import QObject
 from loguru import logger
-from d2rloader.constants import BASE_DIR
+from d2rloader.constants import CONFIG_BASE_DIR
 from d2rloader.core.process import ProcessManager
 from d2rloader.core.store.settings import SettingService
 from d2rloader.core.store.accounts import AccountService
@@ -31,7 +31,7 @@ class D2RLoaderState:
         if self.settings.data.log_file:
             logger.remove()
             logger.add(
-                pathlib.Path(BASE_DIR, "d2rloader.log"),
+                pathlib.Path(CONFIG_BASE_DIR, "d2rloader.log"),
                 level=self.settings.data.log_level.upper(),
             )
         elif self.settings.data.log_level.upper() != "DEBUG":

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 import os
 import sys
 
-from d2rloader.constants import BASE_DIR, CONFIG_BASE_DIR
+from d2rloader.constants import CONFIG_BASE_DIR
 
 
 def _get_default_wineprefix():
@@ -12,7 +12,7 @@ def _get_default_wineprefix():
 
 
 def _get_default_accounts_path():
-    return os.path.join(BASE_DIR, "accounts.json")
+    return os.path.join(CONFIG_BASE_DIR, "accounts.json")
 
 
 class Setting(BaseModel):
