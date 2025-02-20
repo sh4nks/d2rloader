@@ -38,7 +38,8 @@ class AuthMethod(enum.Enum):
 
 
 class Account(BaseModel):
-    username: str
+    profile_name: str | None = Field(default=None)
+    email: str
     auth_method: AuthMethod
     token: str | None
     token_protected: bytes | None = Field(default=None)
@@ -46,6 +47,12 @@ class Account(BaseModel):
     region: Region
     params: str | None
     runtime: float | None = Field(default=0)
+
+    @property
+    def displayname(self):
+        if self.profile_name is None or self.profile_name == "":
+            return self.email
+        return self.profile_name
 
 
 # TODO: Unused at the moment - switch to QTableView first

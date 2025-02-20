@@ -102,7 +102,7 @@ class ProcessManager(QObject):
                 "Password-based authentication is selected but no password was provided."
             )
 
-        params.extend(["-username", account.username, "-password", account.password,"-adress", account.region.value])
+        params.extend(["-username", account.email, "-password", account.password,"-adress", account.region.value])
 
     def _handle_instance_start(self, account: Account, pid: int):
         logger.trace(f"process id: {pid}")

@@ -169,6 +169,8 @@ class MainWindow(QMainWindow):
             <b>Python: </b> {python_version}, <b>Qt: </b> {qt_version}<br />
             <b>Source Code: </b> <a href="https://github.com/sh4nks/d2r-loader">Link</a><br />
             <b>License: </b> MIT<br />
+            <br />
+            <b>TZ Info and DClone Info provided by <a href="https://d2emu.com">D2Emu.com</a>
             </center>
         """
 

@@ -17,6 +17,7 @@ from loguru import logger
 from d2rloader.core.core import D2RLoaderState
 from d2rloader.models.account import Account, AuthMethod, Region
 from d2rloader.ui.account_dialog import AccountDialogWidget
+from d2rloader.ui.utils.utils import show_error_dialog
 
 
 class D2RLoaderTableWidget(QTableWidget):
@@ -101,7 +102,7 @@ class D2RLoaderTableWidget(QTableWidget):
         if item is None:
             return
 
-        account_item = QTableWidgetItem(item.username)
+        account_item = QTableWidgetItem(item.email)
         account_item.setFlags(account_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
 
         auth_item = QTableWidgetItem()
@@ -237,7 +238,7 @@ class D2RLoaderTableWidget(QTableWidget):
         button.setText("Starting...")
         button.setDisabled(True)
 
-        logger.info(f"Starting D2R.exe - {account.username} ({account.region.value})")
+        logger.info(f"Starting D2R.exe - {account.displayname} ({account.region.value})")
         self._state.process_manager.process_finished.connect(
             functools.partial(self.process_finished, button)
         )
@@ -249,7 +250,7 @@ class D2RLoaderTableWidget(QTableWidget):
     def process_kill(self, account: Account, button: QPushButton):
         pid = None
         try:
-            pid = self._processes[account.username][1]
+            pid = self._processes[account.email][1]
         except KeyError:
             pass
 
@@ -257,14 +258,14 @@ class D2RLoaderTableWidget(QTableWidget):
             logger.error("Stopping D2R.exe failed - PID not found!")
         else:
             logger.info(
-                f"Stopping D2R.exe with PID {self._processes[account.username][1]} - {account.username} ({account.region})"
+                f"Stopping D2R.exe with PID {self._processes[account.email][1]} - {account.displayname} ({account.region})"
             )
             try:
                 self._state.process_manager.kill(pid)
             except Exception:
                 logger.error(f"Couldn't kill pid {pid}")
 
-        del self._processes[account.username]
+        del self._processes[account.email]
         self.change_buttons_state(button, "start")
 
     @Slot()  # pyright: ignore
@@ -277,13 +278,14 @@ class D2RLoaderTableWidget(QTableWidget):
             self.change_buttons_state(button, "start")
             return
 
-        logger.info(f"Started account {account.username} with pid {pid}")
+        logger.info(f"Started account {account.displayname} with pid {pid}")
         self.change_buttons_state(button, "start")
         button.setText("Running")
         button.setDisabled(False)
 
-        self._processes[account.username] = (logged_in, pid)
+        self._processes[account.email] = (logged_in, pid)
 
     @Slot()  # pyright: ignore
     def process_error(self, button: QPushButton, account: Account, msg: str):
+        show_error_dialog(self, msg)
         self.change_buttons_state(button, "start")

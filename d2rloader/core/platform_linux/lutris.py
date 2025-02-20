@@ -37,7 +37,7 @@ export TERM="xterm"
 cd '{GAME_PATH}'
 
 # Command
-gamemoderun {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION}
+gamemoderun {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION} {PARAMS}
 """
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.+]+')
@@ -79,9 +79,10 @@ class LutrisManager:
             GAME_PATH=self.settings.game_path,
             LUTRIS_PATH=self.lutris_home,
             LUTRIS_UMU_LAUNCHER=self.lutris_umu_launcher,
-            USERNAME=self.account.username,
+            USERNAME=self.account.email,
             PASSWORD=self.account.password,
             REGION=self.account.region.value,
+            PARAMS=self.account.params
         )
 
     def save_start_script(self, force: bool = True):
@@ -102,7 +103,7 @@ class LutrisManager:
         return True
 
     def normalize_username_name(self, delim: str = "-"):
-        text = unidecode.unidecode(self.account.username)
+        text = unidecode.unidecode(self.account.email)
         result: list[str] = []
         for word in _punct_re.split(text.lower()):
             if word:

@@ -18,7 +18,7 @@ def window_title_callback(hwnd: int, account: Account):
 
     if title == D2R_PROCESS_TITLE:
         window_title = WINDOW_TITLE_FORMAT.format(
-            account.username, account.region.value
+            account.displayname, account.region.value
         )
         logger.debug(f"Setting Window Handle '{hwnd}' to '{window_title}'")
         win32gui.SetWindowText(hwnd, window_title)  # pyright: ignore

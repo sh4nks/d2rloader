@@ -73,8 +73,8 @@ class ProcessManager(QObject):
             )
 
         if (
-            len(account.username) == 0
+            len(account.email) == 0
             or account.password is None
             or len(account.password) == 0
         ):
-            raise ProcessingError("No username/password provided")
+            raise ProcessingError("No email/password provided")

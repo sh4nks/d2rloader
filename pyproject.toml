@@ -2,11 +2,9 @@
 name = "d2rloader"
 version = "0.1.0"
 dependencies = [
-  "httpx>=0.28.1",
   "loguru>=0.7.3",
   "psutil>=6.1.1",
   "pydantic>=2.10.6",
-  "pyinstaller>=6.11.1",
   "PySide6",
   "pywin32>=308; platform_system == 'Windows'",
   "unidecode>=1.3.8",
@@ -31,9 +29,7 @@ classifiers = [
 [dependency-groups]
 dev = [
   "ruff",
-  "ipython"
-]
-release = [
+  "ipython",
   "pyinstaller"
 ]
 

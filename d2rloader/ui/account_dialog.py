@@ -27,7 +27,7 @@ class AccountDialogWidget(QDialog):
 
     def __init__(self, parent: QWidget | None = None, account: Account | None = None):
         super().__init__(parent)
-        self.setFixedHeight(200)
+        self.setFixedHeight(230)
         self.setFixedWidth(700)
         main_layout = QVBoxLayout()
         options_group_box = QGroupBox("Options")
@@ -39,16 +39,13 @@ class AccountDialogWidget(QDialog):
         left_layout = QFormLayout()
         right_layout = QFormLayout()
 
-        username_label: Final = QLabel("Account:", self)
-        self.username: Final = QLineEdit()
-        left_layout.addRow(username_label, self.username)
+        profile_name_label: Final = QLabel("Profile Name:", self)
+        self.profile_name: Final = QLineEdit()
+        left_layout.addRow(profile_name_label, self.profile_name)
 
-        region_label: Final = QLabel("Region:", self)
-        self.region_combobox: Final = QComboBox()
-        self.region_combobox.addItem(Region.Europe.name, Region.Europe)
-        self.region_combobox.addItem(Region.Americas.name, Region.Americas)
-        self.region_combobox.addItem(Region.Asia.name, Region.Asia)
-        right_layout.addRow(region_label, self.region_combobox)
+        email_label: Final = QLabel("Account:", self)
+        self.email: Final = QLineEdit()
+        left_layout.addRow(email_label, self.email)
 
         auth_label: Final = QLabel("Auth Method:", self)
         self.auth_combobox: Final = QComboBox()
@@ -57,11 +54,22 @@ class AccountDialogWidget(QDialog):
         self.auth_combobox.currentTextChanged.connect(self.change_password_token_widget)
         left_layout.addRow(auth_label, self.auth_combobox)
 
+        region_label: Final = QLabel("Region:", self)
+        self.region_combobox: Final = QComboBox()
+        self.region_combobox.addItem(Region.Europe.name, Region.Europe)
+        self.region_combobox.addItem(Region.Americas.name, Region.Americas)
+        self.region_combobox.addItem(Region.Asia.name, Region.Asia)
+        right_layout.addRow(region_label, self.region_combobox)
+
         self.password_label: Final = QLabel("Password:", self)
         # self.password: Final = QLineEdit()
         # right_layout.addRow(self.password_label, self.password)
         self.password: PasswordWidget = PasswordWidget("")
-        right_layout.addRow(self.password_label, self.password)
+        left_layout.addRow(self.password_label, self.password)
+
+        params_label: Final = QLabel("Start Parameters:", self)
+        self.params: Final = QLineEdit()
+        right_layout.addRow(params_label, self.params)
 
         self.token_label: Final = QLabel("Token:", self)
         self.token: Final = QTextEdit()
@@ -70,12 +78,9 @@ class AccountDialogWidget(QDialog):
         )
         right_layout.addRow(self.token_label, self.token)
 
-        params_label: Final = QLabel("Start Parameters:", self)
-        self.params: Final = QLineEdit()
-        left_layout.addRow(params_label, self.params)
-
         if account is not None:
-            self.username.setText(account.username)
+            self.profile_name.setText(account.profile_name or "")
+            self.email.setText(account.email)
             account_idx = self.auth_combobox.findData(account.auth_method)
             self.auth_combobox.setCurrentIndex(account_idx)
             region_idx = self.region_combobox.findData(account.region)
@@ -104,7 +109,7 @@ class AccountDialogWidget(QDialog):
         if account is None:
             self.setWindowTitle("Add a new Account")
         else:
-            self.setWindowTitle(f"Edit Account - Username: {account.username}")
+            self.setWindowTitle(f"Edit Account - email: {account.email}")
 
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
@@ -115,7 +120,8 @@ class AccountDialogWidget(QDialog):
     @property
     def data(self):
         return Account(
-            username=self.username.text(),
+            profile_name=self.profile_name.text(),
+            email=self.email.text(),
             auth_method=cast(
                 AuthMethod,
                 self.auth_combobox.itemData(self.auth_combobox.currentIndex()),
