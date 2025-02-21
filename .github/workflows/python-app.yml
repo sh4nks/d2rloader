@@ -33,7 +33,7 @@ jobs:
     - name: Add release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "./dist/D2RLoader.windows.zip"
+        artifacts: "D2RLoader.windows.zip"
         artifactErrorsFailBuild: true
         allowUpdates: true
         generateReleaseNotes: true
