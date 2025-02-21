@@ -102,7 +102,7 @@ class D2RLoaderTableWidget(QTableWidget):
         if item is None:
             return
 
-        account_item = QTableWidgetItem(item.email)
+        account_item = QTableWidgetItem(item.displayname)
         account_item.setFlags(account_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
 
         auth_item = QTableWidgetItem()
