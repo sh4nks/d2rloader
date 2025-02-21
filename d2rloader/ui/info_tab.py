@@ -117,7 +117,7 @@ class InfoTabsWidget(QTabWidget):
     def on_finished(self, reply: QNetworkReply, type: RequestType):
         response = reply.readAll()
         json_response = json.loads(response.data())  # pyright: ignore
-        logger.debug(f"Requested Data: {type} -> {json_response}")
+        logger.trace(f"Requested Data: {type} -> {json_response}")
 
         if type == RequestType.TZ:
             self.tzinfo.process(json_response)

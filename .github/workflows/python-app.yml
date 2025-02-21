@@ -28,7 +28,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'D2RLoader.windows.zip'
-        path: './dist/'
+        path: './dist/D2RLoader/*'
 
     - name: Add release
       uses: ncipollo/release-action@v1
