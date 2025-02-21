@@ -28,12 +28,12 @@ jobs:
       with:
         type: 'zip'
         filename: 'D2RLoader.windows.zip'
-        path: 'dist/D2RLoader'
+        path: './dist/'
 
     - name: Add release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "D2RLoader.windows.zip"
+        artifacts: "./dist/D2RLoader.windows.zip"
         artifactErrorsFailBuild: true
         allowUpdates: true
         generateReleaseNotes: true
