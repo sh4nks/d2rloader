@@ -72,7 +72,7 @@ class ProcessManager(QObject):
         self.handle.kill(silent=True)
         try:
             proc = subprocess.Popen([cmd, *params])
-            logger.debug(f"Launching using auth method {account.auth_method.value} instance: {[cmd, *params]}")
+            logger.debug(f"Launching instance with auth method {account.auth_method.value} and parameters: {[cmd, *self._log_params(params)]}")
         except OSError | ValueError as e:
             logger.error(e)
             raise ProcessingError(f"Error occured during executing {cmd}", e)
@@ -85,7 +85,7 @@ class ProcessManager(QObject):
     def _process_auth_token(self, account: Account, params: list[str]):
         if account.token is None:
             raise ProcessingError(
-                "Token-based authentication is selected but no token was provided."
+                "Token authentication is selected but no token was provided."
             )
 
         protected_token: bytes | None = protect_data(account.token)
@@ -99,10 +99,10 @@ class ProcessManager(QObject):
     def _process_auth_password(self, account: Account, params: list[str]):
         if not account.password:
             raise ProcessingError(
-                "Password-based authentication is selected but no password was provided."
+                "Password authentication is selected but no password was provided."
             )
 
-        params.extend(["-username", account.email, "-password", account.password,"-adress", account.region.value])
+        params.extend(["-username", account.email, "-password", account.password,"-address", account.region.value])
 
     def _handle_instance_start(self, account: Account, pid: int):
         logger.trace(f"process id: {pid}")
@@ -140,6 +140,13 @@ class ProcessManager(QObject):
             f"Instance closed or killed - pid {pid} doesn't exist anymore"
         )
 
+    def _log_params(self, params: list[str]):
+        try:
+            idx = params.index("-password")
+            params[idx + 1] = "*****"
+            return params
+        except ValueError:
+            return params
 
 class HandleManager:
     _search_regex: re.Pattern[str] = re.compile(
