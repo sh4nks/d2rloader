@@ -10,7 +10,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=["ipython", "ruff"],
     noarchive=False,
     optimize=0,
 )

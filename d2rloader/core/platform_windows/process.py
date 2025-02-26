@@ -71,7 +71,7 @@ class ProcessManager(QObject):
 
         self.handle.kill(silent=True)
         try:
-            proc = subprocess.Popen([cmd, *params])
+            proc = subprocess.Popen([cmd, *params],  creationflags = subprocess.CREATE_NO_WINDOW)
             logger.debug(f"Launching instance with auth method {account.auth_method.value} and parameters: {[cmd, *self._log_params(params)]}")
         except OSError | ValueError as e:
             logger.error(e)
@@ -170,7 +170,7 @@ class HandleManager:
             return
 
         cmd = [self.settings.handle_path, *handle_search_args]
-        output = subprocess.run(cmd, capture_output=True)
+        output = subprocess.run(cmd, capture_output=True, creationflags = subprocess.CREATE_NO_WINDOW)
         matches = self._search_regex.search(output.stdout.decode("utf-8"))
         if matches is None:
             return None

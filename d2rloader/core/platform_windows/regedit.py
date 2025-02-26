@@ -22,7 +22,7 @@ def update_region_value(value: Region):
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
     ) as key:
-        logger.trace(f"Setting REGION to: {shortcode}")
+        logger.debug(f"Setting REGION to: {shortcode}")
         try:
             winreg.SetValueEx(key, "REGION", 1, winreg.REG_SZ, shortcode)
         except Exception as e:
@@ -39,6 +39,7 @@ def update_web_token_value(value: bytes):
         except Exception as e:
             logger.error("Couldn't set registry key 'WEB_TOKEN'", e)
             raise e
+        logger.debug("Setting WEB_TOKEN was successful")
 
 
 def get_web_token() -> bytes:
