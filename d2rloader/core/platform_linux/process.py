@@ -50,7 +50,7 @@ class ProcessManager(QObject):
             try:
                 with open(lutris.start_script_log_path, "w") as logfile:
                     logger.debug(
-                        f"Launching instance: {lutris.start_script_path, account.params}"
+                        f"Launching instance: {lutris.start_script_path.absolute()}"
                     )
                     proc = subprocess.Popen(["sh", lutris.start_script_path], stderr=logfile)
                     return None, account, proc.pid

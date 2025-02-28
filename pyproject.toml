@@ -1,6 +1,6 @@
 [project]
 name = "d2rloader"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
   "loguru>=0.7.3",
   "psutil>=6.1.1",
@@ -34,11 +34,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sh4nks/d2r-loader"
-Documentation = "https://github.com/sh4nks/d2r-loader"
-Repository = "https://github.com/sh4nks/d2r-loader"
-"Bug Tracker" = "https://github.com/sh4nks/d2r-loader/issues"
-Changelog = "https://github.com/sh4nks/d2r-loader/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/sh4nks/d2rloader"
+Documentation = "https://github.com/sh4nks/d2rloader"
+Repository = "https://github.com/sh4nks/d2rloader"
+"Bug Tracker" = "https://github.com/sh4nks/d2rloader/issues"
+Changelog = "https://github.com/sh4nks/d2rloader/blob/master/CHANGELOG.md"
 
 [project.scripts]
 d2rloader = "d2rloader.app:main"
