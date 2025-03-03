@@ -32,7 +32,7 @@ class D2RLoaderState:
             logger.remove()
             logger.add(
                 pathlib.Path(CONFIG_BASE_DIR, "d2rloader.log"),
-                level=self.settings.data.log_level.upper(),
+                level=self.settings.data.log_level.upper() or "INFO",
             )
         elif self.settings.data.log_level.upper() != "DEBUG":
             logger.remove()
