@@ -71,7 +71,7 @@ class ProcessManager(QObject):
 
         self.handle.kill(silent=True)
         try:
-            proc = subprocess.Popen([cmd, *params],  creationflags = subprocess.CREATE_NO_WINDOW)
+            proc = subprocess.Popen([cmd, *params],  creationflags=subprocess.CREATE_NO_WINDOW)
             logger.debug(f"Launching instance with auth method {account.auth_method.value} and parameters: {[cmd, *self._log_params(params)]}")
         except OSError | ValueError as e:
             logger.error(e)
@@ -197,7 +197,7 @@ class HandleManager:
             "-y",
         ]
         cmd = [self.settings.handle_path, *handle_kill_args]
-        result = subprocess.run(cmd, capture_output=True)
+        result = subprocess.run(cmd, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
         if result.returncode != 0:
             if not silent:
                 logger.error(f"Couldn't kill handle: {result.stdout}")
