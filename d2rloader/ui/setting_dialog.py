@@ -1,12 +1,22 @@
 from __future__ import annotations
-import functools
-from typing import Final
 
+import functools
+import os
+import shutil
+from typing import Callable, Final
+
+from loguru import logger
 from PySide6 import QtWidgets
-from PySide6 import QtCore
-from PySide6.QtCore import Slot
-from PySide6.QtGui import Qt
+from PySide6.QtCore import (
+    QDir,
+    QFile,
+    QIODevice,
+    QSaveFile,
+    Slot,
+)
+from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDialog,
     QFileDialog,
@@ -16,16 +26,20 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLayout,
+    QLineEdit,
+    QMessageBox,
     QPushButton,
     QStyleFactory,
-    QDialogButtonBox,
     QVBoxLayout,
     QWidget,
 )
-from loguru import logger
 
+from d2rloader.constants import CONFIG_BASE_DIR
 from d2rloader.models.setting import Setting
 from d2rloader.ui.utils.utils import init_widget
+
+HANDLE_URL_FILENAME = "Handle.zip"
+HANDLE_URL = f"https://download.sysinternals.com/files/{HANDLE_URL_FILENAME}"
 
 
 class SettingDialogWidget(QDialog):
@@ -34,10 +48,10 @@ class SettingDialogWidget(QDialog):
     def __init__(self, parent: QWidget | None, setting: Setting):
         super().__init__(parent)
         # self.setFixedHeight(350)
-        self.setFixedWidth(500)
+        self.setFixedWidth(530)
         self.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.MinimumExpanding,
-            QtWidgets.QSizePolicy.Policy.MinimumExpanding
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
         )
         self.setting: Setting = setting
 
@@ -64,17 +78,7 @@ class SettingDialogWidget(QDialog):
         form_layout.addRow(account_path_label, self.account_path_button)
 
         handle_path_label: Final = QLabel("Handle Path: ", self)
-        self.handle_path_button: Final = QPushButton(
-            self.setting.handle_path or "Select..."
-        )
-        self.handle_path_button.clicked.connect(
-            functools.partial(
-                self.select_file,
-                "handle_path",
-                self.handle_path_button,
-                "handle.exe; handle64.exe",
-            )
-        )
+        self.handle_path_button = DownloadHandleWidget(setting, self.select_file)
         form_layout.addRow(handle_path_label, self.handle_path_button)
 
         self.style_combobox: Final = QComboBox()
@@ -99,19 +103,39 @@ class SettingDialogWidget(QDialog):
         options_group_box.setLayout(main_form_layout)
         main_layout.addWidget(options_group_box)
 
-
         advanced_form = QFormLayout()
-        wineprefix_path_label: Final = QLabel("Account Settings: ", self)
+        d2emu_token_user_label: Final = QLabel("D2Emu Token Username: ", self)
+        self.d2emu_token_user: Final = QLineEdit()
+        self.d2emu_token_user.setText(setting.token_username or "")
+        advanced_form.addRow(d2emu_token_user_label, self.d2emu_token_user)
+
+        d2emu_token_label: Final = QLabel("D2Emu Token: ", self)
+        self.d2emu_token: Final = QLineEdit()
+        self.d2emu_token.setText(setting.token or "")
+        advanced_form.addRow(d2emu_token_label, self.d2emu_token)
+
+        wineprefix_path_label: Final = QLabel("Wineprefix (Linux): ", self)
         self.wineprefix_path_button: Final = QPushButton(
-            self.setting.accounts_path or "Select..."
+            self.setting.wineprefix or "Select..."
         )
         self.wineprefix_path_button.clicked.connect(
             functools.partial(
-                self.select_file, "wineprefix", self.wineprefix_path_button, "*.json"
+                self.select_directory, "wineprefix", self.wineprefix_path_button
             )
         )
         advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
 
+        log_level_label: Final = QLabel("Log Level: ", self)
+        self.log_level_combobox: Final = QComboBox()
+        self.log_level_combobox.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        log_level_idx = self.log_level_combobox.findText(setting.log_level)
+        self.log_level_combobox.setCurrentIndex(log_level_idx)
+
+        advanced_form.addRow(log_level_label, self.log_level_combobox)
+        log_file_label: Final = QLabel("Log To File: ", self)
+        self.log_file: Final = QCheckBox()
+        self.log_file.setChecked(setting.log_file or False)
+        advanced_form.addRow(log_file_label, self.log_file)
 
         self.advanced_frame: QFrame = QFrame()
         advanced_layout = QVBoxLayout()
@@ -124,12 +148,10 @@ class SettingDialogWidget(QDialog):
         advanced_layout.addWidget(options_group_box)
         advanced_layout.addWidget(advanced_options_group_box)
 
-
         ok_button = QPushButton("OK")
         cancel_button = QPushButton("Cancel")
         self.advanced_settings: QPushButton = QPushButton("Advanced Settings")
         self.advanced_settings.setCheckable(True)
-
 
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.advanced_settings)
@@ -156,20 +178,23 @@ class SettingDialogWidget(QDialog):
         self.setting.theme = self.style_combobox.itemText(
             self.style_combobox.currentIndex()
         )
+        self.setting.token_username = self.d2emu_token_user.text()
+        self.setting.token = self.d2emu_token.text()
+        self.setting.log_file = self.log_file.isChecked()
+        self.setting.log_level = self.log_level_combobox.itemText(
+            self.log_level_combobox.currentIndex()
+        )
         return self.setting
 
     def show_advanced_settings(self):
-        print(self.advanced_settings.isChecked())
         if not self.advanced_settings.isChecked():
             self.advanced_settings.setChecked(False)
             self.advanced_frame.hide()
         else:
             self.advanced_settings.setChecked(True)
             self.advanced_frame.show()
-        # QtCore.QTimer.singleShot(0, self.layout().adjustSize)
-        # self.advanced_settings.adjustSize
 
-    @Slot()
+    @Slot(str, QPushButton)  # pyright: ignore
     def select_directory(self, setting_key: str, button: QPushButton):
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.Directory)
@@ -180,12 +205,12 @@ class SettingDialogWidget(QDialog):
                 button.setText(dialog.selectedFiles()[0])
                 setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
-    @Slot()
+    @Slot(str, QPushButton, str)  # pyright: ignore
     def select_file(self, setting_key: str, button: QPushButton, file_filter: str):
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
-        # dialog.setNameFilter((file_filter))
+        dialog.setNameFilter((file_filter))
         dialog.setDirectory(self._get_setting_value(setting_key))
         if dialog.exec():
             if len(dialog.selectedFiles()) > 0:
@@ -207,10 +232,120 @@ class SettingDialogWidget(QDialog):
             return result
 
         default_style_name = parent.style().objectName().lower()
-        logger.debug(f"Current theme: {default_style_name}")
         for style in QStyleFactory.keys():
             if style.lower() == default_style_name:
                 result.insert(0, style)
             else:
                 result.append(style)
         return result
+
+
+class DownloadHandleWidget(QHBoxLayout):
+    def __init__(
+        self, setting: Setting, filechooser: Callable[[str, QPushButton, str], None]
+    ):
+        super().__init__()
+
+        self.HANDLE_DOWNLOAD_DIR: str = os.path.join(CONFIG_BASE_DIR, "Handle")
+        self.HANDLE_DOWNLOAD_FILE: str = os.path.join(
+            self.HANDLE_DOWNLOAD_DIR, HANDLE_URL_FILENAME
+        )
+
+        self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
+        self.file: QSaveFile = QSaveFile(self.HANDLE_DOWNLOAD_FILE)
+        self.reply: QNetworkReply | None = None
+
+        self.setting: Setting = setting
+
+        self.handle_path_button: Final = QPushButton(
+            self.setting.handle_path or "Select..."
+        )
+        self.handle_path_button.clicked.connect(
+            functools.partial(
+                filechooser,
+                "handle_path",
+                self.handle_path_button,
+                "handle.exe;handle64.exe",
+            )
+        )
+        self.download_button: QPushButton = QPushButton("Download")
+        self.download_button.clicked.connect(self.download_handle)
+
+        self.addWidget(self.handle_path_button, 1)
+        self.addWidget(self.download_button)
+
+    def download_handle(self):
+        self.handle_path_button.setDisabled(True)
+        self.download_button.setDisabled(True)
+
+        dest_file = QFile(
+            QDir(QDir.fromNativeSeparators(self.HANDLE_DOWNLOAD_DIR)).filePath(
+                "handle64.exe"
+            )
+        )
+        if os.path.exists(os.path.join(self.HANDLE_DOWNLOAD_DIR, "handle64.exe")):
+            logger.info("handle64.exe already downloaded!")
+            ret = QMessageBox.question(
+                self.widget(),
+                "File exists",
+                "Do you want to override the file ?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if ret == QMessageBox.StandardButton.No:
+                return
+
+            dest_file.remove()
+        else:
+            os.makedirs(self.HANDLE_DOWNLOAD_DIR, exist_ok=True)
+
+        logger.info(f"Saving to '{self.file.fileName()}'")
+        self.send_request()
+
+    def send_request(self):
+        request = QNetworkRequest(HANDLE_URL)
+        if not self.file.open(QIODevice.OpenModeFlag.WriteOnly):
+            error = self.file.errorString()
+            logger.error(f"Cannot open device: {error}")
+            return
+
+        self.reply = self.networkmanager.get(request)
+        self.reply.downloadProgress.connect(self.on_progress)
+        self.reply.finished.connect(self.on_finished)
+        self.reply.readyRead.connect(self.on_ready_read)
+        self.reply.errorOccurred.connect(self.on_error)
+
+    @Slot(QNetworkReply)
+    def on_finished(self):
+        if self.reply:
+            self.reply.deleteLater()
+
+        if self.file:
+            self.file.commit()
+
+        shutil.unpack_archive(self.HANDLE_DOWNLOAD_FILE, self.HANDLE_DOWNLOAD_DIR)
+
+        self.setting.handle_path = os.path.join(
+            self.HANDLE_DOWNLOAD_DIR, "handle64.exe"
+        )
+        self.handle_path_button.setText(self.setting.handle_path)
+        self.handle_path_button.setDisabled(False)
+        self.download_button.setDisabled(False)
+
+    @Slot(QNetworkReply.NetworkError)  # pyright: ignore
+    def on_error(self, code: QNetworkReply.NetworkError):
+        """Show a message if an error happen"""
+        logger.error(f"Couldn't download handle64.exe: {code}")
+
+    @Slot()
+    def on_ready_read(self):
+        """Get available bytes and store them into the file"""
+        if self.reply:
+            if self.reply.error() == QNetworkReply.NetworkError.NoError:
+                self.file.write(self.reply.readAll())
+
+    @Slot(int, int)  # pyright: ignore
+    def on_progress(self, bytesReceived: int, bytesTotal: int):
+        """Update progress bar"""
+        logger.info(
+            f"Downloading handle.exe - {bytesReceived / 1000} kb from {bytesTotal or 0 / 1000} kb"
+        )

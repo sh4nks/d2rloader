@@ -2,6 +2,7 @@ from typing import Any, cast
 from d2rloader.core.storage import StorageService, StorageType
 from d2rloader.core.store.settings import SettingService
 from d2rloader.models.account import Account
+from d2rloader.models.setting import get_default_accounts_path
 
 
 class AccountService:
@@ -62,6 +63,9 @@ class AccountService:
         )
 
     def load(self):
+        if not self._setting.data.accounts_path:
+            self._setting.set(accounts_path=get_default_accounts_path())
+
         self._current_accounts = cast(
             list[Account],
             self._storage.load(StorageType.Account, self._setting.data.accounts_path),

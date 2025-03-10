@@ -1,3 +1,4 @@
+import os
 from typing import Any, cast
 from d2rloader.core.storage import StorageService, StorageType
 from d2rloader.models.setting import Setting
@@ -33,3 +34,6 @@ class SettingService:
         self._current_setting = cast(
             Setting, self._storage.load(StorageType.Setting, path)
         )
+
+        if not os.path.exists(self._current_setting.handle_path):
+            self._current_setting.handle_path = ""
