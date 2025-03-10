@@ -189,6 +189,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self)
+        if not filename:
+            return
         self.state.settings.set(accounts_path=filename)
         self.state.accounts.load()
         self.main_widget.table_widget.reload_table()
@@ -196,6 +198,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def save_file(self):
         filename, _ = QFileDialog.getSaveFileName(self)
+        if not filename:
+            return
         self.state.storage.save(self.state.accounts.data, StorageType.Account, filename)
 
 

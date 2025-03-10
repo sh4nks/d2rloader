@@ -49,7 +49,6 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 
 - Minimize to system tray
 - Settings switcher (per account game settings)
-- Auto-download handle.exe on Windows
 - Change Window Title on Linux (not easily done on Wayland, maybe we can change them in Wine?)
 - Provide a package for Linux
 
