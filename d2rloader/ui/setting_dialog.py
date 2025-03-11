@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import os
 import shutil
+import sys
 from typing import Callable, Final
 
 from loguru import logger
@@ -263,8 +264,13 @@ class DownloadHandleWidget(QHBoxLayout):
                 "handle.exe;handle64.exe",
             )
         )
+
         self.download_button: QPushButton = QPushButton("Download")
         self.download_button.clicked.connect(self.download_handle)
+
+        if sys.platform == "linux":
+            self.handle_path_button.setDisabled(True)
+            self.download_button.setDisabled(True)
 
         self.addWidget(self.handle_path_button, 1)
         self.addWidget(self.download_button)
