@@ -1,6 +1,6 @@
+import enum
 import os
 import pathlib
-import enum
 from typing import Any
 
 from pydantic import TypeAdapter
@@ -31,7 +31,7 @@ class StorageService:
         except FileNotFoundError:
             return None
 
-        if content is None or content == "":
+        if not content:
             return None
         return self.STORAGE_MAPPING[type].validate_json(content)
 

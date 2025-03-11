@@ -1,7 +1,8 @@
 import os
-from pathlib import Path
 import signal
 import subprocess
+from pathlib import Path
+
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
@@ -52,7 +53,9 @@ class ProcessManager(QObject):
                     logger.debug(
                         f"Launching instance: {lutris.start_script_path.absolute()}"
                     )
-                    proc = subprocess.Popen(["sh", lutris.start_script_path], stderr=logfile)
+                    proc = subprocess.Popen(
+                        ["sh", lutris.start_script_path], stderr=logfile
+                    )
                     return None, account, proc.pid
             except Exception as e:
                 logger.error(e)

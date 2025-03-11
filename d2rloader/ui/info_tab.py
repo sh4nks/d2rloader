@@ -1,7 +1,6 @@
 import enum
 import functools
 import json
-import logging
 from typing import Final
 
 from loguru import logger
@@ -25,12 +24,6 @@ from PySide6.QtWidgets import (
 
 from d2rloader.constants import DIABLO_LEVELS
 from d2rloader.core.core import D2RLoaderState
-
-logging.basicConfig(
-    format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.DEBUG,
-)
 
 URI_TZ_INFO = "https://d2emu.com/api/v1/tz"
 URI_DC_INFO = "https://d2emu.com/api/v1/dclone"
@@ -282,4 +275,3 @@ class ApplicationOutputWidget(QWidget):
 
     def _update(self, msg: str):
         self.out.append(msg.strip("\n").strip("\t").strip("\r"))
-        # self.out.append(f"<span style='color: red'>{msg.strip("\n").strip("\t").strip("\r")}</span>")

@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
 import os
 import sys
+
+from pydantic import BaseModel, Field
 
 from d2rloader.constants import CONFIG_BASE_DIR
 

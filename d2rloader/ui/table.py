@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import functools
+import warnings
 from typing import Final, cast
 
+from loguru import logger
 from PySide6.QtCore import QProcess, Qt, Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -12,7 +14,6 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
 )
-from loguru import logger
 
 from d2rloader.core.core import D2RLoaderState
 from d2rloader.models.account import Account, AuthMethod, Region
@@ -229,8 +230,10 @@ class D2RLoaderTableWidget(QTableWidget):
 
         # try to disconnect previous signals before adding a new one
         try:
-            self._state.process_manager.process_finished.disconnect()
-            self._state.process_manager.process_error.disconnect()
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self._state.process_manager.process_finished.disconnect()
+                self._state.process_manager.process_error.disconnect()
         except Exception:
             pass
 
@@ -238,7 +241,9 @@ class D2RLoaderTableWidget(QTableWidget):
         button.setText("Starting...")
         button.setDisabled(True)
 
-        logger.info(f"Starting D2R.exe - {account.displayname} ({account.region.value})")
+        logger.info(
+            f"Starting D2R.exe - {account.displayname} ({account.region.value})"
+        )
         self._state.process_manager.process_finished.connect(
             functools.partial(self.process_finished, button)
         )

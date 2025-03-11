@@ -23,6 +23,19 @@ CONFIG_BASE_DIR = os.path.join(
     "d2rloader",
 )
 
+CONFIG_HANDLE_DIR = os.path.join(
+    CONFIG_BASE_DIR,
+    "handle",
+)
+
+CONFIG_GAME_SETTINGS_DIR = os.path.join(
+    CONFIG_BASE_DIR,
+    "game_settings",
+)
+
+HANDLE_URL_FILENAME = "Handle.zip"
+HANDLE_URL = f"https://download.sysinternals.com/files/{HANDLE_URL_FILENAME}"
+
 UPDATE_HANDLE = "DiabloII Check For Other Instances"
 
 REG_BATTLE_NET_PATH = (

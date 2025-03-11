@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import subprocess
 from time import sleep
 
@@ -13,13 +14,18 @@ from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account, AuthMethod
 from d2rloader.models.setting import Setting
 
-from .utils import change_window_title, kill_process_by_pid
 from .regedit import (
     get_web_token,
     is_changed_web_token,
     protect_data,
     update_region_value,
     update_web_token_value,
+)
+from .utils import (
+    change_window_title,
+    get_d2r_game_settings_path,
+    get_saved_game_folder,
+    kill_process_by_pid,
 )
 
 
@@ -49,7 +55,7 @@ class ProcessManager(QObject):
         self.process_error.emit(None, msg)
 
     def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
-        logger.info(f"Instance started and user logged in: {result[0]}")
+        logger.success("Instance started successfully")
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
@@ -69,10 +75,16 @@ class ProcessManager(QObject):
         elif account.auth_method == AuthMethod.Password:
             self._process_auth_password(account, params)
 
+        self._copy_game_settings(account)
+
         self.handle.kill(silent=True)
         try:
-            proc = subprocess.Popen([cmd, *params],  creationflags=subprocess.CREATE_NO_WINDOW)
-            logger.debug(f"Launching instance with auth method {account.auth_method.value} and parameters: {[cmd, *self._log_params(params)]}")
+            proc = subprocess.Popen(
+                [cmd, *params], creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            logger.debug(
+                f"Launching instance with auth method {account.auth_method.value} and parameters: {' '.join([cmd, *self._log_params(params)])}"
+            )
         except OSError | ValueError as e:
             logger.error(e)
             raise ProcessingError(f"Error occured during executing {cmd}", e)
@@ -102,7 +114,16 @@ class ProcessManager(QObject):
                 "Password authentication is selected but no password was provided."
             )
 
-        params.extend(["-username", account.email, "-password", account.password,"-address", account.region.value])
+        params.extend(
+            [
+                "-username",
+                account.email,
+                "-password",
+                account.password,
+                "-address",
+                account.region.value,
+            ]
+        )
 
     def _handle_instance_start(self, account: Account, pid: int):
         logger.trace(f"process id: {pid}")
@@ -140,6 +161,23 @@ class ProcessManager(QObject):
             f"Instance closed or killed - pid {pid} doesn't exist anymore"
         )
 
+    def _copy_game_settings(self, account: Account):
+        current_game_settings: str = get_d2r_game_settings_path()
+        if not account.game_settings:
+            return
+        elif not os.path.exists(account.game_settings):
+            logger.warning(
+                "Configured game settings do not exist - launching without game settings"
+            )
+            return
+
+        logger.info(f"Using game settings: {os.path.basename(account.game_settings)}")
+        if os.path.exists(current_game_settings):
+            shutil.move(current_game_settings, f"{current_game_settings}.bak")
+
+        dst_file = os.path.join(get_saved_game_folder(), "Settings.json")
+        shutil.copy2(account.game_settings, dst_file)
+
     def _log_params(self, params: list[str]):
         try:
             idx = params.index("-password")
@@ -147,6 +185,7 @@ class ProcessManager(QObject):
             return params
         except ValueError:
             return params
+
 
 class HandleManager:
     _search_regex: re.Pattern[str] = re.compile(
@@ -170,7 +209,9 @@ class HandleManager:
             return
 
         cmd = [self.settings.handle_path, *handle_search_args]
-        output = subprocess.run(cmd, capture_output=True, creationflags = subprocess.CREATE_NO_WINDOW)
+        output = subprocess.run(
+            cmd, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW
+        )
         matches = self._search_regex.search(output.stdout.decode("utf-8"))
         if matches is None:
             return None
@@ -197,7 +238,9 @@ class HandleManager:
             "-y",
         ]
         cmd = [self.settings.handle_path, *handle_kill_args]
-        result = subprocess.run(cmd, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        result = subprocess.run(
+            cmd, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW
+        )
         if result.returncode != 0:
             if not silent:
                 logger.error(f"Couldn't kill handle: {result.stdout}")

@@ -11,14 +11,11 @@ def init_widget(w: QWidget, name: str, tooltip: str | None = None) -> None:
     w.setObjectName(name)
     w.setToolTip(tooltip or class_name(w))
 
+
 def show_error_dialog(w: QWidget, msg: str) -> None:
     QMessageBox.critical(
         w,
         "Error",
-        (
-            "<center>"
-            f"{msg}"
-            "</center>"
-        ),
+        (f"<center>{msg}</center>"),
         QMessageBox.StandardButton.Ok,
     )

@@ -1,9 +1,8 @@
 from __future__ import annotations
-import os
-import sys
-import signal
 
-import PySide6.QtAsyncio as QtAsyncio
+import signal
+import sys
+
 
 try:
     from ctypes import windll  # Only exists on Windows.
@@ -14,15 +13,15 @@ except ImportError:
     pass
 
 import PySide6
-from PySide6 import QtCore
-from PySide6 import QtGui
+from loguru import logger
+from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Slot
-
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
+    QGridLayout,
     QHBoxLayout,
-    QLayout,
     QMainWindow,
     QMenu,
     QMessageBox,
@@ -30,10 +29,7 @@ from PySide6.QtWidgets import (
     QStyleFactory,
     QVBoxLayout,
     QWidget,
-    QGridLayout,
 )
-
-from PySide6.QtGui import QAction
 
 from d2rloader.constants import BASE_DIR, ICON_PATH
 from d2rloader.core.core import D2RLoaderState
@@ -41,7 +37,6 @@ from d2rloader.core.storage import StorageType
 from d2rloader.ui.info_tab import InfoTabsWidget
 from d2rloader.ui.setting_dialog import SettingDialogWidget
 from d2rloader.ui.table import D2RLoaderTableWidget
-from loguru import logger
 
 
 class MainWidget(QWidget):

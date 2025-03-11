@@ -45,13 +45,6 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 - Select your prefered WINEPREFIX location otherwise a default one will be set to $XDG_CONFIG_DIRS/d2rloader/wineprefixes.
 
 
-# Planned Features
-
-- Minimize to system tray
-- Settings switcher (per account game settings)
-- Change Window Title on Linux (not easily done on Wayland, maybe we can change them in Wine?)
-- Provide a package for Linux
-
 # License
 
 MIT License

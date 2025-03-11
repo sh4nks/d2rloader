@@ -8,8 +8,6 @@ from typing import Callable, Final
 from loguru import logger
 from PySide6 import QtWidgets
 from PySide6.QtCore import (
-    QDir,
-    QFile,
     QIODevice,
     QSaveFile,
     Slot,
@@ -34,12 +32,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from d2rloader.constants import CONFIG_BASE_DIR
+from d2rloader.constants import CONFIG_HANDLE_DIR, HANDLE_URL, HANDLE_URL_FILENAME
 from d2rloader.models.setting import Setting
 from d2rloader.ui.utils.utils import init_widget
-
-HANDLE_URL_FILENAME = "Handle.zip"
-HANDLE_URL = f"https://download.sysinternals.com/files/{HANDLE_URL_FILENAME}"
 
 
 class SettingDialogWidget(QDialog):
@@ -78,7 +73,9 @@ class SettingDialogWidget(QDialog):
         form_layout.addRow(account_path_label, self.account_path_button)
 
         handle_path_label: Final = QLabel("Handle Path: ", self)
-        self.handle_path_button = DownloadHandleWidget(setting, self.select_file)
+        self.handle_path_button: DownloadHandleWidget = DownloadHandleWidget(
+            setting, self.select_file
+        )
         form_layout.addRow(handle_path_label, self.handle_path_button)
 
         self.style_combobox: Final = QComboBox()
@@ -245,10 +242,8 @@ class DownloadHandleWidget(QHBoxLayout):
         self, setting: Setting, filechooser: Callable[[str, QPushButton, str], None]
     ):
         super().__init__()
-
-        self.HANDLE_DOWNLOAD_DIR: str = os.path.join(CONFIG_BASE_DIR, "Handle")
         self.HANDLE_DOWNLOAD_FILE: str = os.path.join(
-            self.HANDLE_DOWNLOAD_DIR, HANDLE_URL_FILENAME
+            CONFIG_HANDLE_DIR, HANDLE_URL_FILENAME
         )
 
         self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
@@ -278,25 +273,21 @@ class DownloadHandleWidget(QHBoxLayout):
         self.handle_path_button.setDisabled(True)
         self.download_button.setDisabled(True)
 
-        dest_file = QFile(
-            QDir(QDir.fromNativeSeparators(self.HANDLE_DOWNLOAD_DIR)).filePath(
-                "handle64.exe"
-            )
-        )
-        if os.path.exists(os.path.join(self.HANDLE_DOWNLOAD_DIR, "handle64.exe")):
+        if os.path.exists(os.path.join(CONFIG_HANDLE_DIR, "handle64.exe")):
             logger.info("handle64.exe already downloaded!")
             ret = QMessageBox.question(
                 self.widget(),
                 "File exists",
-                "Do you want to override the file ?",
+                "Do you want to override the file?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if ret == QMessageBox.StandardButton.No:
+                self.set_handle_path(os.path.join(CONFIG_HANDLE_DIR, "handle64.exe"))
+                self.handle_path_button.setDisabled(False)
+                self.download_button.setDisabled(False)
                 return
-
-            dest_file.remove()
         else:
-            os.makedirs(self.HANDLE_DOWNLOAD_DIR, exist_ok=True)
+            os.makedirs(CONFIG_HANDLE_DIR, exist_ok=True)
 
         logger.info(f"Saving to '{self.file.fileName()}'")
         self.send_request()
@@ -322,12 +313,9 @@ class DownloadHandleWidget(QHBoxLayout):
         if self.file:
             self.file.commit()
 
-        shutil.unpack_archive(self.HANDLE_DOWNLOAD_FILE, self.HANDLE_DOWNLOAD_DIR)
+        shutil.unpack_archive(self.HANDLE_DOWNLOAD_FILE, CONFIG_HANDLE_DIR)
 
-        self.setting.handle_path = os.path.join(
-            self.HANDLE_DOWNLOAD_DIR, "handle64.exe"
-        )
-        self.handle_path_button.setText(self.setting.handle_path)
+        self.set_handle_path(os.path.join(CONFIG_HANDLE_DIR, "handle64.exe"))
         self.handle_path_button.setDisabled(False)
         self.download_button.setDisabled(False)
 
@@ -347,5 +335,9 @@ class DownloadHandleWidget(QHBoxLayout):
     def on_progress(self, bytesReceived: int, bytesTotal: int):
         """Update progress bar"""
         logger.info(
-            f"Downloading handle.exe - {bytesReceived / 1000} kb from {bytesTotal or 0 / 1000} kb"
+            f"Downloading handle.exe - {bytesReceived / 1000} kb of {bytesTotal or 0 / 1000} kb recieved"
         )
+
+    def set_handle_path(self, path: str):
+        self.setting.handle_path = path
+        self.handle_path_button.setText(self.setting.handle_path)

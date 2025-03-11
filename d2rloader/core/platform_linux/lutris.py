@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-import re
-import unidecode
+
 from loguru import logger
+
 from d2rloader.models.account import Account
 from d2rloader.models.setting import Setting
 
@@ -41,8 +41,6 @@ cd '{GAME_PATH}'
 gamemoderun {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION} {PARAMS}
 """
 
-_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.+]+')
-
 
 class LutrisManager:
     home: Path = Path.home()
@@ -63,7 +61,7 @@ class LutrisManager:
     def wineprefix_account(self):
         return Path(
             self.settings.wineprefix,
-            self.normalize_username_name(),
+            self.account.email_normalized,
         )
 
     @property
@@ -83,7 +81,7 @@ class LutrisManager:
             USERNAME=self.account.email,
             PASSWORD=self.account.password,
             REGION=self.account.region.value,
-            PARAMS=self.account.params
+            PARAMS=self.account.params,
         )
 
     def save_start_script(self, force: bool = True):
@@ -102,11 +100,3 @@ class LutrisManager:
         with open(self.start_script_path, "w") as f:
             f.write(self.render_start_script())
         return True
-
-    def normalize_username_name(self, delim: str = "-"):
-        text = unidecode.unidecode(self.account.email)
-        result: list[str] = []
-        for word in _punct_re.split(text.lower()):
-            if word:
-                result.append(word)
-        return str(delim.join(result))

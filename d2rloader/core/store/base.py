@@ -1,6 +1,7 @@
 from typing import Any, Generic, TypeVar, cast
 
 from pydantic import BaseModel
+
 from d2rloader.core.storage import StorageService, StorageType
 
 T = TypeVar("T", bound="BaseModel")

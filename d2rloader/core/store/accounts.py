@@ -1,4 +1,5 @@
 from typing import Any, cast
+
 from d2rloader.core.storage import StorageService, StorageType
 from d2rloader.core.store.settings import SettingService
 from d2rloader.models.account import Account

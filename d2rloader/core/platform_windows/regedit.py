@@ -57,6 +57,7 @@ def get_web_token() -> bytes:
 
         return value[0]
 
+
 def is_changed_web_token(previous_value: bytes):
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ

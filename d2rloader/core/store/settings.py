@@ -1,5 +1,6 @@
 import os
 from typing import Any, cast
+
 from d2rloader.core.storage import StorageService, StorageType
 from d2rloader.models.setting import Setting
 
