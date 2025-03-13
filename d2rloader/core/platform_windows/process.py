@@ -1,8 +1,11 @@
 import os
 import re
-import shutil
 import subprocess
 from time import sleep
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from d2rloader.core.core import D2RLoaderState
 
 import psutil
 from loguru import logger
@@ -23,8 +26,6 @@ from .regedit import (
 )
 from .utils import (
     change_window_title,
-    get_d2r_game_settings_path,
-    get_saved_game_folder,
     kill_process_by_pid,
 )
 
@@ -33,11 +34,11 @@ class ProcessManager(QObject):
     process_finished: Signal = Signal(bool, Account, int)
     process_error: Signal = Signal(Account, str)
 
-    def __init__(self, parent: QObject, settings: Setting) -> None:
+    def __init__(self, parent: QObject, appstate: "D2RLoaderState") -> None:
         super().__init__()
-        self.settings: Setting = settings
+        self._state: "D2RLoaderState" = appstate
         self.threadpool = QThreadPool()
-        self.handle: HandleManager = HandleManager(self.settings)
+        self.handle: HandleManager = HandleManager(self._state.settings.data)
         self.threadpool: QThreadPool = QThreadPool()
 
     def kill(self, pid: int):
@@ -59,11 +60,12 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        cmd = os.path.join(self.settings.game_path, "D2R.exe")
+        cmd = os.path.join(self._state.settings.data.game_path, "D2R.exe")
+        game_settings = self._state.game_settings.get_game_settings(account)
 
         if not os.path.exists(cmd):
             raise ProcessingError(
-                f"Could not find 'D2R.exe' in '{self.settings.game_path}'"
+                f"Could not find 'D2R.exe' in '{self._state.settings.data.game_path}'"
             )
 
         params: list[str] = []
@@ -75,7 +77,7 @@ class ProcessManager(QObject):
         elif account.auth_method == AuthMethod.Password:
             self._process_auth_password(account, params)
 
-        self._copy_game_settings(account)
+        game_settings.set_account_game_settings()
 
         self.handle.kill(silent=True)
         try:
@@ -160,23 +162,6 @@ class ProcessManager(QObject):
         raise ProcessingError(
             f"Instance closed or killed - pid {pid} doesn't exist anymore"
         )
-
-    def _copy_game_settings(self, account: Account):
-        current_game_settings: str = get_d2r_game_settings_path()
-        if not account.game_settings:
-            return
-        elif not os.path.exists(account.game_settings):
-            logger.warning(
-                "Configured game settings do not exist - launching without game settings"
-            )
-            return
-
-        logger.info(f"Using game settings: {os.path.basename(account.game_settings)}")
-        if os.path.exists(current_game_settings):
-            shutil.move(current_game_settings, f"{current_game_settings}.bak")
-
-        dst_file = os.path.join(get_saved_game_folder(), "Settings.json")
-        shutil.copy2(account.game_settings, dst_file)
 
     def _log_params(self, params: list[str]):
         try:

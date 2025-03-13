@@ -6,6 +6,7 @@ from loguru import logger
 from PySide6.QtCore import QObject
 
 from d2rloader.constants import CONFIG_BASE_DIR
+from d2rloader.core.game_settings import GameSettingsService
 from d2rloader.core.process import ProcessManager
 from d2rloader.core.storage import StorageService
 from d2rloader.core.store.accounts import AccountService
@@ -20,13 +21,16 @@ class D2RLoaderState:
         self.settings: SettingService = SettingService(self.storage)
         self._setup_logger()
         self.accounts: AccountService = AccountService(self.storage, self.settings)
+        self.game_settings: GameSettingsService = GameSettingsService(
+            self.settings.data
+        )
 
     @override
     def __repr__(self) -> str:
         return f"D2RLoaderState - Settings: {self.settings.data}, Accounts: {self.accounts.data}"
 
     def register_process_manager(self, parent: QObject):
-        self.process_manager = ProcessManager(parent, self.settings.data)
+        self.process_manager = ProcessManager(parent, self)
 
     def _setup_logger(self):
         if self.settings.data.log_file:

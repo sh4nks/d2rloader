@@ -55,7 +55,9 @@ class D2RLoaderTableWidget(QTableWidget):
             return
 
         row_index = self.selectedIndexes()[0].row()
-        edit_dialog = AccountDialogWidget(self, self._state.accounts.get(row_index))
+        edit_dialog = AccountDialogWidget(
+            self, self._state, self._state.accounts.get(row_index)
+        )
 
         if edit_dialog.exec():
             self.removeRow(row_index)
@@ -65,7 +67,7 @@ class D2RLoaderTableWidget(QTableWidget):
 
     @Slot()
     def add_entry(self):
-        add_dialog = AccountDialogWidget(self)
+        add_dialog = AccountDialogWidget(self, self._state)
 
         if add_dialog.exec():
             self.add_row(add_dialog.data)

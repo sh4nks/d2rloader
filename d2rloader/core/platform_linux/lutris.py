@@ -59,9 +59,9 @@ class LutrisManager:
 
     @property
     def wineprefix_account(self):
-        return Path(
-            self.settings.wineprefix,
-            self.account.email_normalized,
+        return Account.wineprefix_account(
+            self.settings,
+            self.account,
         )
 
     @property

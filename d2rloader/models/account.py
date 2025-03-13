@@ -1,8 +1,11 @@
 import enum
 import re
+from pathlib import Path
 
 import unidecode
 from pydantic import BaseModel, Field
+
+from d2rloader.models.setting import Setting
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.+]+')
 
@@ -56,10 +59,16 @@ class Account(BaseModel):
 
     @property
     def profile_normalized(self):
-        print(self)
         if self.profile_name:
             return _normalize_str(self.profile_name)
         return ""
+
+    @classmethod
+    def wineprefix_account(cls, settings: Setting, account: "Account"):
+        return Path(
+            settings.wineprefix,
+            account.email_normalized,
+        )
 
     @classmethod
     def default_account(cls):

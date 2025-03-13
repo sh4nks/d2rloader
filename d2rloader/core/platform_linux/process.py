@@ -2,6 +2,10 @@ import os
 import signal
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from d2rloader.core.core import D2RLoaderState
 
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
@@ -10,16 +14,15 @@ from d2rloader.core.exception import ProcessingError
 from d2rloader.core.platform_linux.lutris import LutrisManager
 from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account, AuthMethod
-from d2rloader.models.setting import Setting
 
 
 class ProcessManager(QObject):
     process_finished: Signal = Signal(bool, Account, int)
     process_error: Signal = Signal(Account, str)
 
-    def __init__(self, parent: QObject, settings: Setting) -> None:
+    def __init__(self, parent: QObject, appstate: "D2RLoaderState") -> None:
         super().__init__()
-        self.settings: Setting = settings
+        self._state: "D2RLoaderState" = appstate
         self.threadpool = QThreadPool()
         self.threadpool: QThreadPool = QThreadPool()
 
@@ -44,12 +47,14 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        lutris = LutrisManager(self.settings, account)
+        lutris = LutrisManager(self._state.settings.data, account)
+        game_settings = self._state.game_settings.get_game_settings(account)
         self._validate_start(account)
 
         if lutris.save_start_script():
             try:
                 with open(lutris.start_script_log_path, "w") as logfile:
+                    game_settings.set_account_game_settings()
                     logger.debug(
                         f"Launching instance: {lutris.start_script_path.absolute()}"
                     )
@@ -64,9 +69,9 @@ class ProcessManager(QObject):
                 )
 
     def _validate_start(self, account: Account):
-        if not Path(self.settings.game_path, "D2R.exe").exists():
+        if not Path(self._state.settings.data.game_path, "D2R.exe").exists():
             raise ProcessingError(
-                f"Could not find 'D2R.exe' in '{self.settings.game_path}'"
+                f"Could not find 'D2R.exe' in '{self._state.settings.data.game_path}'"
             )
 
         # TODO: Implement password based authentication

@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import os
-import shutil
-import sys
 from typing import Final, cast
 
-from loguru import logger
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -27,18 +24,26 @@ from PySide6.QtWidgets import (
 )
 
 from d2rloader.constants import CONFIG_GAME_SETTINGS_DIR
+from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.game_settings import GameSetting
 from d2rloader.models.account import Account, AuthMethod, Region
 
 
 class AccountDialogWidget(QDialog):
     """A dialog to add a new address to the addressbook."""
 
-    def __init__(self, parent: QWidget | None = None, account: Account | None = None):
+    def __init__(
+        self, parent: QWidget, appstate: D2RLoaderState, account: Account | None = None
+    ):
         super().__init__(parent)
         if account is None:
             self.account: Account = Account.default_account()
         else:
             self.account = account
+
+        self.game_settings: GameSetting = appstate.game_settings.get_game_settings(
+            self.account
+        )
 
         self.setFixedHeight(230)
         self.setFixedWidth(700)
@@ -91,8 +96,10 @@ class AccountDialogWidget(QDialog):
         right_layout.addRow(self.token_label, self.token)
 
         game_settings_label: Final = QLabel("Game Settings")
-        self.game_settings: GameSettingWidget = GameSettingWidget(self.account)
-        left_layout.addRow(game_settings_label, self.game_settings)
+        self.game_setting_widget: GameSettingWidget = GameSettingWidget(
+            self.account, self.game_settings
+        )
+        left_layout.addRow(game_settings_label, self.game_setting_widget)
 
         if account is not None:
             self.profile_name.setText(account.profile_name or "")
@@ -146,7 +153,7 @@ class AccountDialogWidget(QDialog):
                 self.region_combobox.itemData(self.region_combobox.currentIndex()),
             ),
             params=self.params.text(),
-            game_settings=self.game_settings.value,
+            game_settings=self.game_setting_widget.value,
         )
 
     def change_profile_name(self):
@@ -180,8 +187,9 @@ class PasswordWidget(QHBoxLayout):
 
 
 class GameSettingWidget(QHBoxLayout):
-    def __init__(self, account: Account):
+    def __init__(self, account: Account, game_settings: GameSetting):
         super().__init__()
+        self.game_settings: GameSetting = game_settings
         self.account: Account = account
         self.value: str | None = None
         if account.game_settings is not None:
@@ -192,7 +200,7 @@ class GameSettingWidget(QHBoxLayout):
 
         self.copy_game_settings: QPushButton = QPushButton("Copy")
         self.copy_game_settings.setToolTip("Copy Current D2R Settings")
-        self.copy_game_settings.clicked.connect(self.copy_current_settings)
+        self.copy_game_settings.clicked.connect(self.copy_settings)
 
         self.addWidget(self.select_game_settings, 1)
         self.addWidget(self.copy_game_settings)
@@ -203,38 +211,24 @@ class GameSettingWidget(QHBoxLayout):
         return "Select..."
 
     @Slot()
-    def copy_current_settings(self):
-        if sys.platform == "linux":
-            logger.info("Wine/Linux is not supported")
+    def copy_settings(self):
+        dst_path, exists = self.game_settings.copy_current_settings()
+
+        if dst_path is None and exists is None:
             return
 
-        if not self.account.profile_name:
-            logger.error("Please choose a profile name first")
-            return
-
-        from d2rloader.core.platform_windows.utils import get_d2r_game_settings_path
-
-        src_path = get_d2r_game_settings_path()
-
-        settings_filename = f"settings.{self.account.profile_normalized}.json"
-        dst_path = os.path.join(CONFIG_GAME_SETTINGS_DIR, settings_filename)
-
-        os.makedirs(CONFIG_GAME_SETTINGS_DIR, exist_ok=True)
-
-        if os.path.exists(dst_path):
-            logger.info(f"Settings file '{settings_filename}' already exists")
+        if exists:
             ret = QMessageBox.question(
                 self.widget(),
                 "File exists",
-                f"Settings file '{settings_filename}' already exists! <br />"
+                f"Settings file '{dst_path}' already exists! <br />"
                 + "Do you want to override the file?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if ret == QMessageBox.StandardButton.No:
                 return
+            dst_path, _ = self.game_settings.copy_current_settings(True)
 
-        logger.debug(f"Copying current game settings to '{settings_filename}'")
-        shutil.copy2(src_path, dst_path)
         self.value = dst_path
         self.select_game_settings.setText(self._get_display_value())
 

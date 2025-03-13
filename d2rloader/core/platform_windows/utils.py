@@ -14,23 +14,6 @@ from d2rloader.core.exception import ProcessingError
 from d2rloader.models.account import Account
 
 
-def get_saved_game_folder():
-    path: str = shell.SHGetKnownFolderPath(  # pyright: ignore
-        shellcon.FOLDERID_SavedGames,
-        0,  # see KNOWN_FOLDER_FLAG
-        0,  # current user
-    )
-
-    if not path:
-        return ""
-
-    return os.path.join(cast(str, path), "Diablo II Resurrected")
-
-
-def get_d2r_game_settings_path():
-    return os.path.join(get_saved_game_folder(), "Settings.json")
-
-
 def change_window_title(account: Account, pid: int):
     win32gui.EnumWindows(window_title_callback, account)
 
