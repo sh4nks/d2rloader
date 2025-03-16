@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+"""Main entry point for D2RLoader"""
+import sys
+from os.path import dirname, realpath
+
+LAUNCH_PATH = dirname(realpath(__file__))
+
+if LAUNCH_PATH not in sys.path:
+    sys.path.insert(0, LAUNCH_PATH)
+
+
+try:
+    from d2rloader.app import main  # pylint: disable=no-name-in-module
+except ImportError as ex:
+    sys.stderr.write("Error importing D2RLoader application module: %s\n" % ex)
+    sys.exit(1)
+
+main()

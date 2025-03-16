@@ -11,9 +11,7 @@ else:
     )
 
 
-ICON_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "d2rloader.ico"
-)
+ICON_PATH = os.path.join(BASE_DIR, "resources", "icons", "d2rloader.ico")
 
 
 CONFIG_BASE_DIR = os.path.join(

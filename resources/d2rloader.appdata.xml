@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>d2rloader</id>
+
+  <name>D2RLoader</name>
+  <summary>Diablo 2 Resurrected Loader</summary>
+
+  <keywords>
+    <keyword>Diablo 2</keyword>
+    <keyword>Diablo 2 Resurrected</keyword>
+    <keyword>Multiboxing</keyword>
+  </keywords>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      This is a simple Qt app which manages starting multiple Diablo 2 Resurrected instances.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">d2rloader.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/sh4nks/d2rloader/main/resources/screenshot_linux.png</image>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.0" />
+
+  <releases>
+    <release version="1.0.0" date="2025-02-21">
+      <description>
+        <p>Initial commit</p>
+      </description>
+    </release>
+    <release version="1.1.0" date="2025-03-11">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>TODO</li>
+        </ul>
+
+        <p>Fixed/Improved</p>
+        <ul>
+          <li>TODO</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+    <control>gamepad</control>
+  </supports>
+
+  <developer id="sh4nks">
+    <name translate="no">sh4nks</name>
+  </developer>
+  <url type="homepage">https://github.com/sh4nks/d2rloader</url>
+  <url type="bugtracker">https://github.com/sh4nks/d2rloader/issues</url>
+  <url type="vcs-browser">https://github.com/sh4nks/d2rloader</url>
+</component>

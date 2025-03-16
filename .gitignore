@@ -7,3 +7,7 @@ venv
 *.log
 build
 dist
+# makepkg stuff
+resources/src
+resources/pkg
+resources/d2rloader

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=D2RLoader
+Comment=Diablo 2 Resurrected Loader
+Comment[de]=Diablo 2 Resurrected Loader
+Exec=/usr/lib/d2rloader
+Terminal=false
+Icon=d2rloader
+Categories=Game;Utility;
