@@ -285,7 +285,7 @@ class D2RLoaderTableWidget(QTableWidget):
             self.change_buttons_state(button, "start")
             return
 
-        logger.info(f"Started account {account.displayname} with pid {pid}")
+        logger.info(f"Started profile {account.displayname} with pid {pid}")
         self.change_buttons_state(button, "start")
         button.setText("Running")
         button.setDisabled(False)

@@ -7,11 +7,11 @@ Its heavily inspired by <a href="https://github.com/shupershuff/Diablo2RLoader">
 
 Running on Windows
 
-![Screenshot](./screenshot_windows.png "D2R Loader Windows Screenshot")
+![Screenshot](./resources/screenshot_windows.png "D2R Loader Windows Screenshot")
 
 Running on Linux
 
-![Screenshot](./screenshot_linux.png "D2R Loader Linux Screenshot")
+![Screenshot](./resources/screenshot_linux.png "D2R Loader Linux Screenshot")
 
 
 # Getting Started

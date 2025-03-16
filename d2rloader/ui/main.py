@@ -41,7 +41,7 @@ from d2rloader.ui.table import D2RLoaderTableWidget
 class MainWidget(QWidget):
     def __init__(self, state: D2RLoaderState):
         super().__init__()
-        self.state: D2RLoaderState = state
+        self._state: D2RLoaderState = state
         main_layout = QGridLayout(self)
 
         self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(state)
@@ -98,7 +98,7 @@ class MainWidget(QWidget):
         logger.add(
             self.info_tab_widget.application_output.output.emit,
             format=fmt,
-            level="DEBUG",
+            level=self._state.settings.data.log_level or "INFO",
         )
 
 

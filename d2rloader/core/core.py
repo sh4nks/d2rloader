@@ -33,12 +33,15 @@ class D2RLoaderState:
         self.process_manager = ProcessManager(parent, self)
 
     def _setup_logger(self):
+        log_level = self.settings.data.log_level or "INFO"
+
         if self.settings.data.log_file:
             logger.remove()
             logger.add(
                 pathlib.Path(CONFIG_BASE_DIR, "d2rloader.log"),
-                level=self.settings.data.log_level.upper() or "INFO",
+                level=log_level,
             )
+
         elif self.settings.data.log_level.upper() != "DEBUG":
             logger.remove()
-            logger.add(sys.stderr, level=self.settings.data.log_level)
+            logger.add(sys.stderr, level=log_level)

@@ -43,7 +43,7 @@ class ProcessManager(QObject):
         self.process_error.emit(None, msg)
 
     def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
-        logger.info(f"Instance started and user logged in: {result[0]}")
+        logger.debug(f"Instance started and user logged in: {result}")
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
@@ -55,11 +55,11 @@ class ProcessManager(QObject):
             try:
                 with open(lutris.start_script_log_path, "w") as logfile:
                     game_settings.set_account_game_settings()
-                    logger.debug(
+                    logger.info(
                         f"Launching instance: {lutris.start_script_path.absolute()}"
                     )
                     proc = subprocess.Popen(
-                        ["sh", lutris.start_script_path], stderr=logfile
+                        ["sh", lutris.start_script_path], stderr=logfile, creationflags=subprocess.CREATE_NO_WINDOW
                     )
                     return None, account, proc.pid
             except Exception as e:

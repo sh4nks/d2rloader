@@ -65,6 +65,11 @@ class Account(BaseModel):
 
     @classmethod
     def wineprefix_account(cls, settings: Setting, account: "Account"):
+        if account.profile_normalized:
+            return Path(
+                settings.wineprefix,
+                account.profile_normalized,
+            )
         return Path(
             settings.wineprefix,
             account.email_normalized,

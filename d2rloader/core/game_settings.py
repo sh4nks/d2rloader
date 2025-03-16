@@ -62,9 +62,6 @@ class GameSetting:
             shutil.move(self.current_game_settings, f"{self.current_game_settings}.bak")
 
         if sys.platform == "linux":
-            logger.info(
-                f"New Wineprefix with game settings - creating {os.path.dirname(self.current_game_settings)}"
-            )
             os.makedirs(os.path.dirname(self.current_game_settings), exist_ok=True)
 
         shutil.copy2(self.account.game_settings, self.current_game_settings)
