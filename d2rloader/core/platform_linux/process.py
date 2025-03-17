@@ -59,7 +59,7 @@ class ProcessManager(QObject):
                         f"Launching instance: {lutris.start_script_path.absolute()}"
                     )
                     proc = subprocess.Popen(
-                        ["sh", lutris.start_script_path], stderr=logfile, creationflags=subprocess.CREATE_NO_WINDOW
+                        ["sh", lutris.start_script_path], stderr=logfile
                     )
                     return None, account, proc.pid
             except Exception as e:
