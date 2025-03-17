@@ -111,6 +111,12 @@ class MainWindow(QMainWindow):
 
         self.main_widget: MainWidget = MainWidget(state)
         self.setWindowTitle("D2RLoader")
+
+        if sys.platform == 'linux':
+            self.setWindowIcon(QtGui.QIcon.fromTheme("d2rloader"))
+        else:
+            self.setWindowIcon(QtGui.QIcon(ICON_PATH))
+
         self.setCentralWidget(self.main_widget)
 
         file_menu = self.menuBar().addMenu("&File")
@@ -207,12 +213,13 @@ class D2RLoaderUI:
 
     def init_ui(self, state: D2RLoaderState):
         self.ui_app = QApplication(sys.argv)
-        self.ui_app.setWindowIcon(QtGui.QIcon(ICON_PATH))
         self.ui_app.setApplicationName("D2RLoader")
         self.ui_app.setApplicationVersion(importlib.metadata.version("d2rloader"))
         if sys.platform == 'linux':
             self.ui_app.setWindowIcon(QtGui.QIcon.fromTheme("d2rloader"))
             self.ui_app.setDesktopFileName("d2rloader")
+        else:
+            self.ui_app.setWindowIcon(QtGui.QIcon(ICON_PATH))
 
         if state.settings.data.theme:
             QApplication.setStyle(QStyleFactory.create(state.settings.data.theme))
