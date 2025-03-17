@@ -54,11 +54,8 @@ package() {
   cd "$_pkgname"
   python -m installer --destdir="$pkgdir" dist/*.whl
 
-  install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-  install -Dm644 "./resources/icons/d2rloader.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/d2rloader.svg"
-
   # link app icons to system folder
-  for res in 256x256 128x128 48x48 32x32 16x16; do
+  for res in 256x256 128x128 64x64 48x48 32x32 16x16; do
     install -dm755 "${pkgdir}"/usr/share/icons/hicolor/${res}/apps
     install -Dm644 "./resources/icons/${res}/d2rloader.png" "${pkgdir}"/usr/share/icons/hicolor/${res}/apps/d2rloader.png
   done
