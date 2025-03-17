@@ -35,7 +35,8 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 
 ## Linux
 
-- Install Lutris (i.e. via your package manager ``pacman -S lutris``)
+- On Arch Linux you can use your favorite AUR helper to install [d2rloader-git](https://aur.archlinux.org/packages/d2rloader-git)
+- Install Lutris (Note: When using my AUR Package you don't have to install Lutris anymore as it will be installed as well)
 - Search for Diablo 2 Resurrected on Lutris and install it. This will install the Battle.NET app.
 - Install Diablo 2 Resurrected from the Battle.NET app. Tipp: If you have D2R already installed on Windows you can just copy it to your preferred location and point to it from the Battle.NET app.
 - Handle64.exe is not needed on Linux as we are working with different WINEPREFIXES to solve this problem :-)
