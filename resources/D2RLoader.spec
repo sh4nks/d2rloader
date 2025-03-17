@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['d2rloader\\app.py'],
+    ['..\\d2rloader\\app.py'],
     pathex=[],
     binaries=[],
-    datas=[('resources/icons/d2rloader.ico', '.')],
+    datas=[('.\\icons\\d2rloader.ico', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
