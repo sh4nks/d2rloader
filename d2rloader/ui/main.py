@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.metadata
 import signal
 import sys
 
@@ -149,7 +150,6 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def open_about(self):
-        import importlib.metadata
 
         version_string = importlib.metadata.version("d2rloader")
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
@@ -208,6 +208,12 @@ class D2RLoaderUI:
     def init_ui(self, state: D2RLoaderState):
         self.ui_app = QApplication(sys.argv)
         self.ui_app.setWindowIcon(QtGui.QIcon(ICON_PATH))
+        self.ui_app.setApplicationName("D2RLoader")
+        self.ui_app.setApplicationVersion(importlib.metadata.version("d2rloader"))
+        if sys.platform == 'linux':
+            self.ui_app.setWindowIcon(QtGui.QIcon.fromTheme("d2rloader"))
+            self.ui_app.setDesktopFileName("d2rloader")
+
         if state.settings.data.theme:
             QApplication.setStyle(QStyleFactory.create(state.settings.data.theme))
 

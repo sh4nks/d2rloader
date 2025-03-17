@@ -31,11 +31,6 @@
   <content_rating type="oars-1.0" />
 
   <releases>
-    <release version="1.0.0" date="2025-02-21">
-      <description>
-        <p>Initial commit</p>
-      </description>
-    </release>
     <release version="1.1.0" date="2025-03-11">
       <description>
         <p>Added</p>
@@ -49,6 +44,11 @@
         </ul>
       </description>
     </release>
+    <release version="1.0.0" date="2025-02-21">
+      <description>
+        <p>Initial commit</p>
+      </description>
+    </release>
   </releases>
 
   <supports>
@@ -58,7 +58,7 @@
     <control>gamepad</control>
   </supports>
 
-  <developer id="sh4nks">
+  <developer id="com.someblocks.sh4nks">
     <name translate="no">sh4nks</name>
   </developer>
   <url type="homepage">https://github.com/sh4nks/d2rloader</url>

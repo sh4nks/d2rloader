@@ -6,4 +6,4 @@ Comment[de]=Diablo 2 Resurrected Loader
 Exec=/usr/lib/d2rloader
 Terminal=false
 Icon=d2rloader
-Categories=Game;Utility;
+Categories=Game;
