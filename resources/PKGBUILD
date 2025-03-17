@@ -1,7 +1,7 @@
 # Maintainer: Peter Justin <peter.justin@outlook.com>
 pkgname=d2rloader-git
 _pkgname=d2rloader
-pkgver=v1.1.0.r4.gd849371
+pkgver=v1.1.0.r5.g122cda4
 pkgrel=1
 pkgdesc="Cross-platform Diablo 2 Resurrected Loader written in Python/Qt "
 arch=('any')
