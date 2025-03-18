@@ -31,16 +31,31 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="1.2.0" date="2025-03-18">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>Linux: Add support for the Game Settings Switcher</li>
+          <li>Linux: Add PKGBUILD to install D2RLoader directly from <a href="https://aur.archlinux.org/packages/d2rloader-git">AUR</a></li>
+        </ul>
+        <p>Fixed/Improved</p>
+        <ul>
+          <li>Improved the install and setup instructions</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2025-03-11">
       <description>
         <p>Added</p>
         <ul>
-          <li>TODO</li>
+          <li>Windows: Game Settings Switcher - Custom game settings for each profile</li>
+          <li>Windows: Download and set up ``handle.exe`` via a button (Account Settings -> Download)</li>
+          <li>Added Advanced Settings (File -> Settings) - Configure the D2Emu Token, Log Settings and the WINEPREFIX from within the App</li>
         </ul>
-
         <p>Fixed/Improved</p>
         <ul>
-          <li>TODO</li>
+          <li>Windows: Suppress console window when running ``handle.exe``</li>
+          <li>Remove password from logs when using authentication method ``Password``</li>
         </ul>
       </description>
     </release>
