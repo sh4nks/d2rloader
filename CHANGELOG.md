@@ -5,7 +5,7 @@ Here you can see the full list of changes between each release.
 
 ## Version 1.2.0
 
-Unreleased
+Released March 18th, 2025
 
 ### Added
 
