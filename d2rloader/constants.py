@@ -1,18 +1,19 @@
 import os
 import sys
 
+# pyinstaller
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     BASE_DIR: str = os.path.join(  # pyright: ignore
         os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    )
+    ICON_PATH = os.path.join(
+        os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "d2rloader.ico"
     )
 else:
     BASE_DIR: str = os.path.join(  # pyright: ignore
         os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     )
-
-
-ICON_PATH = os.path.join(BASE_DIR, "resources", "icons", "d2rloader.ico")
-
+    ICON_PATH = os.path.join(BASE_DIR, "resources", "icons", "d2rloader.ico")  # pyright: ignore
 
 CONFIG_BASE_DIR = os.path.join(
     os.environ.get("APPDATA")

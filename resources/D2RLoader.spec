@@ -22,7 +22,7 @@ exe = EXE(
     [],
     exclude_binaries=True,
     name='D2RLoader',
-    icon='d2rloader.ico',
+    icon='.\\icons\\d2rloader.ico',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -1,13 +1,9 @@
-import os
-from typing import cast
-
 import win32api
 import win32com.client
 import win32con
 import win32gui
 import win32pdhutil
 from loguru import logger
-from win32com.shell import shell, shellcon  # pyright: ignore
 
 from d2rloader.constants import D2R_PROCESS_TITLE, WINDOW_TITLE_FORMAT
 from d2rloader.core.exception import ProcessingError

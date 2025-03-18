@@ -132,7 +132,12 @@ class AccountDialogWidget(QDialog):
         if account is None:
             self.setWindowTitle("Add a new Account")
         else:
-            self.setWindowTitle(f"Edit Account - email: {account.email}")
+            window_title = (
+                account.email
+                if not account.profile_name
+                else f"{account.profile_name} ({account.email})"
+            )
+            self.setWindowTitle(f"Edit Account - {window_title}")
 
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)

@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         self.main_widget: MainWidget = MainWidget(state)
         self.setWindowTitle("D2RLoader")
 
-        if sys.platform == 'linux':
+        if sys.platform == "linux":
             self.setWindowIcon(QtGui.QIcon.fromTheme("d2rloader"))
         else:
             self.setWindowIcon(QtGui.QIcon(ICON_PATH))
@@ -156,7 +156,6 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def open_about(self):
-
         version_string = importlib.metadata.version("d2rloader")
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
         qt_version = f"{PySide6.__version__}"
@@ -215,7 +214,7 @@ class D2RLoaderUI:
         self.ui_app = QApplication(sys.argv)
         self.ui_app.setApplicationName("D2RLoader")
         self.ui_app.setApplicationVersion(importlib.metadata.version("d2rloader"))
-        if sys.platform == 'linux':
+        if sys.platform == "linux":
             self.ui_app.setWindowIcon(QtGui.QIcon.fromTheme("d2rloader"))
             self.ui_app.setDesktopFileName("d2rloader")
         else:
