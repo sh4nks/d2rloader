@@ -27,7 +27,7 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 
 ## Windows
 
-- Download the latest "D2RLoader.windows.zip" from the releases page here and extract it.
+- Download the latest "D2RLoader.windows.zip" from the [releases page](https://github.com/sh4nks/d2rloader/releases) and extract it.
 - Create a desktop shortcut and configure it to run as **Administrator**. Admin rights are unfortunately needed to kill the handles.
 - Start D2RLoader.exe and configure the handle.exe path and D2R game folder (File -> Settings)
 - Create and configure a new account by pressing "Add".
