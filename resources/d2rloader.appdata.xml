@@ -36,7 +36,7 @@
         <p>Added</p>
         <ul>
           <li>Linux: Add support for the Game Settings Switcher</li>
-          <li>Linux: Add PKGBUILD to install D2RLoader directly from <a href="https://aur.archlinux.org/packages/d2rloader-git">AUR</a></li>
+          <li>Linux: Add PKGBUILD to install D2RLoader directly from AUR</li>
         </ul>
         <p>Fixed/Improved</p>
         <ul>
