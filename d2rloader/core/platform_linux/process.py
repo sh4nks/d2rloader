@@ -1,6 +1,9 @@
 import subprocess
 from pathlib import Path
+from time import sleep
 from typing import TYPE_CHECKING
+
+from d2rloader.constants import WINDOW_TITLE_FORMAT
 
 if TYPE_CHECKING:
     from d2rloader.core.core import D2RLoaderState
@@ -63,6 +66,10 @@ class ProcessManager(QObject):
                     proc = subprocess.Popen(
                         ["sh", lutris.start_script_path], stderr=logfile
                     )
+
+                    if self._is_d2r_started(proc.pid):
+                        self._rename_window_title(proc.pid, account)
+
                     return None, account, proc.pid
             except Exception as e:
                 logger.error(e)
@@ -88,3 +95,81 @@ class ProcessManager(QObject):
             or len(account.password) == 0
         ):
             raise ProcessingError("No email/password provided")
+
+    def _is_d2r_started(self, parent_pid: int):
+        parent = psutil.Process(parent_pid)
+        pid = None
+        timeout = 30  # abort after 30 seconds
+        counter = 0
+        while True:
+            pid = self._get_d2r_exe_pid(None, parent)
+            if pid is not None:
+                logger.debug("D2R.exe process found!")
+                break
+            sleep(0.5)
+
+            counter += 0.5
+            if counter == timeout:
+                logger.error("D2R.exe not found after looking for it for 30 seconds")
+                break
+
+        return pid is not None
+
+    def _get_d2r_exe_pid(
+        self, parent_pid: int | None, process: psutil.Process | None = None
+    ):
+        if parent_pid is None and process is None:
+            return None
+
+        if parent_pid and process:
+            return None
+
+        if parent_pid is not None:
+            parent = psutil.Process(parent_pid)
+        elif process is not None:
+            parent = process
+        else:
+            return None
+
+        for child in parent.children(recursive=True):
+            if child.name() == "Main":
+                return child
+        return None
+
+    def _rename_window_title(self, pid: int, account: Account):
+        # Once Wine Wayland is the only thing that works we gotta reinvestigate how to
+        # fix this. Perhaps it's possible to change it directly in Wine?
+        # And then we can use something like
+        # this https://github.com/jmazzola/window-title-spoofer/tree/master
+        #
+        # For now, with XWayland we can use xdotool or wmctrl to change
+        # the window title
+        process = self._get_d2r_exe_pid(pid)
+        if process is None:
+            logger.error(f"Couldn't set window title for pid {pid}. No process found.")
+            return False
+
+        window_title = WINDOW_TITLE_FORMAT.format(
+            account.displayname, account.region.value
+        )
+        d2r_pid = str(process.pid)
+
+        wmIds = (
+            subprocess.check_output(["wmctrl", "-lp"])
+            .decode("utf-8")
+            .strip()
+            .splitlines()
+        )
+        for wmId in wmIds:
+            if d2r_pid in wmId:
+                windowId = wmId.split(sep=None, maxsplit=4)[0]
+                logger.debug(
+                    f"Updating title for window id '{windowId}' to '{window_title}'"
+                )
+                subprocess.Popen(["wmctrl", "-i", "-r", windowId, "-N", window_title])
+                return True
+
+        logger.error(
+            f"Couldn't set window title for pid {pid}. Found window ids: {wmIds}"
+        )
+        return False
