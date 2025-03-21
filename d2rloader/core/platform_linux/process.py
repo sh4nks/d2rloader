@@ -1,5 +1,3 @@
-import os
-import signal
 import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -7,6 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from d2rloader.core.core import D2RLoaderState
 
+import psutil
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
@@ -34,7 +33,10 @@ class ProcessManager(QObject):
 
     def kill(self, pid: int):
         logger.info(f"Killing instance with pid: {pid}")
-        os.kill(pid, signal.SIGKILL)
+        parent = psutil.Process(pid)
+        for child in parent.children(recursive=True):
+            child.kill()
+        parent.kill()
 
     def _handle_worker_error(self, err: tuple[Exception, str]):
         logger.debug(err)
