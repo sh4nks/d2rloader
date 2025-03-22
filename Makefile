@@ -8,8 +8,9 @@ run: ## Runs the development server with the development config
 	uv run --extra dev d2rloader
 
 format: ## Sorts the imports and reformats the code
-	# sort imports
-	uv run ruff check --select I --fix
+	# sort imports / remove unused
+	uv run ruff check --fix --select I
+	uv run ruff check --fix
 	# reformat
 	uv run ruff format
 

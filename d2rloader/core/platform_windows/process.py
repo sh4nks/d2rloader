@@ -50,6 +50,10 @@ class ProcessManager(QObject):
         worker.signals.success.connect(self._handle_worker_success)
         self.threadpool.start(worker)
 
+    def find_active_instances(self, accounts: list[Account]):
+        instances: dict[int, Account] = {}
+        return instances
+
     def _handle_worker_error(self, err: tuple[ProcessingError, str]):
         msg, *_ = err[0].args
         logger.error(f"Could not start instance due to: {msg}")

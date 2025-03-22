@@ -48,6 +48,12 @@ class Account(BaseModel):
     game_settings: str | None = Field(default=None)
 
     @property
+    def id(self):
+        if self.profile_name is not None:
+            return self.profile_normalized
+        return self.email_normalized
+
+    @property
     def displayname(self):
         if self.profile_name is None or self.profile_name == "":
             return self.email

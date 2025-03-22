@@ -48,6 +48,7 @@ class D2RLoaderTableWidget(QTableWidget):
         self.itemChanged.connect(self.change_parameters)
         self.itemDoubleClicked.connect(self.double_clicked_row)
         self.create_table_entries()
+        self.find_active_instances()
 
     @Slot()
     def edit_entry(self) -> None:
@@ -225,6 +226,24 @@ class D2RLoaderTableWidget(QTableWidget):
             if account is not None and account.params != item.text():
                 self._state.accounts.update(item.row(), params=item.text())
 
+    def find_active_instances(self):
+        if self._state.process_manager is None:
+            logger.error("ProcessManager not registered!")
+            return
+
+        instances = self._state.process_manager.find_active_instances(
+            self._state.accounts.data
+        )
+        for i in instances.items():
+            self._processes[i[1].id] = (True, i[0])
+
+        for idx, account in enumerate(self._state.accounts.data):
+            if account.id in self._processes.keys():
+                button = cast(QPushButton, self.cellWidget(idx, 5))
+                if button.text() == "Running":
+                    continue
+                button.setText("Running")
+
     def process_start(self, account: Account, button: QPushButton):
         if self._state.process_manager is None:
             logger.error("ProcessManager not registered!")
@@ -257,7 +276,7 @@ class D2RLoaderTableWidget(QTableWidget):
     def process_kill(self, account: Account, button: QPushButton):
         pid = None
         try:
-            pid = self._processes[account.email][1]
+            pid = self._processes[account.id][1]
         except KeyError:
             pass
 
@@ -265,14 +284,14 @@ class D2RLoaderTableWidget(QTableWidget):
             logger.error("Stopping D2R.exe failed - PID not found!")
         else:
             logger.info(
-                f"Stopping D2R.exe with PID {self._processes[account.email][1]} - {account.displayname} ({account.region})"
+                f"Stopping D2R.exe with PID {self._processes[account.id][1]} - {account.displayname} ({account.region})"
             )
             try:
                 self._state.process_manager.kill(pid)
             except Exception:
                 logger.error(f"Couldn't kill pid {pid}")
 
-        del self._processes[account.email]
+        del self._processes[account.id]
         self.change_buttons_state(button, "start")
 
     @Slot()  # pyright: ignore
@@ -290,7 +309,7 @@ class D2RLoaderTableWidget(QTableWidget):
         button.setText("Running")
         button.setDisabled(False)
 
-        self._processes[account.email] = (logged_in, pid)
+        self._processes[account.id] = (logged_in, pid)
 
     @Slot()  # pyright: ignore
     def process_error(self, button: QPushButton, account: Account, msg: str):

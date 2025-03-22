@@ -4,6 +4,7 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 from d2rloader.constants import WINDOW_TITLE_FORMAT
+from d2rloader.core.platform_linux.utils import get_window_by_title, set_window_title
 
 if TYPE_CHECKING:
     from d2rloader.core.core import D2RLoaderState
@@ -40,6 +41,28 @@ class ProcessManager(QObject):
         for child in parent.children(recursive=True):
             child.kill()
         parent.kill()
+
+    def find_active_instances(self, accounts: list[Account]) -> dict[int, Account]:
+        instances: dict[int, Account] = {}
+        for account in accounts:
+            title = WINDOW_TITLE_FORMAT.format(
+                account.displayname, account.region.value
+            )
+            window_id, window_pid = get_window_by_title(title)
+            if window_id is None or window_pid is None:
+                continue
+
+            p_parents = psutil.Process(int(window_pid)).parents()
+            pid = None
+            for p in p_parents:
+                if p.name() == "srt-bwrap":
+                    pid = p.pid
+                    break
+
+            if pid is not None:
+                instances[pid] = account
+
+        return instances
 
     def _handle_worker_error(self, err: tuple[Exception, str]):
         logger.debug(err)
@@ -147,29 +170,9 @@ class ProcessManager(QObject):
         process = self._get_d2r_exe_pid(pid)
         if process is None:
             logger.error(f"Couldn't set window title for pid {pid}. No process found.")
-            return False
+            return
 
         window_title = WINDOW_TITLE_FORMAT.format(
             account.displayname, account.region.value
         )
-        d2r_pid = str(process.pid)
-
-        wmIds = (
-            subprocess.check_output(["wmctrl", "-lp"])
-            .decode("utf-8")
-            .strip()
-            .splitlines()
-        )
-        for wmId in wmIds:
-            if d2r_pid in wmId:
-                windowId = wmId.split(sep=None, maxsplit=4)[0]
-                logger.debug(
-                    f"Updating title for window id '{windowId}' to '{window_title}'"
-                )
-                subprocess.Popen(["wmctrl", "-i", "-r", windowId, "-N", window_title])
-                return True
-
-        logger.error(
-            f"Couldn't set window title for pid {pid}. Found window ids: {wmIds}"
-        )
-        return False
+        set_window_title(process.pid, window_title)
