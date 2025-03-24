@@ -60,6 +60,7 @@ class ProcessManager(QObject):
                     break
 
             if pid is not None:
+                logger.info(f"Found running instance: {title}")
                 instances[pid] = account
 
         return instances
@@ -71,7 +72,7 @@ class ProcessManager(QObject):
         self.process_error.emit(None, msg)
 
     def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
-        logger.debug(f"Instance started and user logged in: {result}")
+        logger.debug(f"Instance started: {result}")
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
@@ -175,4 +176,5 @@ class ProcessManager(QObject):
         window_title = WINDOW_TITLE_FORMAT.format(
             account.displayname, account.region.value
         )
+        sleep(1)
         set_window_title(process.pid, window_title)
