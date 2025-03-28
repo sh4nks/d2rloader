@@ -60,7 +60,7 @@ class ProcessManager(QObject):
                     break
 
             if pid is not None:
-                logger.info(f"Found running instance: {title}")
+                logger.info(f"Running instance found: {title}")
                 instances[pid] = account
 
         return instances
