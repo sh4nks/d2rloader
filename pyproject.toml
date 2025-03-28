@@ -31,9 +31,10 @@ classifiers = [
   "Topic :: Games/Entertainment"
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
   "ruff>=0.9.10",
+  "pre-commit>=4.2.0"
 ]
 windows = [
   "pyinstaller>=6.12.0"
