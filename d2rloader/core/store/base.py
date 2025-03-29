@@ -1,6 +1,6 @@
 from typing import Any, Generic, TypeVar, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from d2rloader.core.storage import StorageService, StorageType
 
@@ -11,9 +11,9 @@ class BaseService(Generic[T]):
     _state: list[T] | None = []
 
     def __init__(
-        self, storage: StorageService, type: StorageType, path: str | None = None
+        self, storage: StorageService, adapter: TypeAdapter[T], path: str | None = None
     ):
-        self.storage_type: StorageType = type
+        self.storage_adapter: TypeAdapter[T] = adapter
         self.storage: StorageService = storage
         self.path: str | None = path
         self.load()
@@ -52,12 +52,27 @@ class BaseService(Generic[T]):
             self._state.append(item)
 
         if commit:
-            self.storage.save(self._state, self.storage_type, self.path)
+            self.storage.save(
+                self._state,
+                type=StorageType.Plugin,
+                adapter=self.storage_adapter,
+                path=self.path,
+            )
 
     def delete(self, index: int):
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         self.data.pop(index)
-        self.storage.save(self._state, self.storage_type, self.path)
+        self.storage.save(
+            self._state,
+            type=StorageType.Plugin,
+            adapter=self.storage_adapter,
+            path=self.path,
+        )
 
     def load(self):
-        self._state = cast(list[T], self.storage.load(self.storage_type, self.path))
+        self._state = cast(
+            list[T],
+            self.storage.load(
+                type=StorageType.Plugin, adapter=self.storage_adapter, path=self.path
+            ),
+        )

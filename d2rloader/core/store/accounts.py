@@ -51,7 +51,7 @@ class AccountService:
             self._storage.save(
                 self._current_accounts,
                 StorageType.Account,
-                self._setting.data.accounts_path,
+                path=self._setting.data.accounts_path,
             )
 
     def delete(self, index: int):
@@ -60,7 +60,7 @@ class AccountService:
         self._storage.save(
             self._current_accounts,
             StorageType.Account,
-            self._setting.data.accounts_path,
+            path=self._setting.data.accounts_path,
         )
 
     def load(self):
@@ -69,5 +69,7 @@ class AccountService:
 
         self._current_accounts = cast(
             list[Account],
-            self._storage.load(StorageType.Account, self._setting.data.accounts_path),
+            self._storage.load(
+                StorageType.Account, path=self._setting.data.accounts_path
+            ),
         )

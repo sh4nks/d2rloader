@@ -39,7 +39,7 @@ class SettingService:
 
     def load(self, path: str | None = None):
         self._current_setting = cast(
-            Setting, self._storage.load(StorageType.Setting, path)
+            Setting, self._storage.load(StorageType.Setting, path=path)
         )
 
         if not self._current_setting:

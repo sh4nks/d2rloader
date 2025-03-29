@@ -4,6 +4,8 @@ import importlib.metadata
 import signal
 import sys
 
+from d2rloader.ui.utils.utils import create_action
+
 try:
     from ctypes import windll  # Only exists on Windows.
 
@@ -23,7 +25,6 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QMainWindow,
-    QMenu,
     QMessageBox,
     QPushButton,
     QStyleFactory,
@@ -47,6 +48,9 @@ class MainWidget(QWidget):
 
         self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(state)
         self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(state)
+        self._state.plugin_manager.hook.d2rloader_info_tabbar(
+            state=state, tabbar=self.info_tab_widget
+        )
 
         top_layout = self.create_top_layout()
         main_layout.addLayout(top_layout, 0, 0, 1, 2)
@@ -121,38 +125,35 @@ class MainWindow(QMainWindow):
 
         file_menu = self.menuBar().addMenu("&File")
         account_menu = self.menuBar().addMenu("&Account")
-
         # Populate the File menu
-        self.setting_action: QAction = self.create_action(
-            "Settings", file_menu, self.open_settings
+        self.setting_action: QAction = create_action(
+            self, "Settings", file_menu, self.open_settings
         )
         file_menu.addSeparator()
-        self.open_action: QAction = self.create_action(
-            "&Load Account Settings...", file_menu, self.open_file
+        self.open_action: QAction = create_action(
+            self, "&Load Account Settings...", file_menu, self.open_file
         )
-        self.save_action: QAction = self.create_action(
-            "&Save Account Settings As...", file_menu, self.save_file
-        )
-        file_menu.addSeparator()
-        self.info_action: QAction = self.create_action(
-            "&About", file_menu, self.open_about
+        self.save_action: QAction = create_action(
+            self, "&Save Account Settings As...", file_menu, self.save_file
         )
         file_menu.addSeparator()
-        self.exit_action: QAction = self.create_action("E&xit", file_menu, self.close)
+        self.info_action: QAction = create_action(
+            self, "&About", file_menu, self.open_about
+        )
+        file_menu.addSeparator()
+        self.exit_action: QAction = create_action(self, "E&xit", file_menu, self.close)
 
         # Populate the Tools menu
-        self.add_action: QAction = self.create_action(
-            "&Add Account...", account_menu, self.main_widget.table_widget.add_entry
+        self.add_action: QAction = create_action(
+            self,
+            "&Add Account...",
+            account_menu,
+            self.main_widget.table_widget.add_entry,
         )
 
-    def create_action(self, text: str, menu: QMenu, slot: object) -> QAction:
-        """Helper function to save typing when populating menus
-        with action.
-        """
-        action = QAction(text, self)
-        menu.addAction(action)
-        action.triggered.connect(slot)
-        return action
+        self.state.plugin_manager.hook.d2rloader_mainwindow_plugin_menu(
+            state=state, parent=self, menu=self.menuBar()
+        )
 
     @Slot()
     def open_about(self):
@@ -199,7 +200,9 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(self)
         if not filename:
             return
-        self.state.storage.save(self.state.accounts.data, StorageType.Account, filename)
+        self.state.storage.save(
+            self.state.accounts.data, StorageType.Account, path=filename
+        )
 
 
 class D2RLoaderUI:

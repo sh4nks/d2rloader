@@ -2,6 +2,18 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.3.0
+
+Unreleased
+
+### Added
+
+- Plugin API - Its possible to hook into some parts of D2RLoader and extend it with plugins
+
+
+**Full Changelog**: [v1.2.1...v1.3.0](https://github.com/sh4nks/d2rloader/compare/v1.2.1...main)
+
+
 ## Version 1.2.1
 
 Released March 30th, 2025

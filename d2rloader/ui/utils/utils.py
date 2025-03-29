@@ -1,4 +1,6 @@
-from PySide6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtCore import QObject
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 
 
 def class_name(o: QWidget):
@@ -10,6 +12,16 @@ def init_widget(w: QWidget, name: str, tooltip: str | None = None) -> None:
     class name"""
     w.setObjectName(name)
     w.setToolTip(tooltip or class_name(w))
+
+
+def create_action(parent: QObject, text: str, menu: QMenu, slot: object) -> QAction:
+    """Helper function to save typing when populating menus
+    with action.
+    """
+    action = QAction(text, parent)
+    menu.addAction(action)
+    action.triggered.connect(slot)
+    return action
 
 
 def show_error_dialog(w: QWidget, msg: str) -> None:

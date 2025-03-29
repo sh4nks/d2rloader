@@ -32,6 +32,8 @@ CONFIG_GAME_SETTINGS_DIR = os.path.join(
     "game_settings",
 )
 
+CONFIG_PLUGINS_DIR = os.path.join(BASE_DIR, "example_plugins")
+
 HANDLE_URL_FILENAME = "Handle.zip"
 HANDLE_URL = f"https://download.sysinternals.com/files/{HANDLE_URL_FILENAME}"
 

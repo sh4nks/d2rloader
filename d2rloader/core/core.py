@@ -3,10 +3,12 @@ import sys
 from typing import override
 
 from loguru import logger
+from pluggy import PluginManager
 from PySide6.QtCore import QObject
 
-from d2rloader.constants import CONFIG_BASE_DIR
+from d2rloader.constants import CONFIG_BASE_DIR, CONFIG_PLUGINS_DIR
 from d2rloader.core.game_settings import GameSettingsService
+from d2rloader.core.plugins.loader import register_plugins
 from d2rloader.core.process import ProcessManager
 from d2rloader.core.storage import StorageService
 from d2rloader.core.store.accounts import AccountService
@@ -24,6 +26,7 @@ class D2RLoaderState:
         self.game_settings: GameSettingsService = GameSettingsService(
             self.settings.data
         )
+        self.plugin_manager: PluginManager = self.register_plugin_manager()
 
     @override
     def __repr__(self) -> str:
@@ -31,6 +34,10 @@ class D2RLoaderState:
 
     def register_process_manager(self, parent: QObject):
         self.process_manager = ProcessManager(parent, self)
+
+    def register_plugin_manager(self):
+        pm = register_plugins(CONFIG_PLUGINS_DIR)
+        return pm
 
     def _setup_logger(self):
         log_level = self.settings.data.log_level or "INFO"
