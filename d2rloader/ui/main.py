@@ -48,7 +48,7 @@ class MainWidget(QWidget):
 
         self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(state)
         self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(state)
-        self._state.plugin_manager.hook.d2rloader_info_tabbar(
+        self._state.plugins.hook.d2rloader_info_tabbar(
             state=state, tabbar=self.info_tab_widget
         )
 
@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
             self.main_widget.table_widget.add_entry,
         )
 
-        self.state.plugin_manager.hook.d2rloader_mainwindow_plugin_menu(
+        self.state.plugins.hook.d2rloader_mainwindow_plugin_menu(
             state=state, parent=self, menu=self.menuBar()
         )
 

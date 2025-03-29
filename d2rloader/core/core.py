@@ -26,7 +26,7 @@ class D2RLoaderState:
         self.game_settings: GameSettingsService = GameSettingsService(
             self.settings.data
         )
-        self.plugin_manager: PluginManager = self.register_plugin_manager()
+        self.plugins: PluginManager = self.register_plugin_manager()
 
     @override
     def __repr__(self) -> str:
