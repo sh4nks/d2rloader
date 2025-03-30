@@ -1,6 +1,6 @@
 [project]
 name = "d2rloader"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
   "loguru>=0.7.3",
   "psutil>=7.0.0",

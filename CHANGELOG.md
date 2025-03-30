@@ -2,6 +2,24 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.2.1
+
+Released March 30th, 2025
+
+### Added
+
+- Linux: Window Titles are now renamed as well (this will only work as long as Proton/Wine uses X/XWayland)
+- D2RLoader will look for running D2R instances at startup if the app was closed while some D2R instances where still running
+
+### Fixed
+
+- Fix initial startup in case 'settings.json' is not available
+- Linux: Killing D2R instances now works correctly
+- Linux: Add 'wmctrl' to dependencies
+
+
+**Full Changelog**: [v1.2.0...v1.2.1](https://github.com/sh4nks/d2rloader/compare/v1.2.0...v1.2.1)
+
 
 ## Version 1.2.0
 

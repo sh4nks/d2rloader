@@ -21,7 +21,7 @@ jobs:
         python-version: 3.13
 
     - name: Make PyInstaller Package
-      run: uv run --extra windows pyinstaller resources/D2RLoader.spec --noconfirm
+      run: uv run --group windows pyinstaller resources/D2RLoader.spec --noconfirm
 
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.6
