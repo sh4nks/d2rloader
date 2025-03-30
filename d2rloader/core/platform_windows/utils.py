@@ -2,7 +2,7 @@ import win32api
 import win32com.client
 import win32con
 import win32gui
-import win32pdhutil
+import win32process
 from loguru import logger
 
 from d2rloader.constants import D2R_PROCESS_TITLE, WINDOW_TITLE_FORMAT
@@ -11,10 +11,10 @@ from d2rloader.models.account import Account
 
 
 def change_window_title(account: Account, pid: int):
-    win32gui.EnumWindows(window_title_callback, account)
+    win32gui.EnumWindows(_window_title_callback, account)
 
 
-def window_title_callback(hwnd: int, account: Account):
+def _window_title_callback(hwnd: int, account: Account):
     title = win32gui.GetWindowText(hwnd)
 
     if title == D2R_PROCESS_TITLE:
@@ -24,28 +24,14 @@ def window_title_callback(hwnd: int, account: Account):
         logger.debug(f"Setting Window Handle '{hwnd}' to '{window_title}'")
         win32gui.SetWindowText(hwnd, window_title)  # pyright: ignore
 
+def get_window_by_title(title: str):
+    hwnd = win32gui.FindWindow(None, title)
 
-def kill_process_by_name(procname: str):
-    try:
-        win32pdhutil.GetPerformanceAttributes("Process", "ID Process", procname)
-    except:
-        pass
+    pid = -1
+    if hwnd > 0:
+        _, pid = win32process.GetWindowThreadProcessId(hwnd)
 
-    pids: list[int] = win32pdhutil.FindPerformanceAttributesByName(procname)
-
-    try:
-        pids.remove(win32api.GetCurrentProcessId())
-    except ValueError:
-        pass
-
-    if len(pids) == 0:
-        logger.error(f"Can't find {procname}")
-        return
-
-    for pid in pids:
-        logger.info(f"Killing {procname} with pid {pid}")
-        kill_process_by_pid(pid)
-
+    return pid
 
 def kill_process_by_pid(pid: int):
     try:

@@ -11,7 +11,7 @@ import psutil
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
-from d2rloader.constants import UPDATE_HANDLE
+from d2rloader.constants import UPDATE_HANDLE, WINDOW_TITLE_FORMAT
 from d2rloader.core.exception import ProcessingError
 from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account, AuthMethod
@@ -26,6 +26,7 @@ from .regedit import (
 )
 from .utils import (
     change_window_title,
+    get_window_by_title,
     kill_process_by_pid,
 )
 
@@ -52,6 +53,14 @@ class ProcessManager(QObject):
 
     def find_active_instances(self, accounts: list[Account]):
         instances: dict[int, Account] = {}
+        for account in accounts:
+            title = WINDOW_TITLE_FORMAT.format(
+                account.displayname, account.region.value
+            )
+            pid = get_window_by_title(title)
+            if pid > 0:
+                logger.info(f"Running instance found: {title}")
+                instances[pid] = account
         return instances
 
     def _handle_worker_error(self, err: tuple[ProcessingError, str]):
