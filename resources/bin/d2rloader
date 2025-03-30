@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """Main entry point for D2RLoader"""
+
 import sys
 from os.path import dirname, realpath
 

@@ -1,6 +1,6 @@
 from loguru import logger
 
-from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.state import D2RLoaderState
 from d2rloader.ui.main import D2RLoaderUI
 
 

@@ -15,9 +15,9 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
 )
 
-from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.state import D2RLoaderState
 from d2rloader.models.account import Account, AuthMethod, Region
-from d2rloader.ui.account_dialog import AccountDialogWidget
+from d2rloader.ui.dialog_account import AccountDialogWidget
 from d2rloader.ui.utils.utils import show_error_dialog
 
 
@@ -34,9 +34,9 @@ class D2RLoaderTableWidget(QTableWidget):
     _process: QProcess | None = None
     _processes: dict[str, tuple[bool, int]] = {}
 
-    def __init__(self, appstate: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState):
         super().__init__()
-        self._state: D2RLoaderState = appstate
+        self.d2rloader: D2RLoaderState = d2rloader
 
         self.setColumnCount(len(self._columns))
         self.setHorizontalHeaderLabels(self._columns)
@@ -57,22 +57,22 @@ class D2RLoaderTableWidget(QTableWidget):
 
         row_index = self.selectedIndexes()[0].row()
         edit_dialog = AccountDialogWidget(
-            self, self._state, self._state.accounts.get(row_index)
+            self, self.d2rloader, self.d2rloader.accounts.get(row_index)
         )
 
         if edit_dialog.exec():
             self.removeRow(row_index)
             self.create_row(row_index, edit_dialog.data)
-            self._state.accounts.add(edit_dialog.data, row_index)
+            self.d2rloader.accounts.add(edit_dialog.data, row_index)
             self.selectRow(row_index)
 
     @Slot()
     def add_entry(self):
-        add_dialog = AccountDialogWidget(self, self._state)
+        add_dialog = AccountDialogWidget(self, self.d2rloader)
 
         if add_dialog.exec():
             self.add_row(add_dialog.data)
-            self._state.accounts.add(add_dialog.data)
+            self.d2rloader.accounts.add(add_dialog.data)
 
     @Slot()
     def clone_entry(self):
@@ -80,8 +80,8 @@ class D2RLoaderTableWidget(QTableWidget):
             return
 
         row_index = self.selectedIndexes()[0].row()
-        self._state.accounts.add(self._state.accounts.get(row_index))
-        self.add_row(self._state.accounts.get(row_index))
+        self.d2rloader.accounts.add(self.d2rloader.accounts.get(row_index))
+        self.add_row(self.d2rloader.accounts.get(row_index))
 
     @Slot()
     def delete_entry(self):
@@ -91,13 +91,13 @@ class D2RLoaderTableWidget(QTableWidget):
         row_index = self.selectedIndexes()[0].row()
         self.removeRow(row_index)
         self._items -= 1
-        self._state.accounts.delete(row_index)
+        self.d2rloader.accounts.delete(row_index)
 
     def double_clicked_row(self, _: QTableWidgetItem):
         self.edit_entry()
 
     def create_table_entries(self, data: list[Account] | None = None):
-        data = self._state.accounts.data if not data else data
+        data = self.d2rloader.accounts.data if not data else data
 
         for item in data:
             self.add_row(item)
@@ -170,7 +170,7 @@ class D2RLoaderTableWidget(QTableWidget):
         self.create_table_entries()
 
     def clicked_start_stop_button(self, row_index: int, button: QPushButton | None):
-        account = self._state.accounts.get(row_index)
+        account = self.d2rloader.accounts.get(row_index)
         if account is None:
             logger.error(f"Accout not found for row_index {row_index}")
             return
@@ -209,7 +209,7 @@ class D2RLoaderTableWidget(QTableWidget):
             return
 
         row_index = self.selectedIndexes()[0].row()
-        self._state.accounts.update(row_index, auth_method=method)
+        self.d2rloader.accounts.update(row_index, auth_method=method)
 
     @Slot()
     def change_region(self, activated: str | None = None):
@@ -218,26 +218,26 @@ class D2RLoaderTableWidget(QTableWidget):
             return
 
         row_index = self.selectedIndexes()[0].row()
-        self._state.accounts.update(row_index, region=reg)
+        self.d2rloader.accounts.update(row_index, region=reg)
 
     def change_parameters(self, item: QTableWidgetItem):
         if self._columns[item.column()] == "Launch Parameters":
-            account = self._state.accounts.get(item.row())
+            account = self.d2rloader.accounts.get(item.row())
             if account is not None and account.params != item.text():
-                self._state.accounts.update(item.row(), params=item.text())
+                self.d2rloader.accounts.update(item.row(), params=item.text())
 
     def find_active_instances(self):
-        if self._state.process_manager is None:
+        if self.d2rloader.process_manager is None:
             logger.error("ProcessManager not registered!")
             return
 
-        instances = self._state.process_manager.find_active_instances(
-            self._state.accounts.data
+        instances = self.d2rloader.process_manager.find_active_instances(
+            self.d2rloader.accounts.data
         )
         for i in instances.items():
             self._processes[i[1].id] = (True, i[0])
 
-        for idx, account in enumerate(self._state.accounts.data):
+        for idx, account in enumerate(self.d2rloader.accounts.data):
             if account.id in self._processes.keys():
                 button = cast(QPushButton, self.cellWidget(idx, 5))
                 if button.text() == "Running":
@@ -245,7 +245,7 @@ class D2RLoaderTableWidget(QTableWidget):
                 button.setText("Running")
 
     def process_start(self, account: Account, button: QPushButton):
-        if self._state.process_manager is None:
+        if self.d2rloader.process_manager is None:
             logger.error("ProcessManager not registered!")
             return
 
@@ -253,8 +253,8 @@ class D2RLoaderTableWidget(QTableWidget):
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                self._state.process_manager.process_finished.disconnect()
-                self._state.process_manager.process_error.disconnect()
+                self.d2rloader.process_manager.process_finished.disconnect()
+                self.d2rloader.process_manager.process_error.disconnect()
         except Exception:
             pass
 
@@ -265,13 +265,13 @@ class D2RLoaderTableWidget(QTableWidget):
         logger.info(
             f"Starting D2R.exe - {account.displayname} ({account.region.value})"
         )
-        self._state.process_manager.process_finished.connect(
+        self.d2rloader.process_manager.process_finished.connect(
             functools.partial(self.process_finished, button)
         )
-        self._state.process_manager.process_error.connect(
+        self.d2rloader.process_manager.process_error.connect(
             functools.partial(self.process_error, button)
         )
-        self._state.process_manager.start(account)
+        self.d2rloader.process_manager.start(account)
 
     def process_kill(self, account: Account, button: QPushButton):
         pid = None
@@ -280,14 +280,14 @@ class D2RLoaderTableWidget(QTableWidget):
         except KeyError:
             pass
 
-        if pid is None or self._state.process_manager is None:
+        if pid is None or self.d2rloader.process_manager is None:
             logger.error("Stopping D2R.exe failed - PID not found!")
         else:
             logger.info(
                 f"Stopping D2R.exe with PID {self._processes[account.id][1]} - {account.displayname} ({account.region})"
             )
             try:
-                self._state.process_manager.kill(pid)
+                self.d2rloader.process_manager.kill(pid)
             except Exception:
                 logger.error(f"Couldn't kill pid {pid}")
 

@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from d2rloader.constants import DIABLO_LEVELS
-from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.state import D2RLoaderState
 
 URI_TZ_INFO = "https://d2emu.com/api/v1/tz"
 URI_DC_INFO = "https://d2emu.com/api/v1/dclone"
@@ -69,10 +69,10 @@ class RequestType(enum.Enum):
 class InfoTabsWidget(QTabWidget):
     refresh: Signal = Signal()
 
-    def __init__(self, state: D2RLoaderState, parent: QWidget | None = None):
+    def __init__(self, d2rloader: D2RLoaderState, parent: QWidget | None = None):
         """Initialize the InfoTabsWidget."""
         super().__init__(parent)
-        self.state: D2RLoaderState = state
+        self.d2rloader: D2RLoaderState = d2rloader
         self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
         self.dcinfo: DCInfoWidget = DCInfoWidget(self)
         self.tzinfo: TZInfoWidget = TZInfoWidget(self)
@@ -97,10 +97,10 @@ class InfoTabsWidget(QTabWidget):
         )
         request.setRawHeader(
             b"x-emu-username",
-            f"{self.state.settings.data.token_username}".encode("utf-8"),
+            f"{self.d2rloader.settings.data.token_username}".encode("utf-8"),
         )
         request.setRawHeader(
-            b"x-emu-token", f"{self.state.settings.data.token}".encode("utf-8")
+            b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode("utf-8")
         )
         reply = self.networkmanager.get(request)
         reply.finished.connect(functools.partial(self.on_finished, reply, type))

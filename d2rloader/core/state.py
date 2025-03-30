@@ -6,7 +6,7 @@ from loguru import logger
 from pluggy import PluginManager
 from PySide6.QtCore import QObject
 
-from d2rloader.constants import CONFIG_BASE_DIR, CONFIG_PLUGINS_DIR
+from d2rloader.constants import CONFIG_BASE_DIR
 from d2rloader.core.game_settings import GameSettingsService
 from d2rloader.core.plugins.loader import register_plugins
 from d2rloader.core.process import ProcessManager
@@ -36,7 +36,7 @@ class D2RLoaderState:
         self.process_manager = ProcessManager(parent, self)
 
     def register_plugin_manager(self):
-        pm = register_plugins(CONFIG_PLUGINS_DIR)
+        pm = register_plugins(self.settings.data.plugins_path)
         return pm
 
     def _setup_logger(self):

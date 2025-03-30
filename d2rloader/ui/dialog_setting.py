@@ -123,6 +123,17 @@ class SettingDialogWidget(QDialog):
         )
         advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
 
+        plugins_path_label: Final = QLabel("Plugins: ", self)
+        self.plugins_path_button: Final = QPushButton(
+            self.setting.plugins_path or "Select..."
+        )
+        self.plugins_path_button.clicked.connect(
+            functools.partial(
+                self.select_directory, "plugins_path", self.plugins_path_button
+            )
+        )
+        advanced_form.addRow(plugins_path_label, self.plugins_path_button)
+
         log_level_label: Final = QLabel("Log Level: ", self)
         self.log_level_combobox: Final = QComboBox()
         self.log_level_combobox.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
