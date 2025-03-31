@@ -142,6 +142,8 @@ reportAny = false
 reportExplicitAny = false
 ```
 
+Now run ``vendoring sync`` to synchronize the dependencies.
+
 ## Linux
 
 If you have installed D2RLoader with your package manager, you can create a installable version of your plugin and set the appropriate entrypoint ``d2rloader.plugins``. D2RLoader will now find your plugin. You don't need to vendor anything this way (Year of the Linux Desktop?).
