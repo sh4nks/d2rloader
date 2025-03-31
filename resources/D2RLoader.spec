@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
 
 
 a = Analysis(
@@ -6,7 +7,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('.\\icons\\d2rloader.ico', '.')],
-    hiddenimports=[],
+    hiddenimports=[*list(sys.stdlib_module_names)],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
