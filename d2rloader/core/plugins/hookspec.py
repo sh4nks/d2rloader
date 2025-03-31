@@ -28,27 +28,6 @@ def d2rloader_mainwindow_plugin_menu(
 
 
 @hookspec
-def d2rloader_table_context_menu(d2rloader: "D2RLoaderState", table, item):
-    """Hook for extending the right click menu in the accounts table
-
-    NOT IMPLEMENTED YET
-    """
-    pass
-
-
-@hookspec
-def d2rloader_table_right_button_menu(d2rloader: "D2RLoaderState", widget):
-    """Hook for extending the right aligned button menu"""
-    pass
-
-
-@hookspec
-def d2rloader_table_left_button_menu(d2rloader: "D2RLoaderState", widget):
-    """Hook for extending the left aligned button menu"""
-    pass
-
-
-@hookspec
 def d2rloader_main_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget):
     """Hook for extending the main tabbar"""
     pass
