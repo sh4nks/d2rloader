@@ -4,7 +4,8 @@ import importlib.metadata
 import signal
 import sys
 
-from d2rloader.ui.utils.utils import create_action
+from d2rloader.ui.utils import create_action
+from d2rloader.ui.widget_main import MainTabsWidget
 
 try:
     from ctypes import windll  # Only exists on Windows.
@@ -18,15 +19,12 @@ import PySide6
 from loguru import logger
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QGridLayout,
-    QHBoxLayout,
     QMainWindow,
     QMessageBox,
-    QPushButton,
     QStyleFactory,
     QVBoxLayout,
     QWidget,
@@ -38,7 +36,6 @@ from d2rloader.core.storage import StorageType
 
 from .dialog_setting import SettingDialogWidget
 from .widget_info import InfoTabsWidget
-from .widget_main_table import D2RLoaderTableWidget
 
 
 class MainWidget(QWidget):
@@ -47,51 +44,25 @@ class MainWidget(QWidget):
         self.d2rloader: D2RLoaderState = d2rloader
         main_layout = QGridLayout(self)
 
-        self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(d2rloader)
+        self.main_tab_widget: MainTabsWidget = MainTabsWidget(d2rloader)
         self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(d2rloader)
-        self.d2rloader.plugins.hook.d2rloader_info_tabbar(
-            d2rloader=d2rloader, tabbar=self.info_tab_widget
-        )
-
-        top_layout = self.create_top_layout()
-        main_layout.addLayout(top_layout, 0, 0, 1, 2)
 
         table_layout = self.create_table_layout()
-        main_layout.addLayout(table_layout, 1, 0, 1, 2)
+        main_layout.addLayout(
+            table_layout, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop
+        )
         main_layout.setRowStretch(1, 7)
 
         info_layout = self.create_console_layout()
         main_layout.addLayout(
-            info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom
+            info_layout, 1, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom
         )
 
         self._register_logger_output_panel()
 
-    def create_top_layout(self):
-        top_layout = QHBoxLayout()
-
-        refresh_button = QPushButton("Refresh")
-        refresh_button.clicked.connect(self.info_tab_widget.update_info)
-        top_layout.addWidget(refresh_button)
-
-        top_layout.addStretch(1)
-        add_button = QPushButton("Add")
-        add_button.clicked.connect(self.table_widget.add_entry)
-        clone_button = QPushButton("Clone")
-        clone_button.clicked.connect(self.table_widget.clone_entry)
-        edit_button = QPushButton("Edit")
-        edit_button.clicked.connect(self.table_widget.edit_entry)
-        delete_button = QPushButton("Delete")
-        delete_button.clicked.connect(self.table_widget.delete_entry)
-        top_layout.addWidget(add_button)
-        top_layout.addWidget(clone_button)
-        top_layout.addWidget(edit_button)
-        top_layout.addWidget(delete_button)
-        return top_layout
-
     def create_table_layout(self):
-        table_layout = QHBoxLayout()
-        table_layout.addWidget(self.table_widget)
+        table_layout = QVBoxLayout()
+        table_layout.addWidget(self.main_tab_widget)
         return table_layout
 
     def create_console_layout(self):
@@ -127,29 +98,26 @@ class MainWindow(QMainWindow):
         file_menu = self.menuBar().addMenu("&File")
         account_menu = self.menuBar().addMenu("&Account")
         # Populate the File menu
-        self.setting_action: QAction = create_action(
-            self, "Settings", file_menu, self.open_settings
+        file_menu.addAction(create_action(self, "Settings", self.open_settings))
+        file_menu.addSeparator()
+        file_menu.addAction(
+            create_action(self, "&Load Account Settings...", self.open_file)
+        )
+        file_menu.addAction(
+            create_action(self, "&Save Account Settings As...", self.save_file)
         )
         file_menu.addSeparator()
-        self.open_action: QAction = create_action(
-            self, "&Load Account Settings...", file_menu, self.open_file
-        )
-        self.save_action: QAction = create_action(
-            self, "&Save Account Settings As...", file_menu, self.save_file
-        )
+        file_menu.addAction(create_action(self, "&About", self.open_about))
         file_menu.addSeparator()
-        self.info_action: QAction = create_action(
-            self, "&About", file_menu, self.open_about
-        )
-        file_menu.addSeparator()
-        self.exit_action: QAction = create_action(self, "E&xit", file_menu, self.close)
+        file_menu.addAction(create_action(self, "E&xit", self.close))
 
         # Populate the Tools menu
-        self.add_action: QAction = create_action(
-            self,
-            "&Add Account...",
-            account_menu,
-            self.main_widget.table_widget.add_entry,
+        account_menu.addAction(
+            create_action(
+                self,
+                "&Add Account...",
+                self.main_widget.main_tab_widget.d2rloader_table.add_entry,
+            )
         )
 
         self.d2rloader.plugins.hook.d2rloader_mainwindow_plugin_menu(
@@ -187,7 +155,7 @@ class MainWindow(QMainWindow):
             self.d2rloader.settings.update(settings_dialog.data)
             if prev_accounts_path != settings_dialog.data.accounts_path:
                 self.d2rloader.accounts.load()
-                self.main_widget.table_widget.reload_table()
+                self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
     def open_file(self):
@@ -196,7 +164,7 @@ class MainWindow(QMainWindow):
             return
         self.d2rloader.settings.set(accounts_path=filename)
         self.d2rloader.accounts.load()
-        self.main_widget.table_widget.reload_table()
+        self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
     def save_file(self):

@@ -35,7 +35,7 @@ from PySide6.QtWidgets import (
 
 from d2rloader.constants import CONFIG_HANDLE_DIR, HANDLE_URL, HANDLE_URL_FILENAME
 from d2rloader.models.setting import Setting
-from d2rloader.ui.utils.utils import init_widget
+from d2rloader.ui.utils import init_widget
 
 
 class SettingDialogWidget(QDialog):
