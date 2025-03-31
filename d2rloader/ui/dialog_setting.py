@@ -35,7 +35,7 @@ from PySide6.QtWidgets import (
 
 from d2rloader.constants import CONFIG_HANDLE_DIR, HANDLE_URL, HANDLE_URL_FILENAME
 from d2rloader.models.setting import Setting
-from d2rloader.ui.utils.utils import init_widget
+from d2rloader.ui.utils import init_widget
 
 
 class SettingDialogWidget(QDialog):
@@ -122,6 +122,17 @@ class SettingDialogWidget(QDialog):
             )
         )
         advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
+
+        plugins_path_label: Final = QLabel("Plugins: ", self)
+        self.plugins_path_button: Final = QPushButton(
+            self.setting.plugins_path or "Select..."
+        )
+        self.plugins_path_button.clicked.connect(
+            functools.partial(
+                self.select_directory, "plugins_path", self.plugins_path_button
+            )
+        )
+        advanced_form.addRow(plugins_path_label, self.plugins_path_button)
 
         log_level_label: Final = QLabel("Log Level: ", self)
         self.log_level_combobox: Final = QComboBox()

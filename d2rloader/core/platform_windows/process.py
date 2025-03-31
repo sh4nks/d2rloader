@@ -5,7 +5,7 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from d2rloader.core.core import D2RLoaderState
+    from d2rloader.core.state import D2RLoaderState
 
 import psutil
 from loguru import logger

@@ -7,7 +7,7 @@ from d2rloader.constants import WINDOW_TITLE_FORMAT
 from d2rloader.core.platform_linux.utils import get_window_by_title, set_window_title
 
 if TYPE_CHECKING:
-    from d2rloader.core.core import D2RLoaderState
+    from d2rloader.core.state import D2RLoaderState
 
 import psutil
 from loguru import logger

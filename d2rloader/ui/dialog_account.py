@@ -24,8 +24,8 @@ from PySide6.QtWidgets import (
 )
 
 from d2rloader.constants import CONFIG_GAME_SETTINGS_DIR
-from d2rloader.core.core import D2RLoaderState
 from d2rloader.core.game_settings import GameSetting
+from d2rloader.core.state import D2RLoaderState
 from d2rloader.models.account import Account, AuthMethod, Region
 
 
@@ -33,7 +33,7 @@ class AccountDialogWidget(QDialog):
     """A dialog to add a new address to the addressbook."""
 
     def __init__(
-        self, parent: QWidget, appstate: D2RLoaderState, account: Account | None = None
+        self, parent: QWidget, d2rloader: D2RLoaderState, account: Account | None = None
     ):
         super().__init__(parent)
         if account is None:
@@ -41,7 +41,7 @@ class AccountDialogWidget(QDialog):
         else:
             self.account = account
 
-        self.game_settings: GameSetting = appstate.game_settings.get_game_settings(
+        self.game_settings: GameSetting = d2rloader.game_settings.get_game_settings(
             self.account
         )
 

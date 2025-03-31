@@ -24,6 +24,7 @@ def _window_title_callback(hwnd: int, account: Account):
         logger.debug(f"Setting Window Handle '{hwnd}' to '{window_title}'")
         win32gui.SetWindowText(hwnd, window_title)  # pyright: ignore
 
+
 def get_window_by_title(title: str):
     hwnd = win32gui.FindWindow(None, title)
 
@@ -32,6 +33,7 @@ def get_window_by_title(title: str):
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
 
     return pid
+
 
 def kill_process_by_pid(pid: int):
     try:

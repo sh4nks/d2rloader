@@ -4,6 +4,9 @@ import importlib.metadata
 import signal
 import sys
 
+from d2rloader.ui.utils import create_action
+from d2rloader.ui.widget_main import MainTabsWidget
+
 try:
     from ctypes import windll  # Only exists on Windows.
 
@@ -16,77 +19,50 @@ import PySide6
 from loguru import logger
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QGridLayout,
-    QHBoxLayout,
     QMainWindow,
-    QMenu,
     QMessageBox,
-    QPushButton,
     QStyleFactory,
     QVBoxLayout,
     QWidget,
 )
 
 from d2rloader.constants import BASE_DIR, ICON_PATH
-from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.state import D2RLoaderState
 from d2rloader.core.storage import StorageType
-from d2rloader.ui.info_tab import InfoTabsWidget
-from d2rloader.ui.setting_dialog import SettingDialogWidget
-from d2rloader.ui.table import D2RLoaderTableWidget
+
+from .dialog_setting import SettingDialogWidget
+from .widget_info import InfoTabsWidget
 
 
 class MainWidget(QWidget):
-    def __init__(self, state: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState):
         super().__init__()
-        self._state: D2RLoaderState = state
+        self.d2rloader: D2RLoaderState = d2rloader
         main_layout = QGridLayout(self)
 
-        self.table_widget: D2RLoaderTableWidget = D2RLoaderTableWidget(state)
-        self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(state)
-
-        top_layout = self.create_top_layout()
-        main_layout.addLayout(top_layout, 0, 0, 1, 2)
+        self.main_tab_widget: MainTabsWidget = MainTabsWidget(d2rloader)
+        self.info_tab_widget: InfoTabsWidget = InfoTabsWidget(d2rloader)
 
         table_layout = self.create_table_layout()
-        main_layout.addLayout(table_layout, 1, 0, 1, 2)
+        main_layout.addLayout(
+            table_layout, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop
+        )
         main_layout.setRowStretch(1, 7)
 
         info_layout = self.create_console_layout()
         main_layout.addLayout(
-            info_layout, 2, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom
+            info_layout, 1, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignBottom
         )
 
         self._register_logger_output_panel()
 
-    def create_top_layout(self):
-        top_layout = QHBoxLayout()
-
-        refresh_button = QPushButton("Refresh")
-        refresh_button.clicked.connect(self.info_tab_widget.update_info)
-        top_layout.addWidget(refresh_button)
-
-        top_layout.addStretch(1)
-        add_button = QPushButton("Add")
-        add_button.clicked.connect(self.table_widget.add_entry)
-        clone_button = QPushButton("Clone")
-        clone_button.clicked.connect(self.table_widget.clone_entry)
-        edit_button = QPushButton("Edit")
-        edit_button.clicked.connect(self.table_widget.edit_entry)
-        delete_button = QPushButton("Delete")
-        delete_button.clicked.connect(self.table_widget.delete_entry)
-        top_layout.addWidget(add_button)
-        top_layout.addWidget(clone_button)
-        top_layout.addWidget(edit_button)
-        top_layout.addWidget(delete_button)
-        return top_layout
-
     def create_table_layout(self):
-        table_layout = QHBoxLayout()
-        table_layout.addWidget(self.table_widget)
+        table_layout = QVBoxLayout()
+        table_layout.addWidget(self.main_tab_widget)
         return table_layout
 
     def create_console_layout(self):
@@ -99,17 +75,17 @@ class MainWidget(QWidget):
         logger.add(
             self.info_tab_widget.application_output.output.emit,
             format=fmt,
-            level=self._state.settings.data.log_level or "INFO",
+            level=self.d2rloader.settings.data.log_level or "INFO",
         )
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, state: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState):
         super().__init__()
-        self.state: D2RLoaderState = state
-        self.state.register_process_manager(self)
+        self.d2rloader: D2RLoaderState = d2rloader
+        self.d2rloader.register_process_manager(self)
 
-        self.main_widget: MainWidget = MainWidget(state)
+        self.main_widget: MainWidget = MainWidget(d2rloader)
         self.setWindowTitle("D2RLoader")
 
         if sys.platform == "linux":
@@ -121,38 +97,32 @@ class MainWindow(QMainWindow):
 
         file_menu = self.menuBar().addMenu("&File")
         account_menu = self.menuBar().addMenu("&Account")
-
         # Populate the File menu
-        self.setting_action: QAction = self.create_action(
-            "Settings", file_menu, self.open_settings
+        file_menu.addAction(create_action(self, "Settings", self.open_settings))
+        file_menu.addSeparator()
+        file_menu.addAction(
+            create_action(self, "&Load Account Settings...", self.open_file)
+        )
+        file_menu.addAction(
+            create_action(self, "&Save Account Settings As...", self.save_file)
         )
         file_menu.addSeparator()
-        self.open_action: QAction = self.create_action(
-            "&Load Account Settings...", file_menu, self.open_file
-        )
-        self.save_action: QAction = self.create_action(
-            "&Save Account Settings As...", file_menu, self.save_file
-        )
+        file_menu.addAction(create_action(self, "&About", self.open_about))
         file_menu.addSeparator()
-        self.info_action: QAction = self.create_action(
-            "&About", file_menu, self.open_about
-        )
-        file_menu.addSeparator()
-        self.exit_action: QAction = self.create_action("E&xit", file_menu, self.close)
+        file_menu.addAction(create_action(self, "E&xit", self.close))
 
         # Populate the Tools menu
-        self.add_action: QAction = self.create_action(
-            "&Add Account...", account_menu, self.main_widget.table_widget.add_entry
+        account_menu.addAction(
+            create_action(
+                self,
+                "&Add Account...",
+                self.main_widget.main_tab_widget.d2rloader_table.add_entry,
+            )
         )
 
-    def create_action(self, text: str, menu: QMenu, slot: object) -> QAction:
-        """Helper function to save typing when populating menus
-        with action.
-        """
-        action = QAction(text, self)
-        menu.addAction(action)
-        action.triggered.connect(slot)
-        return action
+        self.d2rloader.plugins.hook.d2rloader_mainwindow_plugin_menu(
+            d2rloader=d2rloader, parent=self, menu=self.menuBar()
+        )
 
     @Slot()
     def open_about(self):
@@ -161,9 +131,11 @@ class MainWindow(QMainWindow):
         qt_version = f"{PySide6.__version__}"
         about_content = f"""
             <center>
-            <h3>Diablo 2 Resurrected Loader</h3>
+            <h3 style="margin-bottom: 0; padding-bottom: 0">D2RLoader</h3>
+            <small>A Cross-platform and Open Source Diablo 2 Resurrected Loader written in Python/Qt</small> <br />
             <br />
-            <b>Install Path: </b> {BASE_DIR} <br /><br />
+            <b>Donate: </b> <a href="https://forums.d2jsp.org/gold.php?i=314054">d2jsp FG</a><br /><br />
+            <b>Install Path: </b> {BASE_DIR} <br />
             <b>Version: </b> {version_string}<br />
             <b>Python: </b> {python_version}, <b>Qt: </b> {qt_version}<br />
             <b>Source Code: </b> <a href="https://github.com/sh4nks/d2rloader">Link</a><br />
@@ -177,40 +149,42 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def open_settings(self):
-        settings_dialog = SettingDialogWidget(self, self.state.settings.data)
-        prev_accounts_path = self.state.settings.data.accounts_path
+        settings_dialog = SettingDialogWidget(self, self.d2rloader.settings.data)
+        prev_accounts_path = self.d2rloader.settings.data.accounts_path
         if settings_dialog.exec():
-            self.state.settings.update(settings_dialog.data)
+            self.d2rloader.settings.update(settings_dialog.data)
             if prev_accounts_path != settings_dialog.data.accounts_path:
-                self.state.accounts.load()
-                self.main_widget.table_widget.reload_table()
+                self.d2rloader.accounts.load()
+                self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self)
         if not filename:
             return
-        self.state.settings.set(accounts_path=filename)
-        self.state.accounts.load()
-        self.main_widget.table_widget.reload_table()
+        self.d2rloader.settings.set(accounts_path=filename)
+        self.d2rloader.accounts.load()
+        self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
     def save_file(self):
         filename, _ = QFileDialog.getSaveFileName(self)
         if not filename:
             return
-        self.state.storage.save(self.state.accounts.data, StorageType.Account, filename)
+        self.d2rloader.storage.save(
+            self.d2rloader.accounts.data, StorageType.Account, path=filename
+        )
 
 
 class D2RLoaderUI:
     ui_app: QApplication | None = None
     ui: MainWindow | None = None
 
-    def __init__(self, state: D2RLoaderState | None = None) -> None:
-        if state is not None:
-            self.init_ui(state)
+    def __init__(self, d2rloader: D2RLoaderState | None = None) -> None:
+        if d2rloader is not None:
+            self.init_ui(d2rloader)
 
-    def init_ui(self, state: D2RLoaderState):
+    def init_ui(self, d2rloader: D2RLoaderState):
         self.ui_app = QApplication(sys.argv)
         self.ui_app.setApplicationName("D2RLoader")
         self.ui_app.setApplicationVersion(importlib.metadata.version("d2rloader"))
@@ -220,10 +194,10 @@ class D2RLoaderUI:
         else:
             self.ui_app.setWindowIcon(QtGui.QIcon(ICON_PATH))
 
-        if state.settings.data.theme:
-            QApplication.setStyle(QStyleFactory.create(state.settings.data.theme))
+        if d2rloader.settings.data.theme:
+            QApplication.setStyle(QStyleFactory.create(d2rloader.settings.data.theme))
 
-        self.ui = MainWindow(state)
+        self.ui = MainWindow(d2rloader)
         self.ui.resize(800, 600)
 
     def run(self):

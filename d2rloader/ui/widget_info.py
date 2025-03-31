@@ -18,12 +18,13 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QTabWidget,
     QTextEdit,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
 from d2rloader.constants import DIABLO_LEVELS
-from d2rloader.core.core import D2RLoaderState
+from d2rloader.core.state import D2RLoaderState
 
 URI_TZ_INFO = "https://d2emu.com/api/v1/tz"
 URI_DC_INFO = "https://d2emu.com/api/v1/dclone"
@@ -69,10 +70,10 @@ class RequestType(enum.Enum):
 class InfoTabsWidget(QTabWidget):
     refresh: Signal = Signal()
 
-    def __init__(self, state: D2RLoaderState, parent: QWidget | None = None):
+    def __init__(self, d2rloader: D2RLoaderState, parent: QWidget | None = None):
         """Initialize the InfoTabsWidget."""
         super().__init__(parent)
-        self.state: D2RLoaderState = state
+        self.d2rloader: D2RLoaderState = d2rloader
         self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
         self.dcinfo: DCInfoWidget = DCInfoWidget(self)
         self.tzinfo: TZInfoWidget = TZInfoWidget(self)
@@ -81,8 +82,19 @@ class InfoTabsWidget(QTabWidget):
         self.addTab(self.dcinfo, "Diablo Clone")
         self.addTab(self.tzinfo, "Terror Zones")
         self.addTab(self.application_output, "Application Log")
+
+        refresh_button = QToolButton()
+        refresh_button.setText("Refresh TZ/DC Info")
+        refresh_button.clicked.connect(self.update_info)
+        self.setCornerWidget(refresh_button, Qt.Corner.TopRightCorner)
+
+        self.d2rloader.plugins.hook.d2rloader_info_tabbar(
+            d2rloader=d2rloader, tabbar=self
+        )
+
         self.setFixedHeight(250)
 
+    @Slot()
     def update_info(self):
         # self.tzinfo.process(TEST_DATA_TZINFO)
         # self.dcinfo.process(TEST_DATA_DCLONE)
@@ -97,16 +109,16 @@ class InfoTabsWidget(QTabWidget):
         )
         request.setRawHeader(
             b"x-emu-username",
-            f"{self.state.settings.data.token_username}".encode("utf-8"),
+            f"{self.d2rloader.settings.data.token_username}".encode("utf-8"),
         )
         request.setRawHeader(
-            b"x-emu-token", f"{self.state.settings.data.token}".encode("utf-8")
+            b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode("utf-8")
         )
         reply = self.networkmanager.get(request)
         reply.finished.connect(functools.partial(self.on_finished, reply, type))
         reply.errorOccurred.connect(self.on_error)
 
-    @Slot(QNetworkReply, RequestType)  # pyright: ignore
+    @Slot(QNetworkReply, RequestType)
     def on_finished(self, reply: QNetworkReply, type: RequestType):
         response = reply.readAll()
         json_response = json.loads(response.data())  # pyright: ignore
@@ -119,7 +131,7 @@ class InfoTabsWidget(QTabWidget):
 
         reply.deleteLater()
 
-    @Slot(QNetworkReply.NetworkError)  # pyright: ignore
+    @Slot(QNetworkReply.NetworkError)
     def on_error(self, code: QNetworkReply.NetworkError):
         """Show a message if an error happen"""
         logger.error(f"Couldn't fetch data from API: {code}")

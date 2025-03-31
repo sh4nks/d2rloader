@@ -36,7 +36,8 @@ jobs:
         artifacts: "D2RLoader.windows.zip"
         artifactErrorsFailBuild: true
         allowUpdates: true
-        generateReleaseNotes: true
+        generateReleaseNotes: false
+        omitBody: true
         omitBodyDuringUpdate: true
         omitDraftDuringUpdate: true
         replacesArtifacts: true
