@@ -86,6 +86,11 @@ This method works with Multi-Factor Authentication!
   https://github.com/D2R-Gimli/TinyMod
 
 
+# D2RLoader Plugins
+
+If you are interested in developing a plugin for D2RLoader, take a look at the [Plugin Documentation](./PLUGINS.md)
+
+
 # License
 
 MIT License

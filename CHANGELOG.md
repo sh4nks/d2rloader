@@ -12,7 +12,7 @@ Released March 31st, 2025
 - Refactored UI to have all relevant components/widgets inside its appropriate layouts
 
 
-**Full Changelog**: [v1.2.1...v1.3.0](https://github.com/sh4nks/d2rloader/compare/v1.2.1...main)
+**Full Changelog**: [v1.2.1...v1.3.0](https://github.com/sh4nks/d2rloader/compare/v1.2.1...v1.3.0)
 
 
 ## Version 1.2.1
