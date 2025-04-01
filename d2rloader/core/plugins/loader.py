@@ -1,11 +1,11 @@
 import json
 import os
 
-import imptools
 from loguru import logger
 from pluggy import PluginManager
 
 from d2rloader.core.plugins import hookspec
+from d2rloader.core.plugins.imptools import import_path
 
 
 class PluginError(Exception):
@@ -39,7 +39,7 @@ class PluginFilesystemLoader:
             if plugin_package_path is None:
                 continue
 
-            plugin = imptools.import_path(plugin_package_path)  # pyright: ignore
+            plugin = import_path(plugin_package_path)
             # plugin already registered or is blocked
             if (
                 plugin is None
