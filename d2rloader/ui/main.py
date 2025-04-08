@@ -51,7 +51,7 @@ class MainWidget(QWidget):
         main_layout.addLayout(
             table_layout, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop
         )
-        main_layout.setRowStretch(1, 7)
+        main_layout.setRowStretch(0, 7)
 
         info_layout = self.create_console_layout()
         main_layout.addLayout(
