@@ -107,10 +107,9 @@ class ProcessManager(QObject):
                 f"Could not find 'D2R.exe' in '{self._state.settings.data.game_path}'"
             )
 
-        # TODO: Implement password based authentication
         if account.auth_method == AuthMethod.Token:
             raise ProcessingError(
-                "Password-based authentication is not supported under Linux/Wine."
+                "Token-based authentication is not supported under Linux/Wine."
             )
 
         if (
