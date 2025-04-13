@@ -9,11 +9,11 @@ Unreleased
 ### Fixed
 
 - Fix spacing of profile table
-- linux: Fix error message for token-based authentication (#3)
-- linux: Make 'gamemode' optional (#4)
+- linux: Fix error message for token-based authentication ([#3](https://github.com/sh4nks/d2rloader/issues/3))
+- linux: Make 'gamemode' optional ([#4](https://github.com/sh4nks/d2rloader/issues/4))
 
 
-**Full Changelog**: [v1.3.0...v1.3.1](https://github.com/sh4nks/d2rloader/compare/v1.3.0...v1.3.1)
+**Full Changelog**: [v1.3.0...v1.3.1](https://github.com/sh4nks/d2rloader/compare/v1.3.1...v1.3.2)
 
 
 ## Version 1.3.1
