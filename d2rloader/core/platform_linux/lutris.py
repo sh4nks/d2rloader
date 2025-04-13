@@ -40,7 +40,14 @@ export TERM="xterm"
 cd '{GAME_PATH}'
 
 # Command
-gamemoderun {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION} {PARAMS}
+
+# Use gamemode if available
+if ! [ -x "$(command -v gamemoderun)" ]; then
+    echo 'gamemode is not installed - starting D2R.exe without gamemoderun' >&2
+    {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION} {PARAMS}
+else
+    gamemoderun {LUTRIS_UMU_LAUNCHER} '{GAME_PATH}/D2R.exe' -w -username {USERNAME} -password {PASSWORD} -address {REGION} {PARAMS}
+fi
 """
 
 
