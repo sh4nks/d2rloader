@@ -4,7 +4,7 @@ Here you can see the full list of changes between each release.
 
 ## Version 1.3.2
 
-Unreleased
+Released April 14th, 2025
 
 ### Fixed
 
@@ -13,7 +13,7 @@ Unreleased
 - linux: Make 'gamemode' optional ([#4](https://github.com/sh4nks/d2rloader/issues/4))
 
 
-**Full Changelog**: [v1.3.0...v1.3.1](https://github.com/sh4nks/d2rloader/compare/v1.3.1...v1.3.2)
+**Full Changelog**: [v1.3.1...v1.3.2](https://github.com/sh4nks/d2rloader/compare/v1.3.1...v1.3.2)
 
 
 ## Version 1.3.1
