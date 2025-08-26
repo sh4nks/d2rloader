@@ -59,11 +59,15 @@ class GameSetting:
             f"Using game settings: {os.path.basename(self.account.game_settings)}"
         )
         if os.path.exists(self.current_game_settings):
+            logger.debug(
+                f"Current game settings exist - renaming to {self.current_game_settings}.bak"
+            )
             shutil.move(self.current_game_settings, f"{self.current_game_settings}.bak")
 
         if sys.platform == "linux":
             os.makedirs(os.path.dirname(self.current_game_settings), exist_ok=True)
 
+        logger.debug(f"Copying game settings to {self.current_game_settings}")
         shutil.copy2(self.account.game_settings, self.current_game_settings)
 
     def copy_current_settings(self, overwrite_ok: bool = False):

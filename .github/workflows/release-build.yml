@@ -1,0 +1,73 @@
+name: Release - Build PyInstaller Package and AppImage
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the latest version of uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: 3.13
+
+      - name: Make PyInstaller Package
+        run: uv run --group windows pyinstaller resources/D2RLoader.spec --noconfirm
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: "zip"
+          filename: "D2RLoader.windows.zip"
+          path: "./dist/D2RLoader/*"
+
+      - name: Add release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "D2RLoader.windows.zip"
+          artifactErrorsFailBuild: true
+          allowUpdates: true
+          generateReleaseNotes: false
+          omitBody: true
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          replacesArtifacts: true
+
+  release-appimage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Install python-appimage builder
+        run: |
+          pip install python-appimage
+
+      - name: Build D2RLoader.AppImage
+        run: |
+          python -m python_appimage build app -p 3.13 ./resources/appimage/
+          mv D2RLoader-x86_64.AppImage D2RLoader.AppImage
+
+      - name: Add AppImage to Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "*.AppImage"
+          artifactErrorsFailBuild: true
+          allowUpdates: true
+          generateReleaseNotes: false
+          omitBody: true
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          replacesArtifacts: true

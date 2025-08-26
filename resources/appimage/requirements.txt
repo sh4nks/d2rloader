@@ -1,0 +1,7 @@
+loguru
+pluggy
+psutil
+pydantic
+PySide6
+unidecode
+git+https://github.com/sh4nks/d2rloader

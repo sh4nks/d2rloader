@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Final, cast
 
+from loguru import logger
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -239,14 +240,12 @@ class GameSettingWidget(QHBoxLayout):
 
     @Slot()
     def select_settings(self):
-        filename = QFileDialog.getOpenFileName(
+        filename, _ = QFileDialog.getOpenFileName(
             self.widget(), "Select Game Settings", CONFIG_GAME_SETTINGS_DIR
         )
-        if filename[0]:
-            self.value = filename[0]
-            self.select_game_settings.setText(self._get_display_value())
-        else:
-            self.value = None
+        if filename:
+            logger.debug(f"selected settings: {filename}")
+            self.value = filename
             self.select_game_settings.setText(self._get_display_value())
 
 
