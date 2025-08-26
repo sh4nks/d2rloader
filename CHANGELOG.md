@@ -2,6 +2,22 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.3.3
+
+Released August 26th, 2025
+
+### Added
+
+- AppImage for Linux
+
+### Fixed
+
+- Fix canceling the "Load Account Settings" Dialog
+
+
+**Full Changelog**: [v1.3.2...v1.3.3](https://github.com/sh4nks/d2rloader/compare/v1.3.2...v1.3.3)
+
+
 ## Version 1.3.2
 
 Released April 14th, 2025
