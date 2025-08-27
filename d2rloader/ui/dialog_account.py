@@ -37,6 +37,7 @@ class AccountDialogWidget(QDialog):
         self, parent: QWidget, d2rloader: D2RLoaderState, account: Account | None = None
     ):
         super().__init__(parent)
+        self.d2rloader: D2RLoaderState = d2rloader
         if account is None:
             self.account: Account = Account.default_account()
         else:
@@ -57,6 +58,10 @@ class AccountDialogWidget(QDialog):
 
         left_layout = QFormLayout()
         right_layout = QFormLayout()
+
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
 
         profile_name_label: Final = QLabel("Profile Name:", self)
         self.profile_name: Final = QLineEdit()
@@ -120,13 +125,9 @@ class AccountDialogWidget(QDialog):
         options_group_box.setLayout(main_form_layout)
         main_layout.addWidget(options_group_box)
 
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-
         layout = QVBoxLayout()
         layout.addLayout(main_layout)
-        layout.addWidget(button_box)
+        layout.addWidget(self.button_box)
 
         self.setLayout(layout)
 
@@ -140,8 +141,8 @@ class AccountDialogWidget(QDialog):
             )
             self.setWindowTitle(f"Edit Account - {window_title}")
 
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
 
     @property
     def data(self):
@@ -162,9 +163,30 @@ class AccountDialogWidget(QDialog):
             game_settings=self.game_setting_widget.value,
         )
 
+    @Slot()
     def change_profile_name(self):
         name = self.profile_name.text()
-        self.account.profile_name = f"{name}"
+        sender: QLineEdit = self.sender()  # pyright: ignore[reportAssignmentType]
+
+        error = False
+        if len(name) < 1:  # minimum 1 characters
+            error = True
+
+        if (
+            self.d2rloader.accounts.validate_name(name) > 0
+            and name != self.account.profile_name
+        ):
+            error = True
+
+        if error:
+            color = "#f6989d"  # red
+            self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+        else:
+            color = ""
+            self.account.profile_name = f"{name}"
+            self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
+
+        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
 
     @Slot()
     def change_password_token_widget(self, activated: str | None = None):
