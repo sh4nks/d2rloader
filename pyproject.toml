@@ -1,6 +1,6 @@
 [project]
 name = "d2rloader"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
   "loguru>=0.7.3",
   "pluggy>=1.6.0",

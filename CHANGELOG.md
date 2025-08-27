@@ -2,6 +2,20 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.3.4
+
+Released August 27th, 2025
+
+### Added
+
+- Cloned profiles will have a counted unique name (Cloned, Cloned1, Cloned2, ...)
+- Ensure profile names are unique on input. If the profile name is not unique the
+  WINEPREFIX cannot be reused and thus the profile not started
+
+
+**Full Changelog**: [v1.3.3...v1.3.4](https://github.com/sh4nks/d2rloader/compare/v1.3.3...v1.3.4)
+
+
 ## Version 1.3.3
 
 Released August 26th, 2025
