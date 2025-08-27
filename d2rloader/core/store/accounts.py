@@ -34,6 +34,15 @@ class AccountService:
         except IndexError:
             return None
 
+    def clone(self, index: int):
+        try:
+            account = self.data[index]
+            cloned = account.model_copy(deep=True)
+            cloned.profile_name = self._generate_name(cloned.profile_name)
+            return self.add(cloned)
+        except IndexError:
+            return None
+
     def add(self, item: Account | None, index: int | None = None, commit: bool = True):
         if item is None:
             return
@@ -43,9 +52,9 @@ class AccountService:
 
         if index is not None:
             self._current_accounts[index] = item
-
         else:
             self._current_accounts.append(item)
+            index = len(self._current_accounts) - 1
 
         if commit:
             self._storage.save(
@@ -53,6 +62,7 @@ class AccountService:
                 StorageType.Account,
                 path=self._setting.data.accounts_path,
             )
+        return index
 
     def delete(self, index: int):
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
@@ -73,3 +83,24 @@ class AccountService:
                 StorageType.Account, path=self._setting.data.accounts_path
             ),
         )
+
+    def _generate_name(self, name: str | None):
+        name_suffix: str = "1"
+        if name is None:
+            name = "Generated Profile"
+        elif name[-1].isdigit():
+            name_suffix = str(int(name[-1]) + 1)
+            name = name[:-1]
+        name = f"{name}{name_suffix}"
+
+        while self.validate_name(name) > 0:
+            name = self._generate_name(name)
+
+        return name
+
+    def validate_name(self, name: str):
+        found_names = 0
+        for account in self._current_accounts or []:
+            if account.profile_name == name:
+                found_names += 1
+        return found_names

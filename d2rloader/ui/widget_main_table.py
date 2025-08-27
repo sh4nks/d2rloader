@@ -118,8 +118,13 @@ class D2RLoaderTableWidget(QWidget):
             return
 
         row_index = self.table.selectedIndexes()[0].row()
-        self.d2rloader.accounts.add(self.d2rloader.accounts.get(row_index))
-        self.add_row(self.d2rloader.accounts.get(row_index))
+
+        cloned_idx = self.d2rloader.accounts.clone(row_index)
+        if cloned_idx is None:
+            logger.error(f"Couldn't clone account with row_index {row_index}")
+            return
+
+        self.add_row(self.d2rloader.accounts.get(cloned_idx))
 
     @Slot()
     def delete_entry(self):
