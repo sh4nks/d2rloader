@@ -231,6 +231,11 @@ class DCInfoWidget(QWidget):
     def _process_item(self, key: str, value: dict[str, int]):
         region = key[:2]
         key_r = key[2:]
+
+        if region not in self.region_mapping.keys():
+            logger.warning(f"Region not supported {key}")
+            return
+
         if key_r.startswith("Non") and key.endswith("Hardcore"):
             self.row_data[region + "Hardcore"]["nonLadder"] = value.get("status", 0)
         elif key_r.startswith("Non"):
