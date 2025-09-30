@@ -46,6 +46,10 @@ TEST_DATA_DCLONE: DCloneInfo = {
     "usLadderHardcore": {"status": 8, "updated_at": 1739326809},
     "usNonLadder": {"status": 9, "updated_at": 1739366084},
     "usNonLadderHardcore": {"status": 9, "updated_at": 1739326809},
+    "cnLadder": {"status": 8, "updated_at": 1739385783},
+    "cnLadderHardcore": {"status": 8, "updated_at": 1739326809},
+    "cnNonLadder": {"status": 9, "updated_at": 1739366084},
+    "cnNonLadderHardcore": {"status": 9, "updated_at": 1739326809},
 }
 TEST_DATA_TZINFO: TZInfo = {
     "current": ["33", "34", "35", "36", "37"],
@@ -182,7 +186,12 @@ class TZInfoWidget(QWidget):
 
 
 class DCInfoWidget(QWidget):
-    region_mapping: dict[str, str] = {"eu": "Europe", "us": "America", "kr": "Asia"}
+    region_mapping: dict[str, str] = {
+        "eu": "Europe",
+        "us": "America",
+        "kr": "Asia",
+        "cn": "China",
+    }
 
     # there is sure as hell a better way to do this
     row_data: dict[str, dict[str, int | str]] = {
@@ -192,6 +201,8 @@ class DCInfoWidget(QWidget):
         "usHardcore": {"index": 3, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
         "krSoftcore": {"index": 4, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
         "krHardcore": {"index": 5, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
+        "cnSoftcore": {"index": 6, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
+        "cnHardcore": {"index": 7, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
     }
 
     def __init__(self, parent: QWidget | None = None):

@@ -14,6 +14,7 @@ class Region(enum.Enum):
     Europe = "eu.actual.battle.net"
     Americas = "us.actual.battle.net"
     Asia = "kr.actual.battle.net"
+    # China = "cn.actual.battle.net" # no idea which address
 
     @classmethod
     def from_name(cls, name: str):
