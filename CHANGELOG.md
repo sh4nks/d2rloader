@@ -2,6 +2,20 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.3.5
+
+Released September 30th, 2025
+
+### Fixed
+
+- Fix DC Info not working anymore due to "China" being added.
+  Region China will be displayed as well now, but at the moment it is not possible to
+  select this region as I don't know the battle.net server URI for it.
+
+
+**Full Changelog**: [v1.3.4...v1.3.5](https://github.com/sh4nks/d2rloader/compare/v1.3.4...v1.3.5)
+
+
 ## Version 1.3.4
 
 Released August 27th, 2025
