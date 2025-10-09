@@ -38,11 +38,11 @@ class AuthMethod(enum.Enum):
 
 class Account(BaseModel):
     profile_name: str | None = Field(default=None, frozen=False)
-    email: str
+    email: str = Field(default="", repr=False)
     auth_method: AuthMethod
-    token: str | None
-    token_protected: bytes | None = Field(default=None)
-    password: str | None
+    token: str | None = Field(default=None, repr=False)
+    token_protected: bytes | None = Field(default=None, repr=False)
+    password: str | None = Field(default=None, repr=False)
     region: Region
     params: str | None
     runtime: float | None = Field(default=0)
