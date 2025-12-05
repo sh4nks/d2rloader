@@ -3,10 +3,17 @@ import subprocess
 from loguru import logger
 
 
-def get_window_list():
-    windows = (
-        subprocess.check_output(["wmctrl", "-lp"]).decode("utf-8").strip().splitlines()
-    )
+def get_window_list() -> list[str]:
+    try:
+        windows = (
+            subprocess.check_output(["wmctrl", "-lp"])
+            .decode("utf-8")
+            .strip()
+            .splitlines()
+        )
+    except subprocess.CalledProcessError as e:
+        logger.error("Couldn't call 'wmctrl -lp'", e)
+        return []
     return windows
 
 
