@@ -5,7 +5,7 @@ Here you can see the full list of changes between each release.
 
 ## Version 1.3.6
 
-Released December TBD, 2025
+Released December 6th, 2025
 
 ### Fixed
 

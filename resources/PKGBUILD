@@ -14,6 +14,7 @@ depends=(
   'python-pydantic'
   'python-unidecode'
   'python-loguru'
+  'python-pluggy'
   'lutris'
   'wmctrl'
 )
@@ -21,7 +22,7 @@ depends=(
 provides=("${pkgname%-git}=$pkgver")
 conflicts=("${pkgname%-git}")
 
-makedepends=('python-hatch')
+makedepends=('python-hatch' 'python-installer')
 
 source=(
   "${_pkgname}::git+https://github.com/sh4nks/d2rloader.git"
