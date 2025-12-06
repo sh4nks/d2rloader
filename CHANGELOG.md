@@ -2,6 +2,20 @@
 
 Here you can see the full list of changes between each release.
 
+
+## Version 1.3.6
+
+Released December TBD, 2025
+
+### Fixed
+
+- Fix crash in case 'wmctrl' doesn't work for some reason. See #6 for more information.
+- Don't log sensitive account information (i.e. email address) when logging whole objects
+
+
+**Full Changelog**: [v1.3.4...v1.3.5](https://github.com/sh4nks/d2rloader/compare/v1.3.4...v1.3.5)
+
+
 ## Version 1.3.5
 
 Released September 30th, 2025
