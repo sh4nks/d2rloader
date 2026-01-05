@@ -51,4 +51,4 @@ def set_window_title(pid: int, title: str):
         return
 
     logger.debug(f"Updating title for window id '{window_id}' to '{title}'")
-    subprocess.Popen(["wmctrl", "-i", "-r", window_id, "-N", title])
+    subprocess.Popen(["wmctrl", "-i", "-r", window_id, "-N", title])  # pyright: ignore[reportUnusedCallResult]

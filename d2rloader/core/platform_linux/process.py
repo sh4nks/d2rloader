@@ -14,7 +14,7 @@ from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from d2rloader.core.exception import ProcessingError
-from d2rloader.core.platform_linux.lutris import LutrisManager
+from d2rloader.core.platform_linux.umu import UmuManager
 from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account, AuthMethod
 
@@ -76,19 +76,20 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        lutris = LutrisManager(self._state.settings.data, account)
+        umu_manager = UmuManager(self._state.settings.data, account)
         game_settings = self._state.game_settings.get_game_settings(account)
         self._validate_start(account)
 
-        if lutris.save_start_script():
+        if umu_manager.save_start_script():
             try:
-                with open(lutris.start_script_log_path, "w") as logfile:
+                with open(umu_manager.start_script_log_path, "w") as logfile:
                     game_settings.set_account_game_settings()
                     logger.info(
-                        f"Launching instance: {lutris.start_script_path.absolute()}"
+                        f"Launching instance: {umu_manager.start_script_path.absolute()}"
                     )
+                    logger.debug(f"Using GAME_PATH: {game_settings.settings.game_path}")
                     proc = subprocess.Popen(
-                        ["sh", lutris.start_script_path], stderr=logfile
+                        ["sh", umu_manager.start_script_path], stderr=logfile
                     )
 
                     if self._is_d2r_started(proc.pid):
@@ -98,7 +99,7 @@ class ProcessManager(QObject):
             except Exception as e:
                 logger.error(e)
                 raise ProcessingError(
-                    f"Error occured during executing {lutris.start_script_path}", e
+                    f"Error occured during executing {umu_manager.start_script_path}", e
                 )
 
     def _validate_start(self, account: Account):

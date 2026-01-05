@@ -13,7 +13,7 @@ Released December 6th, 2025
 - Don't log sensitive account information (i.e. email address) when logging whole objects
 
 
-**Full Changelog**: [v1.3.4...v1.3.5](https://github.com/sh4nks/d2rloader/compare/v1.3.4...v1.3.5)
+**Full Changelog**: [v1.3.5...v1.3.6](https://github.com/sh4nks/d2rloader/compare/v1.3.5...v1.3.6)
 
 
 ## Version 1.3.5
