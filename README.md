@@ -16,7 +16,7 @@ Running on Linux
 
 # Getting Started
 
-D2RLoader supports Windows and Linux (via Wine/[Lutris](https://lutris.net)).
+D2RLoader supports Windows and Linux (via Wine/[UMU-Launcher](https://github.com/Open-Wine-Components/umu-launcher)).
 
 I have only tested my Linux environment (Arch Linux) so far. So, if you find any issues with yours, please report them so I can get them fixed!
 
@@ -37,10 +37,8 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 
 - Download the provided [**AppImage**](https://github.com/sh4nks/d2rloader/releases) from the release page and make it executable.
   - In case you are using Arch Linux you can use your favorite AUR helper to install [d2rloader](https://aur.archlinux.org/packages/d2rloader) from the AUR.
-- Install Lutris (Note: When using my AUR Package you don't have to install Lutris anymore as it will be installed as well)
-- Search for Diablo 2 Resurrected on Lutris and install it. This will install the Battle.NET app.
-- Install Diablo 2 Resurrected from the Battle.NET app. Tipp: If you have D2R already installed on Windows you can just copy it to your preferred location and point to it from the Battle.NET app.
-- Handle64.exe is not needed on Linux as we are working with different WINEPREFIXES to solve this problem :-)
+- Install [UMU-Launcher](https://github.com/Open-Wine-Components/umu-launcher)
+- Install D2R from your favorite Game Launcher (Lutris/Bottles, etc)
 - Select your prefered WINEPREFIX location otherwise a default one will be set to $XDG_CONFIG_DIRS/d2rloader/wineprefixes.
 
 ## Auth Methods
@@ -52,8 +50,6 @@ You can choose between 2 auth methods. However, the token authentication is more
 Deactivate your Battle.net Authenticator for your account because passing passwords via parameters won't work with Multi-Factor Authentication (MFA).
 
 If you try to login using password authentication and get an error like  _"We couldn't verify your account with that information"_, try changing your password and try again. This worked for me at least.
-
-**On Linux only this authentication method is supported**. The reason for this is that the tokens are protected using the proprietary Windows DBAPI which isn't available on Linux/Wine.
 
 
 ### Token
