@@ -4,7 +4,7 @@ Here you can see the full list of changes between each release.
 
 ## Version 1.4.0
 
-Unreleased
+Released January 12th, 2026
 
 ### Added
 
@@ -14,6 +14,7 @@ Unreleased
 
 
 **Full Changelog**: [v1.3.6...v1.4.0](https://github.com/sh4nks/d2rloader/compare/v1.3.6...v1.4.0)
+
 
 ## Version 1.3.6
 
