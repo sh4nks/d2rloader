@@ -41,7 +41,6 @@ class Account(BaseModel):
     email: str = Field(default="", repr=False)
     auth_method: AuthMethod
     token: str | None = Field(default=None, repr=False)
-    token_protected: bytes | None = Field(default=None, repr=False)
     password: str | None = Field(default=None, repr=False)
     region: Region
     params: str | None

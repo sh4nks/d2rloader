@@ -29,5 +29,6 @@ class Setting(BaseModel):
     log_file: bool = Field(default=True)
     wineprefix: str = Field(default_factory=get_default_wineprefix)
     plugins_path: str = Field(default_factory=get_default_plugins_path)
+    d2rreg_version: str | None = Field(default=None)
     token: str | None = Field(default=None)
     token_username: str | None = Field(default=None)

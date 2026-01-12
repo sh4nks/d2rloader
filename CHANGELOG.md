@@ -2,6 +2,18 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.4.0
+
+Unreleased
+
+### Added
+
+- Linux: Switch from Lutris to [umu-launcher](github.com/Open-Wine-Components/umu-launcher).
+  Lutris might still be useful to launch Battle.NET to keep D2R updated though
+- Linux: Implemented Token Authentication
+
+
+**Full Changelog**: [v1.3.6...v1.4.0](https://github.com/sh4nks/d2rloader/compare/v1.3.6...v1.4.0)
 
 ## Version 1.3.6
 

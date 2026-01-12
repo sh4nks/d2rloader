@@ -38,6 +38,12 @@ CONFIG_PLUGINS_DIR = os.path.join(BASE_DIR, "plugins")
 HANDLE_URL_FILENAME = "Handle.zip"
 HANDLE_URL = f"https://download.sysinternals.com/files/{HANDLE_URL_FILENAME}"
 
+# the sha256 sum is used to check for new versions
+D2RREG_VERSION = "v0.0.2"
+D2RREG_URL = (
+    f"https://github.com/sh4nks/d2rreg/releases/download/{D2RREG_VERSION}/d2rreg.exe"
+)
+
 UPDATE_HANDLE = "DiabloII Check For Other Instances"
 
 REG_BATTLE_NET_PATH = (
