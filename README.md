@@ -5,13 +5,13 @@ This is a simple Qt app which manages starting multiple Diablo 2 Resurrected ins
 Its heavily inspired by <a href="https://github.com/shupershuff/Diablo2RLoader">shupershuff/Diablo2RLoader</a> - a powerful PowerShell CLI solution for multiboxing D2R with even more features than this loader. Check this repo out if you want to learn more about multiboxing D2R :-)
 
 
-Running on Windows
-
-![Screenshot](./resources/screenshot_windows.png "D2R Loader Windows Screenshot")
-
 Running on Linux
 
 ![Screenshot](./resources/screenshot_linux.png "D2R Loader Linux Screenshot")
+
+Running on Windows
+
+![Screenshot](./resources/screenshot_windows.png "D2R Loader Windows Screenshot")
 
 
 # Getting Started
@@ -25,14 +25,6 @@ The TZ Info and DClone Info require a working API key from [d2emu.com](https://d
 All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$XDG_CONFIG_DIRS/d2rloader`` on Linux
 
 
-## Windows
-
-- Download the latest "D2RLoader.windows.zip" from the [releases page](https://github.com/sh4nks/d2rloader/releases) and extract it.
-- Create a desktop shortcut and configure it to run as **Administrator**. Admin rights are unfortunately needed to kill the handles.
-- Start D2RLoader.exe and configure the handle.exe path and D2R game folder (File -> Settings)
-- Create and configure a new account by pressing "Add".
-- Start the game with the configured account.
-
 ## Linux
 
 - Download the provided [**AppImage**](https://github.com/sh4nks/d2rloader/releases) from the release page and make it executable.
@@ -40,6 +32,14 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 - Install [UMU-Launcher](https://github.com/Open-Wine-Components/umu-launcher)
 - Install D2R from your favorite Game Launcher (Lutris/Bottles, etc)
 - Select your prefered WINEPREFIX location otherwise a default one will be set to $XDG_CONFIG_DIRS/d2rloader/wineprefixes.
+
+## Windows
+
+- Download the latest "D2RLoader.windows.zip" from the [releases page](https://github.com/sh4nks/d2rloader/releases) and extract it.
+- Create a desktop shortcut and configure it to run as **Administrator**. Admin rights are unfortunately needed to kill the handles.
+- Start D2RLoader.exe and configure the handle.exe path and D2R game folder (File -> Settings)
+- Create and configure a new account by pressing "Add".
+- Start the game with the configured account.
 
 ## Auth Methods
 
