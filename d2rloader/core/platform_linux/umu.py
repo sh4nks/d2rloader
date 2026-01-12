@@ -102,7 +102,7 @@ class UmuManager:
                     "-username",
                     account.email,
                     "-password",
-                    account.password,
+                    f"'{account.password}'",
                     "-address",
                     account.region.value,
                 ]
