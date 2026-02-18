@@ -136,7 +136,7 @@ class SettingDialogWidget(QDialog):
 
         log_level_label: Final = QLabel("Log Level: ", self)
         self.log_level_combobox: Final = QComboBox()
-        self.log_level_combobox.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        self.log_level_combobox.addItems(["TRACE", "DEBUG", "INFO", "WARNING", "ERROR"])
         log_level_idx = self.log_level_combobox.findText(setting.log_level)
         self.log_level_combobox.setCurrentIndex(log_level_idx)
 

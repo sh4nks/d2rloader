@@ -32,3 +32,4 @@ class Setting(BaseModel):
     d2rreg_version: str | None = Field(default=None)
     token: str | None = Field(default=None)
     token_username: str | None = Field(default=None)
+    rotw: bool = Field(default=True)

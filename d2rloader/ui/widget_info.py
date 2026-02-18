@@ -12,6 +12,8 @@ from PySide6.QtNetwork import (
     QNetworkRequest,
 )
 from PySide6.QtWidgets import (
+    QCheckBox,
+    QHBoxLayout,
     QHeaderView,
     QLabel,
     QTableWidget,
@@ -79,7 +81,7 @@ class InfoTabsWidget(QTabWidget):
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader
         self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
-        self.dcinfo: DCInfoWidget = DCInfoWidget(self)
+        self.dcinfo: DCInfoWidget = DCInfoWidget(self, d2rloader)
         self.tzinfo: TZInfoWidget = TZInfoWidget(self)
         self.application_output: ApplicationOutputWidget = ApplicationOutputWidget(self)
         # self.refresh.connect(lambda: asyncio.ensure_future(self._update_info()))
@@ -203,11 +205,19 @@ class DCInfoWidget(QWidget):
         "krHardcore": {"index": 5, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
         "cnSoftcore": {"index": 6, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
         "cnHardcore": {"index": 7, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
+        # Rotw
+        "euSoftcoreRotw": {"index": 0, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
+        "euHardcoreRotw": {"index": 1, "mode": "Harcore", "ladder": 0, "nonLadder": 0},
+        "usSoftcoreRotw": {"index": 2, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
+        "usHardcoreRotw": {"index": 3, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
+        "krSoftcoreRotw": {"index": 4, "mode": "Softcore", "ladder": 0, "nonLadder": 0},
+        "krHardcoreRotw": {"index": 5, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
     }
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget, d2rloader: D2RLoaderState):
         """Initialize the DCInfoWidget."""
         super().__init__(parent)
+        self.d2rloader: D2RLoaderState = d2rloader
 
         layout = QVBoxLayout()
         _columns: Final = [
@@ -224,39 +234,68 @@ class DCInfoWidget(QWidget):
         self.table.setHorizontalHeaderLabels(_columns)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
-        layout.addWidget(self.table)
-        layout.addWidget(
-            QLabel(
-                "DClone Info provided by <a href='https://d2emu.com/dclone'>d2emu.com</a>"
-            )
+
+        self.hbox_layout: QHBoxLayout = QHBoxLayout()
+        self.courtesy_label: QLabel = QLabel(
+            "DClone Info provided by <a href='https://d2emu.com/dclone'>d2emu.com</a>"
         )
+        self.rotw_checkbox: QCheckBox = QCheckBox("Return of the Warlock")
+        self.rotw_checkbox.setChecked(self.d2rloader.settings.data.rotw or False)
+        self.rotw_checkbox.checkStateChanged.connect(self.rotw_toggle)
+
+        self.hbox_layout.addWidget(self.courtesy_label, 1)
+        self.hbox_layout.addWidget(self.rotw_checkbox)
+
+        layout.addWidget(self.table)
+        layout.addLayout(self.hbox_layout)
         self.setLayout(layout)
 
+    @Slot()
+    def rotw_toggle(self, checked: Qt.CheckState):
+        if checked == Qt.CheckState.Checked:
+            self.d2rloader.settings.set(rotw=True)
+        else:
+            self.d2rloader.settings.set(rotw=False)
+
+        self._create_rows(self.d2rloader.settings.data.rotw)
+
     def process(self, info: DCloneInfo):
+        self._fill_row_data(info)
+        self._create_rows(self.d2rloader.settings.data.rotw)
+
+    def _fill_row_data(self, info: DCloneInfo):
         for key, value in info.items():
             self._process_item(key, value)
 
+    def _create_rows(self, rotw: bool | None = None):
+        self.table.setRowCount(0)
         for key, value in self.row_data.items():
+            if not rotw and "Rotw" in key or rotw and "Rotw" not in key:
+                continue
             self.create_row(key[:2], value)
 
     def _process_item(self, key: str, value: dict[str, int]):
         region = key[:2]
-        key_r = key[2:]
 
         if region not in self.region_mapping.keys():
-            logger.warning(f"Region not supported {key}")
+            logger.debug(f"Region not supported {key}")
             return
 
-        if key_r.startswith("Non") and key.endswith("Hardcore"):
-            self.row_data[region + "Hardcore"]["nonLadder"] = value.get("status", 0)
+        mode = "Hardcore" if "Hardcore" in key else "Softcore"
+        addon = "Rotw" if "Rotw" in key else ""
+
+        # Determine the ladder type
+        key_r = key[2:]
+        if key_r.startswith("Ladder"):
+            ladder_type = "ladder"
         elif key_r.startswith("Non"):
-            self.row_data[region + "Softcore"]["nonLadder"] = value.get("status", 0)
-        elif key_r.startswith("Ladder") and key.endswith("Hardcore"):
-            self.row_data[region + "Hardcore"]["ladder"] = value.get("status", 0)
-        elif key_r.startswith("Ladder"):
-            self.row_data[region + "Softcore"]["ladder"] = value.get("status", 0)
+            ladder_type = "nonLadder"
         else:
-            logger.error(f"Unknown DClone Info key {key}")
+            logger.error(f"Unknown DClone Info key format: {key}")
+            return
+
+        row_key = region + mode + addon
+        self.row_data[row_key][ladder_type] = value.get("status", 0)
 
     def create_row(self, region: str, item: dict[str, int | str]):
         row_index = int(item["index"])
@@ -276,9 +315,7 @@ class DCInfoWidget(QWidget):
         non_ladder_item = QTableWidgetItem(f"{item['nonLadder']}")
         non_ladder_item.setFlags(non_ladder_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
 
-        self.table.removeRow(row_index)
         self.table.insertRow(row_index)
-
         self.table.setItem(row_index, 0, region_item)
         self.table.setItem(row_index, 1, mode_item)
         self.table.setItem(row_index, 2, ladder_item)
