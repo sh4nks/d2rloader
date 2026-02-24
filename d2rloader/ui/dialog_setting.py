@@ -112,6 +112,11 @@ class SettingDialogWidget(QDialog):
         self.d2emu_token.setText(setting.token or "")
         advanced_form.addRow(d2emu_token_label, self.d2emu_token)
 
+        d2rinfo_label: Final = QLabel("Use D2Emu from D2RLoader: ", self)
+        self.d2rinfo: Final = QCheckBox()
+        self.d2rinfo.setChecked(setting.d2rinfo or False)
+        advanced_form.addRow(d2rinfo_label, self.d2rinfo)
+
         wineprefix_path_label: Final = QLabel("Wineprefix (Linux): ", self)
         self.wineprefix_path_button: Final = QPushButton(
             self.setting.wineprefix or "Select..."
@@ -139,8 +144,8 @@ class SettingDialogWidget(QDialog):
         self.log_level_combobox.addItems(["TRACE", "DEBUG", "INFO", "WARNING", "ERROR"])
         log_level_idx = self.log_level_combobox.findText(setting.log_level)
         self.log_level_combobox.setCurrentIndex(log_level_idx)
-
         advanced_form.addRow(log_level_label, self.log_level_combobox)
+
         log_file_label: Final = QLabel("Log To File: ", self)
         self.log_file: Final = QCheckBox()
         self.log_file.setChecked(setting.log_file or False)
@@ -189,6 +194,7 @@ class SettingDialogWidget(QDialog):
         )
         self.setting.token_username = self.d2emu_token_user.text()
         self.setting.token = self.d2emu_token.text()
+        self.setting.d2rinfo = self.d2rinfo.isChecked()
         self.setting.log_file = self.log_file.isChecked()
         self.setting.log_level = self.log_level_combobox.itemText(
             self.log_level_combobox.currentIndex()
@@ -203,7 +209,7 @@ class SettingDialogWidget(QDialog):
             self.advanced_settings.setChecked(True)
             self.advanced_frame.show()
 
-    @Slot(str, QPushButton)  # pyright: ignore
+    @Slot(str, QPushButton)
     def select_directory(self, setting_key: str, button: QPushButton):
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.Directory)
@@ -214,7 +220,7 @@ class SettingDialogWidget(QDialog):
                 button.setText(dialog.selectedFiles()[0])
                 setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
-    @Slot(str, QPushButton, str)  # pyright: ignore
+    @Slot(str, QPushButton, str)
     def select_file(self, setting_key: str, button: QPushButton, file_filter: str):
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
@@ -336,7 +342,7 @@ class DownloadHandleWidget(QHBoxLayout):
         self.handle_path_button.setDisabled(False)
         self.download_button.setDisabled(False)
 
-    @Slot(QNetworkReply.NetworkError)  # pyright: ignore
+    @Slot(QNetworkReply.NetworkError)
     def on_error(self, code: QNetworkReply.NetworkError):
         """Show a message if an error happen"""
         logger.error(f"Couldn't download handle64.exe: {code}")
@@ -348,7 +354,7 @@ class DownloadHandleWidget(QHBoxLayout):
             if self.reply.error() == QNetworkReply.NetworkError.NoError:
                 self.file.write(self.reply.readAll())
 
-    @Slot(int, int)  # pyright: ignore
+    @Slot(int, int)
     def on_progress(self, bytesReceived: int, bytesTotal: int):
         """Update progress bar"""
         logger.info(

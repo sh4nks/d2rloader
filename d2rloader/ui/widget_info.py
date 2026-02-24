@@ -30,7 +30,7 @@ from d2rloader.core.state import D2RLoaderState
 
 URI_TZ_INFO = "https://d2emu.com/api/v1/tz"
 URI_DC_INFO = "https://d2emu.com/api/v1/dclone"
-
+URI_D2RINFO = "https://d2.someblocks.com/api/d2rinfo"
 
 type DCloneInfo = dict[str, dict[str, int]]
 type TZInfo = dict[str, list[str] | list[int] | int]
@@ -71,6 +71,7 @@ TEST_DATA_TZINFO: TZInfo = {
 class RequestType(enum.Enum):
     TZ = enum.auto()
     DC = enum.auto()
+    ALL = enum.auto()
 
 
 class InfoTabsWidget(QTabWidget):
@@ -104,22 +105,32 @@ class InfoTabsWidget(QTabWidget):
     def update_info(self):
         # self.tzinfo.process(TEST_DATA_TZINFO)
         # self.dcinfo.process(TEST_DATA_DCLONE)
-        self.send_request(URI_TZ_INFO, RequestType.TZ)
-        self.send_request(URI_DC_INFO, RequestType.DC)
+        if self.d2rloader.settings.data.d2rinfo:
+            self.send_request(URI_D2RINFO, RequestType.ALL)
+        else:
+            self.send_request(URI_TZ_INFO, RequestType.TZ)
+            self.send_request(URI_DC_INFO, RequestType.DC)
 
     def send_request(self, url: str, type: RequestType):
         request = QNetworkRequest(url)
-        request.setHeader(
-            QNetworkRequest.KnownHeaders.UserAgentHeader,
-            "D2RLoader (https://github.com/sh4nks/d2rloader)",
-        )
-        request.setRawHeader(
-            b"x-emu-username",
-            f"{self.d2rloader.settings.data.token_username}".encode("utf-8"),
-        )
-        request.setRawHeader(
-            b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode("utf-8")
-        )
+        logger.debug(f"Retrieving data from {url}...")
+        if type == RequestType.ALL:
+            request.setHeader(
+                QNetworkRequest.KnownHeaders.UserAgentHeader,
+                "D2RLoader",
+            )
+        else:
+            request.setHeader(
+                QNetworkRequest.KnownHeaders.UserAgentHeader,
+                "D2RLoader (https://github.com/sh4nks/d2rloader)",
+            )
+            request.setRawHeader(
+                b"x-emu-username",
+                f"{self.d2rloader.settings.data.token_username}".encode("utf-8"),
+            )
+            request.setRawHeader(
+                b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode("utf-8")
+            )
         reply = self.networkmanager.get(request)
         reply.finished.connect(functools.partial(self.on_finished, reply, type))
         reply.errorOccurred.connect(self.on_error)
@@ -134,6 +145,9 @@ class InfoTabsWidget(QTabWidget):
             self.tzinfo.process(json_response)
         elif type == RequestType.DC:
             self.dcinfo.process(json_response)
+        elif type == RequestType.ALL:
+            self.tzinfo.process(json_response["tz"])
+            self.dcinfo.process(json_response["dclone"])
 
         reply.deleteLater()
 
