@@ -9,6 +9,7 @@ from loguru import logger
 
 from d2rloader.constants import CONFIG_BASE_DIR, D2RREG_URL, D2RREG_VERSION
 from d2rloader.core.exception import ProcessingError
+from d2rloader.core.game_settings import GameSetting
 from d2rloader.models.account import Account, AuthMethod
 
 if TYPE_CHECKING:
@@ -83,8 +84,7 @@ class UmuManager:
 
     def start(self, account: Account):
         game_settings = self._state.game_settings.get_game_settings(account)
-
-        params: list[str] = []
+        params: list[str] = ["-adress", account.region.value]
         if account.auth_method == AuthMethod.Password:
             if (
                 len(account.email) == 0
@@ -99,37 +99,21 @@ class UmuManager:
                     account.email,
                     "-password",
                     f"'{account.password}'",
-                    "-address",
-                    account.region.value,
                 ]
             )
         elif account.auth_method == AuthMethod.Token:
             self._update_web_token_value(account)
-
-            params.extend(["-uid", "osi", "-address", account.region.value])
+            params.extend(["-uid", "osi"])
 
         if account.params is not None:
             params.extend(
                 [param.strip() for param in account.params.split(" ") if param]
             )
 
-        if self._save_start_script(account, params):
-            try:
-                with open(self.get_start_script_log_path(account), "w") as logfile:
-                    game_settings.set_account_game_settings()
-                    logger.info(
-                        f"Launching instance: {self.get_start_script_path(account).absolute()}"
-                    )
-                    proc = subprocess.Popen(
-                        ["sh", self.get_start_script_path(account)], stderr=logfile
-                    )
-                    return proc.pid
-            except Exception as e:
-                logger.error(e)
-                raise ProcessingError(
-                    f"Error occured during executing {self.get_start_script_path(account)}",
-                    e,
-                )
+        if account.auth_method == AuthMethod.Steam:
+            return self._start_steam(account, game_settings, params)
+        else:
+            return self._start(account, game_settings, params)
 
     def _update_web_token_value(self, account: Account):
         logger.debug(f"Updating WEB_TOKEN value for account: {account.profile_name}")
@@ -186,7 +170,38 @@ class UmuManager:
             PARAMS=" ".join(params),
         )
 
-    def _save_start_script(
+    def _start_steam(
+        self, account: Account, game_settings: GameSetting, params: list[str]
+    ):
+        game_settings.set_account_game_settings()
+        logger.info(
+            f"Launching instance: {self.get_start_script_path(account).absolute()}"
+        )
+        # alternative: steam -applaunch <gameid> <params>
+        # not tested as I don't have the game on steam
+        proc = subprocess.Popen(["steam", "steam://run/2536520//", *params, "/"])
+        return proc.pid
+
+    def _start(self, account: Account, game_settings: GameSetting, params: list[str]):
+        if self._create_start_script(account, params):
+            try:
+                with open(self.get_start_script_log_path(account), "w") as logfile:
+                    game_settings.set_account_game_settings()
+                    logger.info(
+                        f"Launching instance: {self.get_start_script_path(account).absolute()}"
+                    )
+                    proc = subprocess.Popen(
+                        ["sh", self.get_start_script_path(account)], stderr=logfile
+                    )
+                    return proc.pid
+            except Exception as e:
+                logger.error(e)
+                raise ProcessingError(
+                    f"Error occured during executing {self.get_start_script_path(account)}",
+                    e,
+                )
+
+    def _create_start_script(
         self, account: Account, params: list[str], force: bool = True
     ):
         if (

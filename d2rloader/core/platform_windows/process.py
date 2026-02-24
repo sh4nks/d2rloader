@@ -74,6 +74,9 @@ class ProcessManager(QObject):
 
     def _start_instance(self, account: Account):
         cmd = os.path.join(self._state.settings.data.game_path, "D2R.exe")
+        if account.auth_method == AuthMethod.Steam:
+            cmd = "steam://run/2536520//"
+
         game_settings = self._state.game_settings.get_game_settings(account)
 
         if not os.path.exists(cmd):
@@ -89,6 +92,8 @@ class ProcessManager(QObject):
             self._process_auth_token(account, params)
         elif account.auth_method == AuthMethod.Password:
             self._process_auth_password(account, params)
+        elif account.auth_method == AuthMethod.Steam:
+            params.extend(["-address", account.region.value, "/"])
 
         game_settings.set_account_game_settings()
 

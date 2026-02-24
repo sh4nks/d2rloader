@@ -59,7 +59,7 @@ class AccountDialogWidget(QDialog):
         left_layout = QFormLayout()
         right_layout = QFormLayout()
 
-        self.button_box = QDialogButtonBox(
+        self.button_box: QDialogButtonBox = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
 

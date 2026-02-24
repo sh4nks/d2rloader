@@ -14,7 +14,7 @@ class Region(enum.Enum):
     Europe = "eu.actual.battle.net"
     Americas = "us.actual.battle.net"
     Asia = "kr.actual.battle.net"
-    # China = "cn.actual.battle.net" # no idea which address
+    China = "cn.actual.battlenet.com.cn"  # no idea which address
 
     @classmethod
     def from_name(cls, name: str):
@@ -27,6 +27,7 @@ class Region(enum.Enum):
 class AuthMethod(enum.Enum):
     Token = "token"
     Password = "password"
+    Steam = "steam"
 
     @classmethod
     def from_name(cls, name: str):
@@ -71,6 +72,8 @@ class Account(BaseModel):
 
     @classmethod
     def wineprefix_account(cls, settings: Setting, account: "Account"):
+        if account.auth_method == AuthMethod.Steam:
+            return Path(Path.home(), ".steam/steam/steamapps/compatdata/2536520/pfx/")
         if account.profile_normalized:
             return Path(
                 settings.wineprefix,
