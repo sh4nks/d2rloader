@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -27,6 +28,8 @@ class Setting(BaseModel):
     game_path: str
     log_level: str = Field(default="INFO")
     log_file: bool = Field(default=True)
+    check_update: bool = Field(default=True)
+    last_update_check: datetime | None = Field(default=None)
     wineprefix: str = Field(default_factory=get_default_wineprefix)
     plugins_path: str = Field(default_factory=get_default_plugins_path)
     d2rreg_version: str | None = Field(default=None)

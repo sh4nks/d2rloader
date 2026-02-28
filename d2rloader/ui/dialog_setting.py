@@ -151,6 +151,11 @@ class SettingDialogWidget(QDialog):
         self.log_file.setChecked(setting.log_file or False)
         advanced_form.addRow(log_file_label, self.log_file)
 
+        check_update_label: Final = QLabel("Check Updates: ", self)
+        self.check_update: Final = QCheckBox()
+        self.check_update.setChecked(setting.check_update or True)
+        advanced_form.addRow(check_update_label, self.check_update)
+
         self.advanced_frame: QFrame = QFrame()
         advanced_layout = QVBoxLayout()
         self.advanced_frame.setLayout(advanced_layout)
