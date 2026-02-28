@@ -61,6 +61,14 @@ class UmuManager:
         self._state: D2RLoaderState = state
 
     @property
+    def steam(self):
+        steam_path = which("steam")
+        if steam_path is None:
+            logger.error("Couldn't find 'steam'. Did you forget to install 'steam'?")
+            raise ProcessingError("steam not found in PATH!")
+        return Path(steam_path)
+
+    @property
     def umu_run(self):
         umu_path = which("umu-run")
         if umu_path is None:
@@ -111,7 +119,7 @@ class UmuManager:
             )
 
         if account.auth_method == AuthMethod.Steam:
-            return self._start_steam(account, game_settings, params)
+            return self._start_steam(game_settings, params)
         else:
             return self._start(account, game_settings, params)
 
@@ -170,16 +178,11 @@ class UmuManager:
             PARAMS=" ".join(params),
         )
 
-    def _start_steam(
-        self, account: Account, game_settings: GameSetting, params: list[str]
-    ):
+    def _start_steam(self, game_settings: GameSetting, params: list[str]):
         game_settings.set_account_game_settings()
-        logger.info(
-            f"Launching instance: {self.get_start_script_path(account).absolute()}"
-        )
-        # alternative: steam -applaunch <gameid> <params>
-        # not tested as I don't have the game on steam
-        proc = subprocess.Popen(["steam", "steam://run/2536520//", *params, "/"])
+        steam_cmd = [self.steam.as_posix(), "-applaunch", "2536520", *params]
+        logger.info(f"Launching instance: {' '.join(steam_cmd)}")
+        proc = subprocess.Popen(steam_cmd)
         return proc.pid
 
     def _start(self, account: Account, game_settings: GameSetting, params: list[str]):

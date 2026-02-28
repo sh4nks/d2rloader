@@ -76,6 +76,7 @@ class AccountDialogWidget(QDialog):
         self.auth_combobox: Final = QComboBox()
         self.auth_combobox.addItem(AuthMethod.Token.name, AuthMethod.Token)
         self.auth_combobox.addItem(AuthMethod.Password.name, AuthMethod.Password)
+        self.auth_combobox.addItem(AuthMethod.Steam.name, AuthMethod.Steam)
         self.auth_combobox.currentTextChanged.connect(self.change_password_token_widget)
         left_layout.addRow(auth_label, self.auth_combobox)
 
@@ -84,6 +85,7 @@ class AccountDialogWidget(QDialog):
         self.region_combobox.addItem(Region.Europe.name, Region.Europe)
         self.region_combobox.addItem(Region.Americas.name, Region.Americas)
         self.region_combobox.addItem(Region.Asia.name, Region.Asia)
+        self.region_combobox.addItem(Region.China.name, Region.China)
         right_layout.addRow(region_label, self.region_combobox)
 
         self.password_label: Final = QLabel("Password:", self)
