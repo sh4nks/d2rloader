@@ -222,16 +222,14 @@ class D2RLoaderUI:
 
         interval = timedelta(minutes=15)  # check every 15mins
         now = datetime.now(UTC)
-        next_check = now + interval
-        if (
-            d2rloader.settings.data.last_update_check is not None
-            and d2rloader.settings.data.last_update_check <= next_check
-        ):
+        next_check = (d2rloader.settings.data.last_update_check or now) + interval
+        logger.debug("Checking for updates...")
+        if next_check > now:
+            logger.debug(f"Already checked - next check at {next_check}")
             return
 
         d2rloader.settings.set(last_update_check=now)
         version, has_update = is_update_available()
-        logger.debug(f"version {version}, has_update {has_update}")
 
         if has_update and version:
             new_version_url = f"{REPO_URL}/releases/tag/v{version}"
