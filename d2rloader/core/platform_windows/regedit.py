@@ -47,7 +47,7 @@ def get_steam_path() -> str | None:
 
     try:
         return _get_steam_path_32bit()
-    except Exception as e:
+    except Exception:
         try:
             with winreg.OpenKey(
                 winreg.HKEY_LOCAL_MACHINE, steam_path, 0, winreg.KEY_READ
@@ -61,7 +61,7 @@ def get_steam_path() -> str | None:
             return None
 
 
-def _get_steam_path_32bit() -> str:
+def _get_steam_path_32bit() -> str | None:
     steam_path = "SOFTWARE\\Valve\\Steam"
 
     try:
@@ -70,7 +70,7 @@ def _get_steam_path_32bit() -> str:
         ) as key:
             value = winreg.QueryValueEx(key, "InstallPath")
             if not value:
-                return ""
+                return None
 
             return value[0]
     except Exception as e:
