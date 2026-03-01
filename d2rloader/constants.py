@@ -209,5 +209,10 @@ DIABLO_LEVELS = {
     "129": "Worldstone Keep 2",
     "130": "Worldstone Keep 3",
     "131": "Throne of Destruction",
-    "132": "Worldstone Keep",
+    "132": "Worldstone Chamber",
+    "133": "Matron's Den",
+    "134": "Forgotten Sands",
+    "135": "Furnace of Pain",
+    "136": "Uber Tristram",
+    "137": "Colossal Summit",
 }
