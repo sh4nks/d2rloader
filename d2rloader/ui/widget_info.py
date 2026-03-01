@@ -138,6 +138,13 @@ class InfoTabsWidget(QTabWidget):
     @Slot(QNetworkReply, RequestType)
     def on_finished(self, reply: QNetworkReply, type: RequestType):
         response = reply.readAll()
+
+        status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+        if status != 200:
+            logger.error(f"DC/TZ Info server returned '{status}' - {response}")
+            reply.deleteLater()
+            return
+
         json_response = json.loads(response.data())  # pyright: ignore
         logger.trace(f"Requested Data: {type} -> {json_response}")
 
