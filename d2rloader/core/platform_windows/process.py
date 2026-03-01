@@ -18,6 +18,7 @@ from d2rloader.models.account import Account, AuthMethod
 from d2rloader.models.setting import Setting
 
 from .regedit import (
+    get_steam_path,
     get_web_token,
     is_changed_web_token,
     protect_data,
@@ -63,9 +64,12 @@ class ProcessManager(QObject):
                 instances[pid] = account
         return instances
 
-    def _handle_worker_error(self, err: tuple[ProcessingError, str]):
-        msg, *_ = err[0].args
-        logger.error(f"Could not start instance due to: {msg}")
+    def _handle_worker_error(self, err: tuple[ProcessingError | Exception, str]):
+        if isinstance(err[0], ProcessingError):
+            msg, *_ = err[0].args
+        else:
+            msg = err[1]
+        logger.error(f"Could not start instance due to: {err}")
         self.process_error.emit(None, msg)
 
     def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
@@ -75,7 +79,7 @@ class ProcessManager(QObject):
     def _start_instance(self, account: Account):
         cmd = os.path.join(self._state.settings.data.game_path, "D2R.exe")
         if account.auth_method == AuthMethod.Steam:
-            cmd = "steam://run/2536520//"
+            cmd = self._get_steam_path()
 
         game_settings = self._state.game_settings.get_game_settings(account)
 
@@ -93,7 +97,7 @@ class ProcessManager(QObject):
         elif account.auth_method == AuthMethod.Password:
             self._process_auth_password(account, params)
         elif account.auth_method == AuthMethod.Steam:
-            params.extend(["-address", account.region.value, "/"])
+            params.extend(["-applaunch", "2536520", "-address", account.region.value])
 
         game_settings.set_account_game_settings()
 
@@ -144,6 +148,18 @@ class ProcessManager(QObject):
                 account.region.value,
             ]
         )
+
+    def _get_steam_path(self):
+        steam_installdir = get_steam_path()
+        if steam_installdir is None:
+            raise ProcessingError("Couldn't find steam installation directory.")
+
+        steam_exe = os.path.join(steam_installdir, "steam.exe")
+        if not os.path.exists(steam_exe):
+            raise ProcessingError(
+                f"Couldn't find steam.exe in installation directory: {steam_exe}"
+            )
+        return steam_exe
 
     def _handle_instance_start(self, account: Account, pid: int):
         logger.trace(f"process id: {pid}")

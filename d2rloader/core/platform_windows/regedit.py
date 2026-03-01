@@ -42,6 +42,41 @@ def update_web_token_value(value: bytes):
         logger.debug("Setting WEB_TOKEN was successful")
 
 
+def get_steam_path() -> str | None:
+    steam_path = "SOFTWARE\\WOW6432Node\\Valve\\Steam"
+
+    try:
+        return _get_steam_path_32bit()
+    except Exception as e:
+        try:
+            with winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE, steam_path, 0, winreg.KEY_READ
+            ) as key:
+                value = winreg.QueryValueEx(key, "InstallPath")
+                if not value:
+                    return None
+                return value[0]
+        except FileNotFoundError as e:
+            logger.error("Couldn't read registry key 'InstallPath (64bit)'", e)
+            return None
+
+
+def _get_steam_path_32bit() -> str:
+    steam_path = "SOFTWARE\\Valve\\Steam"
+
+    try:
+        with winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE, steam_path, 0, winreg.KEY_READ
+        ) as key:
+            value = winreg.QueryValueEx(key, "InstallPath")
+            if not value:
+                return ""
+
+            return value[0]
+    except Exception as e:
+        raise e
+
+
 def get_web_token() -> bytes:
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ
