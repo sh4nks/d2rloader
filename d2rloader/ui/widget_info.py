@@ -81,7 +81,9 @@ class InfoTabsWidget(QTabWidget):
         """Initialize the InfoTabsWidget."""
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader
-        self.networkmanager: QNetworkAccessManager = QNetworkAccessManager(self)
+        self.networkmanager: QNetworkAccessManager = (
+            d2rloader.network_manager or QNetworkAccessManager(self)
+        )
         self.dcinfo: DCInfoWidget = DCInfoWidget(self, d2rloader)
         self.tzinfo: TZInfoWidget = TZInfoWidget(self)
         self.application_output: ApplicationOutputWidget = ApplicationOutputWidget(self)
@@ -113,7 +115,7 @@ class InfoTabsWidget(QTabWidget):
 
     def send_request(self, url: str, type: RequestType):
         request = QNetworkRequest(url)
-        logger.debug(f"Retrieving data from {url}...")
+        logger.info("Refreshing TZ/DC Info...")
         if type == RequestType.ALL:
             request.setHeader(
                 QNetworkRequest.KnownHeaders.UserAgentHeader,

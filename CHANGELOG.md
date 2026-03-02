@@ -11,7 +11,7 @@ Unreleased
 - DC/TZ Infos for all! Just hit "Refresh TZ/DC Info". If you don't have a D2Emu User/Token you can use the one from D2RLoader via my own D2Emu API wrapper.
 - Add 'Return of the Warlock' support for the TZ/DC info tabs (there is a small checkbox in the button)
 - Update checker - get notified when a new version is available. Can be disabled in the settings.
-- **Experimental:** Add support for launching D2R through Steam (Auth Method 'Steam') (however only one instance can be run through Steam). I have not tested this with D2R as I don't own it on Steam. TODO: Implement in Windows.
+- **Experimental:** Add support for launching D2R through Steam (Auth Method 'Steam') (however only one instance can be run through Steam). I have not tested this with D2R as I don't own it on Steam.
 - **Experimental:** Add China to the regions.
 
 

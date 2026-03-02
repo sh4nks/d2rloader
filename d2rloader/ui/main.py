@@ -3,9 +3,8 @@ from __future__ import annotations
 import importlib.metadata
 import signal
 import sys
-from datetime import UTC, datetime, timedelta
 
-from d2rloader.core.version import is_update_available
+from d2rloader.ui.update_checker import UpdateChecker
 from d2rloader.ui.utils import create_action
 from d2rloader.ui.widget_main import MainTabsWidget
 
@@ -32,7 +31,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from d2rloader.constants import BASE_DIR, ICON_PATH, REPO_URL
+from d2rloader.constants import BASE_DIR, ICON_PATH
 from d2rloader.core.state import D2RLoaderState
 from d2rloader.core.storage import StorageType
 
@@ -181,6 +180,7 @@ class MainWindow(QMainWindow):
 class D2RLoaderUI:
     ui_app: QApplication | None = None
     ui: MainWindow | None = None
+    update_checker: UpdateChecker | None = None
 
     def __init__(self, d2rloader: D2RLoaderState | None = None) -> None:
         if d2rloader is not None:
@@ -199,6 +199,10 @@ class D2RLoaderUI:
         if d2rloader.settings.data.theme:
             QApplication.setStyle(QStyleFactory.create(d2rloader.settings.data.theme))
 
+        d2rloader.register_network_manager(self.ui_app)
+
+        self.update_checker = UpdateChecker(d2rloader)
+
         self.ui = MainWindow(d2rloader)
         self.ui.resize(800, 600)
 
@@ -208,42 +212,12 @@ class D2RLoaderUI:
         self.ui.show()
 
         logger.info("D2RLoader started")
-        self._check_update(self.ui.d2rloader)
+
+        if self.update_checker is not None:
+            self.update_checker.check_update()
 
         # cant use QtAsyncio yet due to:
         # NotImplementedError('QAsyncioEventLoop.getaddrinfo() is not implemented yet')
         # qtasyncio_run(keep_running=True, quit_qapp=True, handle_sigint=True)
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(self.ui_app.exec())
-
-    def _check_update(self, d2rloader: D2RLoaderState):
-        if not d2rloader.settings.data.check_update:
-            return
-
-        interval = timedelta(minutes=15)  # check every 15mins
-        now = datetime.now(UTC)
-        next_check = (d2rloader.settings.data.last_update_check or now) + interval
-        if next_check > now:
-            return
-
-        logger.info("Checking for updates...")
-        d2rloader.settings.set(last_update_check=now)
-        version, has_update = is_update_available()
-
-        if has_update and version:
-            new_version_url = f"{REPO_URL}/releases/tag/v{version}"
-            current_version = importlib.metadata.version("d2rloader")
-            logger.info("Update available!")
-            logger.info(f"Found new version {version}: {new_version_url}")
-            QMessageBox.information(
-                None,
-                "New Update Available!",
-                (
-                    f"<p><center>Version {version} (current: {current_version}) is now available!</center><p>"
-                    f"<p><center><a href='{new_version_url}'>{new_version_url}</a></center></p>"
-                ),
-                QMessageBox.StandardButton.Ok,
-            )
-
-        else:
-            logger.info("No updates available!")

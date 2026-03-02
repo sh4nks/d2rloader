@@ -5,6 +5,7 @@ from typing import override
 from loguru import logger
 from pluggy import PluginManager
 from PySide6.QtCore import QObject
+from PySide6.QtNetwork import QNetworkAccessManager
 
 from d2rloader.constants import CONFIG_BASE_DIR
 from d2rloader.core.game_settings import GameSettingsService
@@ -17,6 +18,7 @@ from d2rloader.core.store.settings import SettingService
 
 class D2RLoaderState:
     process_manager: ProcessManager | None = None
+    network_manager: QNetworkAccessManager | None = None
 
     def __init__(self):
         self.storage: StorageService = StorageService()
@@ -34,6 +36,9 @@ class D2RLoaderState:
 
     def register_process_manager(self, parent: QObject):
         self.process_manager = ProcessManager(parent, self)
+
+    def register_network_manager(self, parent: QObject):
+        self.network_manager = QNetworkAccessManager(parent)
 
     def register_plugin_manager(self):
         pm = register_plugins(self.settings.data.plugins_path)
