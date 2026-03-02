@@ -7,6 +7,9 @@ help: ## Displays this help message.
 run: ## Runs the development server with the development config
 	uv run --group dev d2rloader
 
+appdata-releases: ## Update appdata releases section
+	python resources/generate_appdata_releases.py --output-file resources/d2rloader.appdata.xml
+
 format: ## Sorts the imports and reformats the code
 	# sort imports / remove unused
 	uv run ruff check --fix --select I

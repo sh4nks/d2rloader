@@ -30,6 +30,18 @@
 
   <content_rating type="oars-1.0" />
   <releases>
+    <release version="1.5.0" date="2026-03-02">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>DC/TZ Infos for all! Just hit "Refresh TZ/DC Info". If you don't have a D2Emu User/Token you can use the one from D2RLoader via my own D2Emu API wrapper.</li>
+          <li>Add 'Return of the Warlock' support for the TZ/DC info tabs (there is a small checkbox at the bottom)</li>
+          <li>Update checker - get notified when a new version is available. Can be disabled in the settings.</li>
+          <li>Experimental: Add support for launching D2R through Steam by selecting the 'Steam' Auth Method. However, note that only one instance can be run using this method. I have not tested this as I don't own the game on Steam.</li>
+          <li>Experimental: Add China to the regions.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.0" date="2026-01-12">
       <description>
         <p>Added</p>
