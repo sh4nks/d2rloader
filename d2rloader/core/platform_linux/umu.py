@@ -92,7 +92,7 @@ class UmuManager:
 
     def start(self, account: Account):
         game_settings = self._state.game_settings.get_game_settings(account)
-        params: list[str] = ["-adress", account.region.value]
+        params: list[str] = ["-address", account.region.value]
         if account.auth_method == AuthMethod.Password:
             if (
                 len(account.email) == 0
@@ -171,6 +171,7 @@ class UmuManager:
         logger.debug(f"Using WINEPREFIX: {self.get_wineprefix_account(account)}")
         logger.debug(f"Using GAME_PATH: {self._state.settings.data.game_path}")
         logger.debug(f"Using UMU_RUN: {self.umu_run}")
+        logger.debug(f"Using PARAMS: {self._log_params(params)}")
         return START_SCRIPT.format(
             WINEPREFIX=self.get_wineprefix_account(account),
             GAME_PATH=self._state.settings.data.game_path,
@@ -222,3 +223,14 @@ class UmuManager:
         with open(self.get_start_script_path(account), "w") as f:
             f.write(self._render_start_script(account, params))
         return True
+
+    def _log_params(self, params: list[str]):
+        log_params = params.copy()
+        try:
+            idx_pw = log_params.index("-password")
+            log_params[idx_pw + 1] = "*****"
+            idx_user = log_params.index("-username")
+            log_params[idx_user + 1] = "*****"
+            return " ".join(log_params)
+        except ValueError:
+            return " ".join(log_params)
