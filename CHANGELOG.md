@@ -2,6 +2,18 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.5.1
+
+Released March 4nd, 2026
+
+### Fixed
+
+- linux: Fix typo in "address" param which prevent one to use the selected region
+
+
+**Full Changelog**: [v1.5.0...v1.5.1](https://github.com/sh4nks/d2rloader/compare/v1.5.0...v1.5.1)
+
+
 ## Version 1.5.0
 
 Released March 2nd, 2026
