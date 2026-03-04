@@ -69,11 +69,13 @@ class UpdateChecker:
         logger.info("Checking for updates...")
         self.d2rloader.settings.set(last_update_check=now)
         version, has_update = compare_versions(
-            get_current_version(), reply.get("tagName", "v0.0.0")
+            get_current_version(), reply.get("tag_name", "v0.0.0")
         )
 
         if has_update and version:
-            new_version_url = f"{REPO_NAME}/releases/tag/v{version}"
+            new_version_url = (
+                f"https://github.com/{REPO_OWNER}/{REPO_NAME}/releases/tag/v{version}"
+            )
             current_version = importlib.metadata.version("d2rloader")
             logger.info("Update available!")
             logger.info(f"Found new version {version}: {new_version_url}")

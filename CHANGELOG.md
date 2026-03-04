@@ -2,6 +2,18 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.5.2
+
+Released March 4nd, 2026
+
+### Fixed
+
+- Fix update checker not working correctly
+
+
+**Full Changelog**: [v1.5.1...v1.5.2](https://github.com/sh4nks/d2rloader/compare/v1.5.1...v1.5.2)
+
+
 ## Version 1.5.1
 
 Released March 4nd, 2026
