@@ -10,6 +10,7 @@ from loguru import logger
 from d2rloader.constants import CONFIG_BASE_DIR, D2RREG_URL, D2RREG_VERSION
 from d2rloader.core.exception import ProcessingError
 from d2rloader.core.game_settings import GameSetting
+from d2rloader.core.platform_linux.utils import run_wine_cmd
 from d2rloader.models.account import Account, AuthMethod
 
 if TYPE_CHECKING:
@@ -137,16 +138,7 @@ class UmuManager:
             "--update-token",
             account.token,
         ]
-        output = subprocess.run(
-            cmd,
-            capture_output=True,
-            env={
-                **os.environ,
-                "PROTON_VERB": "runinprefix",
-                "WINEDEBUG": "-all",
-                "WINEPREFIX": f"{self.get_wineprefix_account(account)}",
-            },
-        )
+        output = run_wine_cmd(cmd, self.get_wineprefix_account(account))
         logger.trace(f"_update_web_token_value output stderr: {output.stderr}")
         logger.trace(f"_update_web_token_value output stdout: {output.stdout}")
         return output.stdout

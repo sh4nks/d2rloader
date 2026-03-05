@@ -1,4 +1,6 @@
+import os
 import subprocess
+from pathlib import Path
 
 from loguru import logger
 
@@ -52,3 +54,16 @@ def set_window_title(pid: int, title: str):
 
     logger.debug(f"Updating title for window id '{window_id}' to '{title}'")
     subprocess.Popen(["wmctrl", "-i", "-r", window_id, "-N", title])  # pyright: ignore[reportUnusedCallResult]
+
+
+def run_wine_cmd(cmd: list[Path | str], wineprefix: str | Path):
+    return subprocess.run(
+        cmd,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PROTON_VERB": "runinprefix",
+            "WINEDEBUG": "-all",
+            "WINEPREFIX": f"{wineprefix}",
+        },
+    )

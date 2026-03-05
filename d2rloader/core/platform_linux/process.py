@@ -6,10 +6,14 @@ import psutil
 from loguru import logger
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
-from d2rloader.constants import WINDOW_TITLE_FORMAT
+from d2rloader.constants import CONFIG_BASE_DIR, WINDOW_TITLE_FORMAT
 from d2rloader.core.exception import ProcessingError
 from d2rloader.core.platform_linux.umu import UmuManager
-from d2rloader.core.platform_linux.utils import get_window_by_title, set_window_title
+from d2rloader.core.platform_linux.utils import (
+    get_window_by_title,
+    run_wine_cmd,
+    set_window_title,
+)
 from d2rloader.core.worker import Worker
 from d2rloader.models.account import Account
 
@@ -128,16 +132,8 @@ class ProcessManager(QObject):
         return None
 
     def _rename_window_title(self, pid: int, account: Account):
-        # Once Wine Wayland is the only thing that works we gotta reinvestigate how to
-        # fix this. Perhaps it's possible to change it directly in Wine?
-        # And then we can use something like
-        # this https://github.com/jmazzola/window-title-spoofer/tree/master
-        #
-        # For now, with XWayland we can use xdotool or wmctrl to change
-        # the window title
-        #
-        # Idea: What might work is, to rename the Window in Wine
-        #       using SetWindowTextA (has to be implemented in d2rreg though)
+        # Once Wine Wayland is stable enough to be mainstream we gotta switch to the
+        # method below
         process = self._get_d2r_exe_pid(pid)
         if process is None:
             logger.error(f"Couldn't set window title for pid {pid}. No process found.")
@@ -148,3 +144,24 @@ class ProcessManager(QObject):
         )
         sleep(1)
         set_window_title(process.pid, window_title)
+
+    def _rename_window_title_wine(self, pid: int, account: Account):
+        process = self._get_d2r_exe_pid(pid)
+        if process is None:
+            logger.error(f"Couldn't set window title for pid {pid}. No process found.")
+            return
+
+        window_title = WINDOW_TITLE_FORMAT.format(
+            account.displayname, account.region.value
+        )
+        cmd = [
+            self.umu_manager.umu_run,
+            f"{CONFIG_BASE_DIR}/d2rreg.exe",
+            "--rename-window",
+            window_title,
+        ]
+        sleep(1)
+        output = run_wine_cmd(
+            cmd, Account.wineprefix_account(self._state.settings.data, account)
+        )
+        logger.trace(f"_rename_window_title_wine output stdout: {output.stdout}")

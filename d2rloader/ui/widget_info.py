@@ -107,6 +107,7 @@ class InfoTabsWidget(QTabWidget):
     def update_info(self):
         # self.tzinfo.process(TEST_DATA_TZINFO)
         # self.dcinfo.process(TEST_DATA_DCLONE)
+        logger.info("Refreshing TZ/DC Info...")
         if self.d2rloader.settings.data.d2rinfo:
             self.send_request(URI_D2RINFO, RequestType.ALL)
         else:
@@ -115,7 +116,6 @@ class InfoTabsWidget(QTabWidget):
 
     def send_request(self, url: str, type: RequestType):
         request = QNetworkRequest(url)
-        logger.info("Refreshing TZ/DC Info...")
         if type == RequestType.ALL:
             request.setHeader(
                 QNetworkRequest.KnownHeaders.UserAgentHeader,
