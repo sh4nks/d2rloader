@@ -1,12 +1,12 @@
 [project]
 name = "d2rloader"
-version = "1.5.2"
+version = "1.6.0"
 dependencies = [
   "loguru>=0.7.3",
   "pluggy>=1.6.0",
   "psutil>=7.2.2",
-  "pydantic>=2.12.5",
-  "PySide6>=6.10.2",
+  "pydantic>=2.13.0",
+  "PySide6>=6.11.0",
   "pywin32>=310; platform_system == 'Windows'",
   "unidecode>=1.4.0",
 ]
@@ -34,7 +34,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  "ruff>=0.15.1",
+  "ruff>=0.15.10",
   "pre-commit>=4.5.1"
 ]
 windows = [

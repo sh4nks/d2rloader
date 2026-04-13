@@ -2,6 +2,22 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.6.0
+
+Released April 13rd, 2026
+
+### Added
+
+This is a release which only contains Linux-related things.
+
+Recently, Valve's Proton version got updated and it contains a bug which prevents one to maximize Windowed D2R instances (i.e. double click on title bar). I found out however, that GE-Proton allows one to resize D2R Windows freely... so I implemented those settings. See the [UMU-Launcher](https://github.com/Open-Wine-Components/umu-launcher?tab=readme-ov-file#how-do-i-use-it) README for a list of possible values.
+
+- linux: Add option in ``File -> Settings -> PROTONPATH`` to set a default Proton version for all profiles.
+- linux: Add option in ``Profile/Account Settings -> PROTONPATH`` to use a different Proton version for this profile.
+
+**Full Changelog**: [v1.5.2...v1.6.0](https://github.com/sh4nks/d2rloader/compare/v1.5.2...v1.6.0)
+
+
 ## Version 1.5.2
 
 Released March 4nd, 2026
