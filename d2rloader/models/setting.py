@@ -31,6 +31,7 @@ class Setting(BaseModel):
     check_update: bool = Field(default=True)
     last_update_check: datetime | None = Field(default=None)
     wineprefix: str = Field(default_factory=get_default_wineprefix)
+    protonpath: str | None = Field(default=None)
     plugins_path: str = Field(default_factory=get_default_plugins_path)
     d2rreg_version: str | None = Field(default=None)
     token: str | None = Field(default=None)

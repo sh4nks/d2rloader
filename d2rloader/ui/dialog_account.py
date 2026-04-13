@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from typing import Final, cast
 
 from loguru import logger
@@ -109,9 +110,11 @@ class AccountDialogWidget(QDialog):
         )
         left_layout.addRow(game_settings_label, self.game_setting_widget)
 
-        protonpath_label: Final = QLabel("PROTONPATH (Linux): ", self)
+        protonpath_label: Final = QLabel("PROTONPATH: ", self)
         self.protonpath: Final = QLineEdit()
-        left_layout.addRow(protonpath_label, self.protonpath)
+
+        if sys.platform == "linux":
+            left_layout.addRow(protonpath_label, self.protonpath)
 
         if account is not None:
             self.profile_name.setText(account.profile_name or "")

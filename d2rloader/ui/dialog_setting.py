@@ -117,7 +117,7 @@ class SettingDialogWidget(QDialog):
         self.d2rinfo.setChecked(setting.d2rinfo or False)
         advanced_form.addRow(d2rinfo_label, self.d2rinfo)
 
-        wineprefix_path_label: Final = QLabel("Wineprefix (Linux): ", self)
+        wineprefix_path_label: Final = QLabel("Wineprefix: ", self)
         self.wineprefix_path_button: Final = QPushButton(
             self.setting.wineprefix or "Select..."
         )
@@ -126,7 +126,14 @@ class SettingDialogWidget(QDialog):
                 self.select_directory, "wineprefix", self.wineprefix_path_button
             )
         )
-        advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
+        protonpath_default_label: Final = QLabel(
+            "PROTONPATH (Default: 'UMU-Proton'): ", self
+        )
+        self.protonpath_default: Final = QLineEdit()
+
+        if sys.platform == "linux":
+            advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
+            advanced_form.addRow(protonpath_default_label, self.protonpath_default)
 
         plugins_path_label: Final = QLabel("Plugins: ", self)
         self.plugins_path_button: Final = QPushButton(
@@ -204,6 +211,7 @@ class SettingDialogWidget(QDialog):
         self.setting.log_level = self.log_level_combobox.itemText(
             self.log_level_combobox.currentIndex()
         )
+        self.setting.protonpath = self.protonpath_default.text()
         return self.setting
 
     def show_advanced_settings(self):

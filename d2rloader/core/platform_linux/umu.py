@@ -87,9 +87,11 @@ class UmuManager:
         )
 
     def get_protonpath_account(self, account: Account):
-        if not account.protonpath:
-            return "UMU-Proton"
-        return account.protonpath
+        if account.protonpath:
+            return account.protonpath
+        if self._state.settings.data.protonpath:
+            return self._state.settings.data.protonpath
+        return "UMU-Proton"
 
     def get_start_script_log_path(self, account: Account):
         return Path(self.get_wineprefix_account(account), "umu.log")
