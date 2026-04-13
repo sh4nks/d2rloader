@@ -39,6 +39,7 @@ export WINEPREFIX="{WINEPREFIX}"
 export WINEESYNC="1" # https://github.com/zfigura/wine/blob/esync/README.esync
 export WINEFSYNC="1"
 export WINEDLLOVERRIDES="winemenubuilder=" # https://gitlab.winehq.org/wine/wine/-/wikis/Commands/winemenubuilder
+export PROTONPATH="{PROTONPATH}"
 
 # Working Directory
 cd '{GAME_PATH}'
@@ -84,6 +85,11 @@ class UmuManager:
             self._state.settings.data,
             account,
         )
+
+    def get_protonpath_account(self, account: Account):
+        if not account.protonpath:
+            return "UMU-Proton"
+        return account.protonpath
 
     def get_start_script_log_path(self, account: Account):
         return Path(self.get_wineprefix_account(account), "umu.log")
@@ -161,11 +167,13 @@ class UmuManager:
 
     def _render_start_script(self, account: Account, params: list[str]):
         logger.debug(f"Using WINEPREFIX: {self.get_wineprefix_account(account)}")
+        logger.debug(f"Using PROTONPATH: {self.get_protonpath_account(account)}")
         logger.debug(f"Using GAME_PATH: {self._state.settings.data.game_path}")
         logger.debug(f"Using UMU_RUN: {self.umu_run}")
         logger.debug(f"Using PARAMS: {self._log_params(params)}")
         return START_SCRIPT.format(
             WINEPREFIX=self.get_wineprefix_account(account),
+            PROTONPATH=self.get_protonpath_account(account),
             GAME_PATH=self._state.settings.data.game_path,
             UMU_RUN=self.umu_run,
             PARAMS=" ".join(params),

@@ -109,6 +109,10 @@ class AccountDialogWidget(QDialog):
         )
         left_layout.addRow(game_settings_label, self.game_setting_widget)
 
+        protonpath_label: Final = QLabel("PROTONPATH (Linux): ", self)
+        self.protonpath: Final = QLineEdit()
+        left_layout.addRow(protonpath_label, self.protonpath)
+
         if account is not None:
             self.profile_name.setText(account.profile_name or "")
             self.email.setText(account.email)
@@ -119,6 +123,7 @@ class AccountDialogWidget(QDialog):
             self.params.setText(account.params or "")
             self.password.password.setText(account.password or "")
             self.token.setText(account.token or "")
+            self.protonpath.setText(account.protonpath)
 
         # options_group_box.setLayout(options_group_box_layout)
         main_form_layout = QHBoxLayout()
@@ -163,6 +168,7 @@ class AccountDialogWidget(QDialog):
             ),
             params=self.params.text(),
             game_settings=self.game_setting_widget.value,
+            protonpath=self.protonpath.text(),
         )
 
     @Slot()

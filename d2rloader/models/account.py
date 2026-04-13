@@ -47,6 +47,7 @@ class Account(BaseModel):
     params: str | None
     runtime: float | None = Field(default=0)
     game_settings: str | None = Field(default=None)
+    protonpath: str | None = Field(default=None)
 
     @property
     def id(self):
@@ -94,6 +95,7 @@ class Account(BaseModel):
             token=None,
             region=Region.Europe,
             params=None,
+            protonpath=None,
         )
 
 
