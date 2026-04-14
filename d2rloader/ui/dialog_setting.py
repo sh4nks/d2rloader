@@ -130,6 +130,7 @@ class SettingDialogWidget(QDialog):
             "PROTONPATH (Default: 'UMU-Proton'): ", self
         )
         self.protonpath_default: Final = QLineEdit()
+        self.protonpath_default.setText(setting.protonpath)
 
         if sys.platform == "linux":
             advanced_form.addRow(wineprefix_path_label, self.wineprefix_path_button)
