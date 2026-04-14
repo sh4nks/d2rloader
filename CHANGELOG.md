@@ -2,6 +2,17 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.6.1
+
+Released April 14rd, 2026
+
+### Fixed
+
+- linux: Fix populating PROTONPATH in File -> Settings. ([#26](https://github.com/sh4nks/d2rloader/issues/26))
+
+**Full Changelog**: [v1.6.0...v1.6.1](https://github.com/sh4nks/d2rloader/compare/v1.6.0...v1.6.1)
+
+
 ## Version 1.6.0
 
 Released April 13rd, 2026
