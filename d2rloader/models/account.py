@@ -47,6 +47,7 @@ class Account(BaseModel):
     params: str | None
     runtime: float | None = Field(default=0)
     game_settings: str | None = Field(default=None)
+    loot_filter: str | None = Field(default=None)
     protonpath: str | None = Field(default=None)
 
     @property

@@ -45,6 +45,14 @@ class GameSetting:
         settings_filename = f"settings.{self.account.profile_normalized}.json"
         return os.path.join(CONFIG_GAME_SETTINGS_DIR, settings_filename)
 
+    def get_available_lootfilters(self):
+        lootfilters: list[str] = []
+        if os.path.exists(self.saved_game_folder):
+            lootfilters = [
+                x for x in os.listdir(self.saved_game_folder) if x.endswith(".fltr")
+            ]
+        return lootfilters
+
     def _get_basename(self, path: str):
         return os.path.basename(path)
 
@@ -70,6 +78,28 @@ class GameSetting:
         logger.debug(f"Copying game settings to {self.current_game_settings}")
         shutil.copy2(self.account.game_settings, self.current_game_settings)
 
+    def set_account_loot_filter(self):
+        if not self.account.loot_filter:
+            return
+        elif not os.path.exists(self.account.loot_filter):
+            logger.warning("Configured loot filter doesn't exist!")
+            return
+
+        lootfilter_name = os.path.basename(self.account.loot_filter)
+        lootfilter_dest_path = os.path.join(self.saved_game_folder, lootfilter_name)
+        logger.info(f"Using loot filter: {lootfilter_name}")
+        if os.path.exists(lootfilter_dest_path):
+            logger.debug(
+                f"Current loot filter exist - renaming to {lootfilter_name}.bak"
+            )
+            shutil.move(lootfilter_dest_path, f"{lootfilter_dest_path}.bak")
+
+        if sys.platform == "linux":
+            os.makedirs(os.path.dirname(lootfilter_dest_path), exist_ok=True)
+
+        logger.debug(f"Copying loot filter to {lootfilter_dest_path}")
+        shutil.copy2(self.account.loot_filter, lootfilter_dest_path)
+
     def copy_current_settings(self, overwrite_ok: bool = False):
         """Returns a tuple containing the destination path and if the path exists"""
         if not self.account.profile_name:
@@ -91,6 +121,27 @@ class GameSetting:
         )
         shutil.copy2(self.current_game_settings, self.account_game_settings)
         return (self.account_game_settings, False)
+
+    def copy_current_lootfilter(self, overwrite_ok: bool = False):
+        """Returns a tuple containing the destination path and if the path exists"""
+        if not self.account.profile_name:
+            logger.error("Please choose a profile name first")
+            return (None, None)
+
+        os.makedirs(CONFIG_GAME_SETTINGS_DIR, exist_ok=True)
+
+        if os.path.exists(self.account.loot_filter) and not overwrite_ok:
+            logger.info(
+                f"lootfilter file '{self._get_basename(self.account_loot_filter)}' already exists!"
+            )
+            return (self.account_loot_filter, True)
+
+        for lootfilter in self.get_available_lootfilters():
+            logger.info(
+                f"Copying current lootfilter to '{self._get_basename(self.account_loot_filter)}'"
+            )
+            shutil.copy2(self.current_loot_filter, self.account_loot_filter)
+        return (self.account_loot_filter, False)
 
 
 class GameSettingsService:

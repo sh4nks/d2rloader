@@ -5,6 +5,7 @@ import sys
 from typing import Final, cast
 
 from loguru import logger
+from PySide6 import QtWidgets
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import (
     QComboBox,
@@ -19,7 +20,6 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QPushButton,
-    QSizePolicy,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -48,8 +48,11 @@ class AccountDialogWidget(QDialog):
             self.account
         )
 
-        self.setFixedHeight(230)
-        self.setFixedWidth(700)
+        self.setFixedWidth(800)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+        )
         main_layout = QVBoxLayout()
         options_group_box = QGroupBox("Options")
 
@@ -99,9 +102,7 @@ class AccountDialogWidget(QDialog):
 
         self.token_label: Final = QLabel("Token:", self)
         self.token: Final = QTextEdit()
-        self.token.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
-        )
+        self.token.setFixedHeight(150)
         right_layout.addRow(self.token_label, self.token)
 
         game_settings_label: Final = QLabel("Game Settings")
@@ -109,6 +110,12 @@ class AccountDialogWidget(QDialog):
             self.account, self.game_settings
         )
         left_layout.addRow(game_settings_label, self.game_setting_widget)
+
+        loot_filter_label: Final = QLabel("Loot Filter")
+        self.loot_filter_widget: LootFilterWidget = LootFilterWidget(
+            self.account, self.game_settings
+        )
+        left_layout.addRow(loot_filter_label, self.loot_filter_widget)
 
         protonpath_label: Final = QLabel("PROTONPATH: ", self)
         self.protonpath: Final = QLineEdit()
@@ -280,6 +287,66 @@ class GameSettingWidget(QHBoxLayout):
             logger.debug(f"selected settings: {filename}")
             self.value = filename
             self.select_game_settings.setText(self._get_display_value())
+
+
+class LootFilterWidget(QHBoxLayout):
+    def __init__(self, account: Account, game_settings: GameSetting):
+        super().__init__()
+        self.game_settings: GameSetting = game_settings
+        self.account: Account = account
+        self.value: str | None = None
+        if account.loot_filter is not None:
+            self.value = account.loot_filter
+
+        self.select_loot_filter: QPushButton = QPushButton(self._get_display_value())
+        self.select_loot_filter.clicked.connect(self.select_lootfilter)
+
+        self.copy_loot_filter: QPushButton = QPushButton("Copy")
+        self.copy_loot_filter.setToolTip("Copy Current Lootfilter")
+        self.copy_loot_filter.clicked.connect(self.copy_lootfilter)
+
+        self.addWidget(self.select_loot_filter, 1)
+        self.addWidget(self.copy_loot_filter)
+
+    def _get_display_value(self):
+        if self.value:
+            return os.path.basename(self.value)
+        return "Select..."
+
+    @Slot()
+    def copy_lootfilter(self):
+        dst_path, exists = self.game_settings.copy_current_lootfilter()
+
+        if dst_path is None and exists is None:
+            return
+
+        if exists:
+            ret = QMessageBox.question(
+                self.widget(),
+                "File exists",
+                f"Settings file '{dst_path}' already exists! <br />"
+                + "Do you want to override the file?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if ret == QMessageBox.StandardButton.No:
+                return
+            dst_path, _ = self.game_settings.copy_current_lootfilter(True)
+
+        self.value = dst_path
+        self.select_loot_filter.setText(self._get_display_value())
+
+    @Slot()
+    def select_lootfilter(self):
+        filename, _ = QFileDialog.getOpenFileName(
+            self.widget(),
+            "Select Lootfilter",
+            CONFIG_GAME_SETTINGS_DIR,
+            "Loot Filter (*.fltr)",
+        )
+        if filename:
+            logger.debug(f"selected loot filter: {filename}")
+            self.value = filename
+            self.select_loot_filter.setText(self._get_display_value())
 
 
 def list_game_settings():
