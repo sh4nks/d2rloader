@@ -62,7 +62,7 @@ class GameSetting:
             logger.debug(
                 f"Current game settings exist - renaming to {self.current_game_settings}.bak"
             )
-            shutil.move(self.current_game_settings, f"{self.current_game_settings}.bak")
+            os.replace(self.current_game_settings, f"{self.current_game_settings}.bak")
 
         if sys.platform == "linux":
             os.makedirs(os.path.dirname(self.current_game_settings), exist_ok=True)
