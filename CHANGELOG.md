@@ -2,6 +2,23 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.7.0
+
+Unreleased
+
+### Added
+
+- Add option in ``Profile/Account Settings -> Game Path`` to use a different D2R installation for this profile. If left empty, the Game Path from ``File -> Settings`` is used. ([#35](https://github.com/sh4nks/d2rloader/issues/35))
+
+### Fixed
+
+- windows: Fix ``d2rloader.exe`` failing to start when a different OpenSSL version is installed in ``System32``. D2RLoader now uses the Windows-native TLS backend instead of the bundled OpenSSL. ([#29](https://github.com/sh4nks/d2rloader/issues/29)) UNTESTED
+- linux: Fix a crash on startup when ``wmctrl`` is not installed. We are showing a warning now instead. ([#39](https://github.com/sh4nks/d2rloader/issues/39))
+- linux: Fix the AppImage not starting on systems where the libraries needed by Qt's xcb platform plugin (e.g. ``libxcb-cursor``) are not installed
+
+**Full Changelog**: [v1.6.2...v1.7.0](https://github.com/sh4nks/d2rloader/compare/v1.6.2...v1.7.0)
+
+
 ## Version 1.6.2
 
 Released April 17rd, 2026
