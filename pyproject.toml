@@ -3,11 +3,11 @@ name = "d2rloader"
 version = "1.6.2"
 dependencies = [
   "loguru>=0.7.3",
-  "pluggy>=1.6.0",
+  "pluggy>=1.7.0",
   "psutil>=7.2.2",
-  "pydantic>=2.13.0",
-  "PySide6>=6.11.0",
-  "pywin32>=310; platform_system == 'Windows'",
+  "pydantic>=2.14.1",
+  "PySide6>=6.12.0",
+  "pywin32>=312; platform_system == 'Windows'",
   "unidecode>=1.4.0",
 ]
 requires-python = ">=3.12"
@@ -34,11 +34,11 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  "ruff>=0.15.10",
-  "pre-commit>=4.5.1"
+  "ruff>=0.17.1",
+  "pre-commit>=4.7.0"
 ]
 windows = [
-  "pyinstaller>=6.12.0"
+  "pyinstaller>=6.22.3"
 ]
 linux = [
   "python-appimage"
