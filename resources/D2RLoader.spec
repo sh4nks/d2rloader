@@ -1,5 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 import sys
+
+# Qt resolves OpenSSL via exe dir -> System32 -> PATH, so a System32 copy shadows
+# the bundled one and mixes versions (see #29). Use the Schannel TLS backend instead.
+QT_OPENSSL_BINARIES = {'qopensslbackend.dll', 'libssl-3-x64.dll', 'libcrypto-3-x64.dll'}
 
 
 a = Analysis(
@@ -15,6 +20,10 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
+a.binaries = [
+    entry for entry in a.binaries
+    if os.path.basename(entry[0]).lower() not in QT_OPENSSL_BINARIES
+]
 pyz = PYZ(a.pure)
 
 exe = EXE(
