@@ -30,6 +30,7 @@ All configuration files are stored in ``%APPDATA%/d2rloader`` on Windows or ``$X
 - Download the provided [**AppImage**](https://github.com/sh4nks/d2rloader/releases) from the release page and make it executable.
   - In case you are using Arch Linux you can use your favorite AUR helper to install [d2rloader](https://aur.archlinux.org/packages/d2rloader) from the AUR.
 - Install [UMU-Launcher](https://github.com/Open-Wine-Components/umu-launcher)
+- Install ``wmctrl`` i.e. ``sudo pacman -S wmctrl``. It is needed to detect running instances and to change their window titles.
 - Install D2R from your favorite Game Launcher (Lutris/Bottles, etc)
 - Select your prefered WINEPREFIX location otherwise a default one will be set to $XDG_CONFIG_DIRS/d2rloader/wineprefixes.
 

@@ -32,6 +32,7 @@ from PySide6.QtWidgets import (
 )
 
 from d2rloader.constants import BASE_DIR, ICON_PATH
+from d2rloader.core.platform_linux.utils import find_wmctrl
 from d2rloader.core.state import D2RLoaderState
 from d2rloader.core.storage import StorageType
 
@@ -212,6 +213,18 @@ class D2RLoaderUI:
         self.ui.show()
 
         logger.info("D2RLoader started")
+
+        if sys.platform == "linux" and find_wmctrl() is None:
+            QMessageBox.warning(
+                self.ui,
+                "Missing Dependency",
+                (
+                    "<p><center>'wmctrl' could not be found.</center></p>"
+                    "<p><center>D2RLoader needs it to detect running instances and to change their window titles. "
+                    "Please install 'wmctrl' using your distribution's package manager.</center></p>"
+                ),
+                QMessageBox.StandardButton.Ok,
+            )
 
         if self.update_checker is not None:
             self.update_checker.check_update()

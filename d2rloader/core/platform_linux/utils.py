@@ -1,20 +1,37 @@
+import functools
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
 from loguru import logger
 
 
+@functools.cache
+def find_wmctrl() -> str | None:
+    wmctrl = shutil.which("wmctrl")
+    if wmctrl is None:
+        logger.warning(
+            "'wmctrl' not found. Running instances can't be detected and "
+            "window titles can't be changed."
+        )
+    return wmctrl
+
+
 def get_window_list() -> list[str]:
+    wmctrl = find_wmctrl()
+    if wmctrl is None:
+        return []
+
     try:
         windows = (
-            subprocess.check_output(["wmctrl", "-lp"])
+            subprocess.check_output([wmctrl, "-lp"])
             .decode("utf-8")
             .strip()
             .splitlines()
         )
-    except subprocess.CalledProcessError as e:
-        logger.error("Couldn't call 'wmctrl -lp'", e)
+    except (subprocess.CalledProcessError, OSError) as e:
+        logger.error(f"Couldn't call 'wmctrl -lp': {e}")
         return []
     return windows
 
