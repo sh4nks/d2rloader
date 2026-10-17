@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFileDialog,
     QFormLayout,
-    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -48,17 +47,15 @@ class AccountDialogWidget(QDialog):
             self.account
         )
 
-        self.setFixedHeight(230)
-        self.setFixedWidth(700)
+        self.setMinimumWidth(760)
         main_layout = QVBoxLayout()
         options_group_box = QGroupBox("Options")
 
-        options_group_box_layout = QGridLayout()
-        options_group_box_layout.setColumnStretch(0, 0)
-        options_group_box_layout.setColumnStretch(4, 0)
-
         left_layout = QFormLayout()
         right_layout = QFormLayout()
+        for form_layout in (left_layout, right_layout):
+            form_layout.setHorizontalSpacing(12)
+            form_layout.setVerticalSpacing(10)
 
         self.button_box: QDialogButtonBox = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -97,6 +94,12 @@ class AccountDialogWidget(QDialog):
         self.params: Final = QLineEdit()
         right_layout.addRow(params_label, self.params)
 
+        game_path_label: Final = QLabel("Game Path:", self)
+        self.game_path_widget: GamePathWidget = GamePathWidget(
+            self.account.game_path, d2rloader.settings.data.game_path
+        )
+        right_layout.addRow(game_path_label, self.game_path_widget)
+
         self.token_label: Final = QLabel("Token:", self)
         self.token: Final = QTextEdit()
         self.token.setSizePolicy(
@@ -104,13 +107,13 @@ class AccountDialogWidget(QDialog):
         )
         right_layout.addRow(self.token_label, self.token)
 
-        game_settings_label: Final = QLabel("Game Settings")
+        game_settings_label: Final = QLabel("Game Settings:", self)
         self.game_setting_widget: GameSettingWidget = GameSettingWidget(
             self.account, self.game_settings
         )
         left_layout.addRow(game_settings_label, self.game_setting_widget)
 
-        protonpath_label: Final = QLabel("PROTONPATH: ", self)
+        protonpath_label: Final = QLabel("PROTONPATH:", self)
         self.protonpath: Final = QLineEdit()
 
         if sys.platform == "linux":
@@ -128,18 +131,21 @@ class AccountDialogWidget(QDialog):
             self.token.setText(account.token or "")
             self.protonpath.setText(account.protonpath)
 
-        # options_group_box.setLayout(options_group_box_layout)
         main_form_layout = QHBoxLayout()
-        main_form_layout.addLayout(left_layout)
-        main_form_layout.addLayout(right_layout)
+        main_form_layout.setContentsMargins(12, 12, 12, 12)
+        main_form_layout.setSpacing(24)
+        main_form_layout.addLayout(left_layout, 1)
+        main_form_layout.addLayout(right_layout, 1)
         options_group_box.setLayout(main_form_layout)
         main_layout.addWidget(options_group_box)
 
         layout = QVBoxLayout()
+        layout.setSpacing(12)
         layout.addLayout(main_layout)
         layout.addWidget(self.button_box)
 
         self.setLayout(layout)
+        self.resize(self.minimumSizeHint())
 
         if account is None:
             self.setWindowTitle("Add a new Account")
@@ -172,6 +178,7 @@ class AccountDialogWidget(QDialog):
             params=self.params.text(),
             game_settings=self.game_setting_widget.value,
             protonpath=self.protonpath.text(),
+            game_path=self.game_path_widget.game_path.text(),
         )
 
     @Slot()
@@ -197,7 +204,7 @@ class AccountDialogWidget(QDialog):
             self.account.profile_name = f"{name}"
             self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
 
-        sender.setStyleSheet("QLineEdit { background-color: %s }" % color)
+        sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     @Slot()
     def change_password_token_widget(self, activated: str | None = None):
@@ -208,6 +215,7 @@ class AccountDialogWidget(QDialog):
 class PasswordWidget(QHBoxLayout):
     def __init__(self, password: str):
         super().__init__()
+        self.setSpacing(6)
         self.password: QLineEdit = QLineEdit(f"{password}")
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         self.hiddenOrShowButton: QPushButton = QPushButton("Show")
@@ -225,9 +233,38 @@ class PasswordWidget(QHBoxLayout):
             self.hiddenOrShowButton.setText("Show")
 
 
+class GamePathWidget(QHBoxLayout):
+    def __init__(self, game_path: str | None, default_game_path: str):
+        super().__init__()
+        self.setSpacing(6)
+        self.game_path: QLineEdit = QLineEdit(game_path or "")
+        self.game_path.setPlaceholderText(default_game_path)
+        self.game_path.setToolTip(
+            "Leave empty to use the Game Path from File -> Settings"
+        )
+
+        self.select_game_path: QPushButton = QPushButton("Select...")
+        self.select_game_path.clicked.connect(self.select_directory)
+
+        self.addWidget(self.game_path, 1)
+        self.addWidget(self.select_game_path)
+
+    @Slot()
+    def select_directory(self):
+        directory = QFileDialog.getExistingDirectory(
+            self.widget(),
+            "Select Game Path",
+            self.game_path.text() or self.game_path.placeholderText(),
+        )
+        if directory:
+            logger.debug(f"selected game path: {directory}")
+            self.game_path.setText(directory)
+
+
 class GameSettingWidget(QHBoxLayout):
     def __init__(self, account: Account, game_settings: GameSetting):
         super().__init__()
+        self.setSpacing(6)
         self.game_settings: GameSetting = game_settings
         self.account: Account = account
         self.value: str | None = None

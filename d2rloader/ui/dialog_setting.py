@@ -4,7 +4,8 @@ import functools
 import os
 import shutil
 import sys
-from typing import Callable, Final
+from collections.abc import Callable
+from typing import Final
 
 from loguru import logger
 from PySide6 import QtWidgets
@@ -229,22 +230,20 @@ class SettingDialogWidget(QDialog):
         dialog.setFileMode(QFileDialog.FileMode.Directory)
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
         dialog.setDirectory(self._get_setting_value(setting_key))
-        if dialog.exec():
-            if len(dialog.selectedFiles()) > 0:
-                button.setText(dialog.selectedFiles()[0])
-                setattr(self.setting, setting_key, dialog.selectedFiles()[0])
+        if dialog.exec() and len(dialog.selectedFiles()) > 0:
+            button.setText(dialog.selectedFiles()[0])
+            setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
     @Slot(str, QPushButton, str)
     def select_file(self, setting_key: str, button: QPushButton, file_filter: str):
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
-        dialog.setNameFilter((file_filter))
+        dialog.setNameFilter(file_filter)
         dialog.setDirectory(self._get_setting_value(setting_key))
-        if dialog.exec():
-            if len(dialog.selectedFiles()) > 0:
-                button.setText(dialog.selectedFiles()[0])
-                setattr(self.setting, setting_key, dialog.selectedFiles()[0])
+        if dialog.exec() and len(dialog.selectedFiles()) > 0:
+            button.setText(dialog.selectedFiles()[0])
+            setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
     def _get_setting_value(self, setting_key: str) -> str:
         return getattr(self.setting, setting_key)
@@ -261,7 +260,7 @@ class SettingDialogWidget(QDialog):
             return result
 
         default_style_name = parent.style().objectName().lower()
-        for style in QStyleFactory.keys():
+        for style in QStyleFactory:
             if style.lower() == default_style_name:
                 result.insert(0, style)
             else:

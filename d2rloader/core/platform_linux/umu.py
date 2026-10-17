@@ -86,6 +86,9 @@ class UmuManager:
             account,
         )
 
+    def get_game_path_account(self, account: Account):
+        return Account.game_path_account(self._state.settings.data, account)
+
     def get_protonpath_account(self, account: Account):
         if account.protonpath:
             return account.protonpath
@@ -165,18 +168,17 @@ class UmuManager:
             logger.info(
                 f"d2rreg.exe saved to {os.path.join(CONFIG_BASE_DIR, 'd2rreg.exe')}"
             )
-        return
 
     def _render_start_script(self, account: Account, params: list[str]):
         logger.debug(f"Using WINEPREFIX: {self.get_wineprefix_account(account)}")
         logger.debug(f"Using PROTONPATH: {self.get_protonpath_account(account)}")
-        logger.debug(f"Using GAME_PATH: {self._state.settings.data.game_path}")
+        logger.debug(f"Using GAME_PATH: {self.get_game_path_account(account)}")
         logger.debug(f"Using UMU_RUN: {self.umu_run}")
         logger.debug(f"Using PARAMS: {self._log_params(params)}")
         return START_SCRIPT.format(
             WINEPREFIX=self.get_wineprefix_account(account),
             PROTONPATH=self.get_protonpath_account(account),
-            GAME_PATH=self._state.settings.data.game_path,
+            GAME_PATH=self.get_game_path_account(account),
             UMU_RUN=self.umu_run,
             PARAMS=" ".join(params),
         )

@@ -27,7 +27,7 @@ class ProcessManager(QObject):
 
     def __init__(self, parent: QObject, appstate: "D2RLoaderState") -> None:
         super().__init__()
-        self._state: "D2RLoaderState" = appstate
+        self._state: D2RLoaderState = appstate
         self.umu_manager: UmuManager = UmuManager(self._state)
         self.threadpool = QThreadPool()
         self.threadpool: QThreadPool = QThreadPool()
@@ -79,10 +79,9 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        if not Path(self._state.settings.data.game_path, "D2R.exe").exists():
-            raise ProcessingError(
-                f"Could not find 'D2R.exe' in '{self._state.settings.data.game_path}'"
-            )
+        game_path = Account.game_path_account(self._state.settings.data, account)
+        if not Path(game_path, "D2R.exe").exists():
+            raise ProcessingError(f"Could not find 'D2R.exe' in '{game_path}'")
 
         pid: int | None = self.umu_manager.start(account)
 

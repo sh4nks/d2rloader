@@ -38,7 +38,7 @@ class ProcessManager(QObject):
 
     def __init__(self, parent: QObject, appstate: "D2RLoaderState") -> None:
         super().__init__()
-        self._state: "D2RLoaderState" = appstate
+        self._state: D2RLoaderState = appstate
         self.threadpool = QThreadPool()
         self.handle: HandleManager = HandleManager(self._state.settings.data)
         self.threadpool: QThreadPool = QThreadPool()
@@ -77,16 +77,15 @@ class ProcessManager(QObject):
         self.process_finished.emit(result[0], result[1], result[2])
 
     def _start_instance(self, account: Account):
-        cmd = os.path.join(self._state.settings.data.game_path, "D2R.exe")
+        game_path = Account.game_path_account(self._state.settings.data, account)
+        cmd = os.path.join(game_path, "D2R.exe")
         if account.auth_method == AuthMethod.Steam:
             cmd = self._get_steam_path()
 
         game_settings = self._state.game_settings.get_game_settings(account)
 
         if not os.path.exists(cmd):
-            raise ProcessingError(
-                f"Could not find 'D2R.exe' in '{self._state.settings.data.game_path}'"
-            )
+            raise ProcessingError(f"Could not find 'D2R.exe' in '{game_path}'")
 
         params: list[str] = []
         if account.params is not None:

@@ -48,6 +48,7 @@ class Account(BaseModel):
     runtime: float | None = Field(default=0)
     game_settings: str | None = Field(default=None)
     protonpath: str | None = Field(default=None)
+    game_path: str | None = Field(default=None)
 
     @property
     def id(self):
@@ -86,6 +87,12 @@ class Account(BaseModel):
         )
 
     @classmethod
+    def game_path_account(cls, settings: Setting, account: "Account"):
+        if account.game_path:
+            return account.game_path
+        return settings.game_path
+
+    @classmethod
     def default_account(cls):
         return Account(
             profile_name=None,
@@ -96,6 +103,7 @@ class Account(BaseModel):
             region=Region.Europe,
             params=None,
             protonpath=None,
+            game_path=None,
         )
 
 
