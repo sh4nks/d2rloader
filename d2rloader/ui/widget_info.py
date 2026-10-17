@@ -128,10 +128,10 @@ class InfoTabsWidget(QTabWidget):
             )
             request.setRawHeader(
                 b"x-emu-username",
-                f"{self.d2rloader.settings.data.token_username}".encode("utf-8"),
+                f"{self.d2rloader.settings.data.token_username}".encode(),
             )
             request.setRawHeader(
-                b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode("utf-8")
+                b"x-emu-token", f"{self.d2rloader.settings.data.token}".encode()
             )
         reply = self.networkmanager.get(request)
         reply.finished.connect(functools.partial(self.on_finished, reply, type))
@@ -300,7 +300,7 @@ class DCInfoWidget(QWidget):
     def _process_item(self, key: str, value: dict[str, int]):
         region = key[:2]
 
-        if region not in self.region_mapping.keys():
+        if region not in self.region_mapping:
             logger.debug(f"Region not supported {key}")
             return
 

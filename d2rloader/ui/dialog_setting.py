@@ -371,7 +371,8 @@ class DownloadHandleWidget(QHBoxLayout):
     def on_progress(self, bytesReceived: int, bytesTotal: int):
         """Update progress bar"""
         logger.info(
-            f"Downloading handle.exe - {bytesReceived / 1000} kb of {bytesTotal or 0 / 1000} kb recieved"
+            f"Downloading handle.exe - {bytesReceived / 1000} kb of "
+            f"{bytesTotal or 0 / 1000} kb recieved"
         )
 
     def set_handle_path(self, path: str):

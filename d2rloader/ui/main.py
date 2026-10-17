@@ -129,14 +129,19 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_about(self):
         version_string = importlib.metadata.version("d2rloader")
-        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        python_version = (
+            f"{sys.version_info.major}.{sys.version_info.minor}."
+            f"{sys.version_info.micro}"
+        )
         qt_version = f"{PySide6.__version__}"
         about_content = f"""
             <center>
             <h3 style="margin-bottom: 0; padding-bottom: 0">D2RLoader</h3>
-            <small>A Cross-platform and Open Source Diablo 2 Resurrected Loader written in Python/Qt</small> <br />
+            <small>A Cross-platform and Open Source Diablo 2 Resurrected Loader
+            written in Python/Qt</small> <br />
             <br />
-            <b>Donate: </b> <a href="https://forums.d2jsp.org/gold.php?i=314054">d2jsp FG</a><br /><br />
+            <b>Donate: </b>
+            <a href="https://forums.d2jsp.org/gold.php?i=314054">d2jsp FG</a><br /><br />
             <b>Install Path: </b> {BASE_DIR} <br />
             <b>Version: </b> {version_string}<br />
             <b>Python: </b> {python_version}, <b>Qt: </b> {qt_version}<br />
@@ -220,8 +225,10 @@ class D2RLoaderUI:
                 "Missing Dependency",
                 (
                     "<p><center>'wmctrl' could not be found.</center></p>"
-                    "<p><center>D2RLoader needs it to detect running instances and to change their window titles. "
-                    "Please install 'wmctrl' using your distribution's package manager.</center></p>"
+                    "<p><center>D2RLoader needs it to detect running instances "
+                    "and to change their window titles. "
+                    "Please install 'wmctrl' using your distribution's package manager."
+                    "</center></p>"
                 ),
                 QMessageBox.StandardButton.Ok,
             )

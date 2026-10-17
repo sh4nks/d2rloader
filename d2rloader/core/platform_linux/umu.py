@@ -207,7 +207,7 @@ class UmuManager:
                 raise ProcessingError(
                     f"Error occured during executing {self.get_start_script_path(account)}",
                     e,
-                )
+                ) from e
 
     def _create_start_script(
         self, account: Account, params: list[str], force: bool = True

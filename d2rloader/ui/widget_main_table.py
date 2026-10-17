@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import warnings
-from typing import Final, cast
+from typing import cast, Final
 
 from loguru import logger
 from PySide6.QtCore import QProcess, Qt, Slot
@@ -283,7 +283,7 @@ class D2RLoaderTableWidget(QWidget):
             self._processes[i[1].id] = (True, i[0])
 
         for idx, account in enumerate(self.d2rloader.accounts.data):
-            if account.id in self._processes.keys():
+            if account.id in self._processes:
                 button = cast(QPushButton, self.table.cellWidget(idx, 5))
                 if button.text() == "Running":
                     continue
@@ -329,7 +329,8 @@ class D2RLoaderTableWidget(QWidget):
             logger.error("Stopping D2R.exe failed - PID not found!")
         else:
             logger.info(
-                f"Stopping D2R.exe with PID {self._processes[account.id][1]} - {account.displayname} ({account.region})"
+                f"Stopping D2R.exe with PID {self._processes[account.id][1]} - "
+                f"{account.displayname} ({account.region})"
             )
             try:
                 self.d2rloader.process_manager.kill(pid)

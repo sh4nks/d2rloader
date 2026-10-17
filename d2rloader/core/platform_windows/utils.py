@@ -40,8 +40,8 @@ def kill_process_by_pid(pid: int):
         handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, 0, pid)
         win32api.TerminateProcess(handle, 0)
         win32api.CloseHandle(handle)
-    except Exception:
-        raise ProcessingError(f"Couldn't kill pid {pid}")
+    except Exception as e:
+        raise ProcessingError(f"Couldn't kill pid {pid}") from e
 
 
 def get_window_size(hwnd: int):

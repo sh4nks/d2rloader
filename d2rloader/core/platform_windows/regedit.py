@@ -27,7 +27,7 @@ def update_region_value(value: Region):
             winreg.SetValueEx(key, "REGION", 1, winreg.REG_SZ, shortcode)
         except Exception as e:
             logger.error(f"Couldn't set registry key 'REGION' to '{shortcode}'", e)
-            raise e
+            raise
 
 
 def update_web_token_value(value: bytes):
@@ -38,7 +38,7 @@ def update_web_token_value(value: bytes):
             winreg.SetValueEx(key, "WEB_TOKEN", 1, winreg.REG_BINARY, value)
         except Exception as e:
             logger.error("Couldn't set registry key 'WEB_TOKEN'", e)
-            raise e
+            raise
         logger.debug("Setting WEB_TOKEN was successful")
 
 
@@ -73,8 +73,8 @@ def _get_steam_path_32bit() -> str | None:
                 return None
 
             return value[0]
-    except Exception as e:
-        raise e
+    except Exception:
+        raise
 
 
 def get_web_token() -> bytes:
@@ -85,7 +85,7 @@ def get_web_token() -> bytes:
             value = winreg.QueryValueEx(key, "WEB_TOKEN")
         except Exception as e:
             logger.error("Couldn't read registry key 'WEB_TOKEN'", e)
-            raise e
+            raise
 
         if not value:
             return b""
@@ -101,7 +101,7 @@ def is_changed_web_token(previous_value: bytes):
             value = winreg.QueryValueEx(key, "WEB_TOKEN")
         except Exception as e:
             logger.error("Couldn't read registry key 'WEB_TOKEN'", e)
-            raise e
+            raise
 
         if not value:
             return False

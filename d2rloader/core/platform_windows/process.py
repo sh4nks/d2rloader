@@ -106,11 +106,12 @@ class ProcessManager(QObject):
                 [cmd, *params], creationflags=subprocess.CREATE_NO_WINDOW
             )
             logger.debug(
-                f"Launching instance with auth method {account.auth_method.value} and parameters: {' '.join([cmd, *self._log_params(params)])}"
+                f"Launching instance with auth method {account.auth_method.value} "
+                f"and parameters: {' '.join([cmd, *self._log_params(params)])}"
             )
-        except OSError | ValueError as e:
+        except (OSError, ValueError) as e:
             logger.error(e)
-            raise ProcessingError(f"Error occured during executing {cmd}", e)
+            raise ProcessingError(f"Error occured during executing {cmd}", e) from e
 
         if proc.pid:
             return self._handle_instance_start(account, proc.pid)

@@ -1,7 +1,7 @@
 import functools
 import importlib.metadata
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any
 
 from loguru import logger
@@ -21,8 +21,7 @@ def get_current_version() -> str:
 
 
 def parse_version_str(version_string: str) -> tuple[int, ...]:
-    if version_string.startswith("v"):
-        version_string = version_string[1:]
+    version_string = version_string.removeprefix("v")
     # Compare versions as tuples of integers for accuracy (1.10 > 1.2)
     return tuple(map(int, version_string.split(".")))
 
@@ -83,7 +82,8 @@ class UpdateChecker:
                 None,
                 "New Update Available!",
                 (
-                    f"<p><center>Version {version} (current: {current_version}) is now available!</center><p>"
+                    f"<p><center>Version {version} (current: {current_version}) "
+                    "is now available!</center><p>"
                     f"<p><center><a href='{new_version_url}'>{new_version_url}</a></center></p>"
                 ),
                 QMessageBox.StandardButton.Ok,

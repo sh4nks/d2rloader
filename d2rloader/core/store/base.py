@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar, cast
+from typing import Any, cast, TypeVar
 
 from pydantic import BaseModel, TypeAdapter
 
@@ -7,7 +7,7 @@ from d2rloader.core.storage import StorageService, StorageType
 T = TypeVar("T", bound="BaseModel")
 
 
-class BaseService(Generic[T]):
+class BaseService[T: "BaseModel"]:
     _state: list[T] | None = []
 
     def __init__(
@@ -27,7 +27,7 @@ class BaseService(Generic[T]):
         item = self.data[index]
 
         for key, value in fields.items():
-            if key in item.model_fields.keys():
+            if key in item.model_fields:
                 setattr(item, key, value)
 
         self.add(item, index)

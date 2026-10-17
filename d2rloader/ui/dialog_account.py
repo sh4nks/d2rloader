@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Final, cast
+from typing import cast, Final
 
 from loguru import logger
 from PySide6.QtCore import Slot

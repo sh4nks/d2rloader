@@ -24,16 +24,13 @@ def d2rloader_mainwindow_plugin_menu(
     A new Section 'Plugins' will be created if it doesn't exist and you plugin will be
     placed in it
     """
-    pass
 
 
 @hookspec
 def d2rloader_main_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget):
     """Hook for extending the main tabbar"""
-    pass
 
 
 @hookspec
 def d2rloader_info_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget):
     """Hook for extending the info tabbar"""
-    pass

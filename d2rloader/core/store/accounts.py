@@ -23,7 +23,7 @@ class AccountService:
         item = self.data[index]
 
         for key, value in fields.items():
-            if key in item.model_fields.keys():
+            if key in item.model_fields:
                 setattr(item, key, value)
 
         self.add(item, index)

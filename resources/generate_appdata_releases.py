@@ -43,7 +43,7 @@ def parse_changelog(changelog_path: str) -> list[dict]:
         "December": 12,
     }
 
-    with open(changelog_path, "r", encoding="utf-8") as f:
+    with open(changelog_path, encoding="utf-8") as f:
         lines = f.readlines()
 
     i = 0
@@ -125,17 +125,17 @@ def parse_changelog(changelog_path: str) -> list[dict]:
                     " ".join(current_paragraph_lines).strip()
                 )
                 if text:
-                    formatted_blocks.append(f"<p>{text}</p>")
+                    formatted_blocks.append(f"<p>{text}</p>")  # noqa: B023
                 current_paragraph_lines = []
 
         def _flush_list_buffer():
             nonlocal current_list_items_buffer, formatted_blocks
             if current_list_items_buffer:
-                formatted_blocks.append("<ul>")
+                formatted_blocks.append("<ul>")  # noqa: B023
                 for item_content in current_list_items_buffer:
                     item_html = markdown_to_appstream_html(item_content.strip())
-                    formatted_blocks.append(f"  <li>{item_html}</li>")
-                formatted_blocks.append("</ul>")
+                    formatted_blocks.append(f"  <li>{item_html}</li>")  # noqa: B023
+                formatted_blocks.append("</ul>")  # noqa: B023
                 current_list_items_buffer = []
 
         for raw_line in description_lines_to_format:
@@ -216,10 +216,11 @@ def update_appdata_file(appdata_file_path: str, new_releases_xml: str):
     using text-based search and replace.
     """
     try:
-        with open(appdata_file_path, "r", encoding="utf-8") as f:
+        with open(appdata_file_path, encoding="utf-8") as f:
             content = f.read()
 
-        # Regex to find the entire <releases>...</releases> block, including its surrounding whitespace.
+        # Regex to find the entire <releases>...</releases> block,
+        # including its surrounding whitespace.
         releases_block_pattern = re.compile(
             r"^\s*<releases>.*?</releases>\s*$", re.DOTALL | re.MULTILINE
         )
@@ -258,7 +259,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--output-file",
-        help="Optional: Path to an existing .appdata.xml file to update. If not provided, XML is printed to stdout.",
+        help=(
+            "Optional: Path to an existing .appdata.xml file to update. "
+            "If not provided, XML is printed to stdout."
+        ),
     )
     args = parser.parse_args()
 

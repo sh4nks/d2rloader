@@ -35,7 +35,26 @@ classifiers = [
 [dependency-groups]
 dev = [
   "ruff>=0.17.1",
-  "pre-commit>=4.7.0"
+  {include-group = "tox"},
+  {include-group = "pre-commit"},
+  {include-group = "typing"},
+]
+tox = [
+  "tox>=4.39",
+  "tox-uv",
+]
+pre-commit = [
+  "pre-commit>=4.7.0",
+  "pre-commit-uv",
+]
+typing = [
+  "mypy",
+  "pyright",
+  "types-psutil",
+  "types-pywin32",
+]
+gha-update = [
+  "gha-update ; python_full_version >= '3.12'",
 ]
 windows = [
   "pyinstaller>=6.22.3"
@@ -59,8 +78,48 @@ d2rloader = "d2rloader.app:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.ruff]
+src = ["d2rloader"]
+fix = true
+show-fixes = true
+output-format = "full"
+
+[tool.ruff.lint]
+select = [
+    "B",  # flake8-bugbear
+    "E",  # pycodestyle error
+    "F",  # pyflakes
+    "I",  # isort
+    "UP",  # pyupgrade
+    "W",  # pycodestyle warning
+]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 100
+
+[tool.ruff.lint.isort]
+order-by-type = false
+
 [tool.mypy]
-plugins = ['pydantic.mypy', 'keyof.mypy_plugin']
+python_version = "3.14"
+files = ["d2rloader/"]
+plugins = ["pydantic.mypy"]
+warn_unused_configs = true
+
+# TODO if all of these can be enabled we can just set 'strict = true'
+disallow_subclassing_any = true
+# disallow_untyped_calls = true
+# disallow_untyped_defs = true
+# disallow_incomplete_defs = true
+# check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# warn_return_any = true
+# no_implicit_reexport = true
+strict_equality = true
+extra_checks = true
 
 [tool.basedpyright]
 include = ["d2rloader"]
@@ -72,3 +131,56 @@ reportMissingTypeStubs = false
 reportUnusedCallResult = false
 reportAny = false
 reportExplicitAny = false
+
+
+[tool.tox]
+env_list = [
+    "style",
+    "typing",
+]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+package = "wheel"
+wheel_build_env = ".pkg"
+constrain_package_deps = true
+use_frozen_constraints = true
+pass_env = ["CI"]
+env_tmp_dir = "{toxworkdir}/tmp/{envname}"
+
+[tool.tox.env.style]
+description = "run all pre-commit hooks on all files"
+dependency_groups = ["pre-commit"]
+skip_install = true
+commands = [["pre-commit", "run", "--all-files"]]
+
+[tool.tox.env.typing]
+description = "run static type checkers for linux and windows"
+dependency_groups = ["typing"]
+ignore_errors = true
+commands = [
+    ["mypy", "--platform", "linux", "--exclude", "d2rloader/core/platform_windows/"],
+    ["mypy", "--platform", "win32"],
+]
+
+[tool.tox.env.update-actions]
+description = "update GitHub Actions pins"
+labels = ["update"]
+dependency_groups = ["gha-update"]
+skip_install = true
+commands = [["gha-update"]]
+
+[tool.tox.env.update-pre_commit]
+description = "update pre-commit pins"
+labels = ["update"]
+dependency_groups = ["pre-commit"]
+skip_install = true
+commands = [["pre-commit", "autoupdate", "--freeze", "-j4"]]
+
+[tool.tox.env.update-requirements]
+description = "update uv lock"
+labels = ["update"]
+dependency_groups = []
+no_default_groups = true
+skip_install = true
+commands = [["uv", "lock", {replace = "posargs", default = ["-U"], extend = true}]]
