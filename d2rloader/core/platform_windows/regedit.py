@@ -8,7 +8,7 @@ from d2rloader.constants import ENTROPY, REG_BATTLE_NET_PATH
 from d2rloader.models.account import Region
 
 
-def protect_data(token: str):
+def protect_data(token: str) -> bytes | None:
     protected_token: bytes = win32crypt.CryptProtectData(
         bytes(token, "utf-8"), None, ENTROPY
     )
@@ -17,7 +17,7 @@ def protect_data(token: str):
     return cast(bytes, protected_token)
 
 
-def update_region_value(value: Region):
+def update_region_value(value: Region) -> None:
     shortcode = value.value.split(".")[0].upper()  # eu.actual.battle.net -> EU
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
@@ -30,7 +30,7 @@ def update_region_value(value: Region):
             raise
 
 
-def update_web_token_value(value: bytes):
+def update_web_token_value(value: bytes) -> None:
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_WRITE
     ) as key:
@@ -55,7 +55,7 @@ def get_steam_path() -> str | None:
                 value = winreg.QueryValueEx(key, "InstallPath")
                 if not value:
                     return None
-                return value[0]
+                return cast(str, value[0])
         except FileNotFoundError as e:
             logger.error("Couldn't read registry key 'InstallPath (64bit)'", e)
             return None
@@ -72,7 +72,7 @@ def _get_steam_path_32bit() -> str | None:
             if not value:
                 return None
 
-            return value[0]
+            return cast(str, value[0])
     except Exception:
         raise
 
@@ -90,10 +90,10 @@ def get_web_token() -> bytes:
         if not value:
             return b""
 
-        return value[0]
+        return cast(bytes, value[0])
 
 
-def is_changed_web_token(previous_value: bytes):
+def is_changed_web_token(previous_value: bytes) -> bool:
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, REG_BATTLE_NET_PATH, 0, winreg.KEY_READ
     ) as key:
@@ -106,4 +106,4 @@ def is_changed_web_token(previous_value: bytes):
         if not value:
             return False
 
-        return value[0] != previous_value
+        return cast(bytes, value[0]) != previous_value

@@ -36,7 +36,7 @@ def get_window_list() -> list[str]:
     return windows
 
 
-def get_window_by_title(title: str):
+def get_window_by_title(title: str) -> tuple[str, str] | tuple[None, None]:
     windows = get_window_list()
     if len(windows) < 1:
         return (None, None)
@@ -49,7 +49,7 @@ def get_window_by_title(title: str):
     return (None, None)
 
 
-def get_window_by_pid(pid: int):
+def get_window_by_pid(pid: int) -> tuple[str, str] | tuple[None, None]:
     windows = get_window_list()
     if len(windows) < 1:
         return (None, None)
@@ -64,7 +64,7 @@ def get_window_by_pid(pid: int):
     return (None, None)
 
 
-def set_window_title(pid: int, title: str):
+def set_window_title(pid: int, title: str) -> None:
     window_id, _ = get_window_by_pid(pid)
     if window_id is None:
         return
@@ -73,7 +73,9 @@ def set_window_title(pid: int, title: str):
     subprocess.Popen(["wmctrl", "-i", "-r", window_id, "-N", title])  # pyright: ignore[reportUnusedCallResult]
 
 
-def run_wine_cmd(cmd: list[Path | str], wineprefix: str | Path):
+def run_wine_cmd(
+    cmd: list[Path | str], wineprefix: str | Path
+) -> subprocess.CompletedProcess[bytes]:
     return subprocess.run(
         cmd,
         capture_output=True,

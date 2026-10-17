@@ -11,7 +11,9 @@ from d2rloader.ui.widget_main_table import D2RLoaderTableWidget
 class MainTabsWidget(QTabWidget):
     refresh: Signal = Signal()
 
-    def __init__(self, d2rloader: D2RLoaderState, parent: QWidget | None = None):
+    def __init__(
+        self, d2rloader: D2RLoaderState, parent: QWidget | None = None
+    ) -> None:
         """Initialize the MainTabsWidget."""
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader

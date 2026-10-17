@@ -9,7 +9,7 @@ from d2rloader.models.setting import get_default_accounts_path
 class AccountService:
     _current_accounts: list[Account] | None = []
 
-    def __init__(self, storage: StorageService, setting: SettingService):
+    def __init__(self, storage: StorageService, setting: SettingService) -> None:
         self._storage: StorageService = storage
         self._setting: SettingService = setting
         self.load()
@@ -18,7 +18,7 @@ class AccountService:
     def data(self) -> list[Account]:
         return self._current_accounts or []
 
-    def update(self, index: int, **fields: Any):
+    def update(self, index: int, **fields: Any) -> None:
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         item = self.data[index]
 
@@ -28,13 +28,13 @@ class AccountService:
 
         self.add(item, index)
 
-    def get(self, index: int):
+    def get(self, index: int) -> Account | None:
         try:
             return self.data[index]
         except IndexError:
             return None
 
-    def clone(self, index: int):
+    def clone(self, index: int) -> int | None:
         try:
             account = self.data[index]
             cloned = account.model_copy(deep=True)
@@ -43,9 +43,11 @@ class AccountService:
         except IndexError:
             return None
 
-    def add(self, item: Account | None, index: int | None = None, commit: bool = True):
+    def add(
+        self, item: Account | None, index: int | None = None, commit: bool = True
+    ) -> int | None:
         if item is None:
-            return
+            return None
 
         if self._current_accounts is None:
             self._current_accounts = []
@@ -64,7 +66,7 @@ class AccountService:
             )
         return index
 
-    def delete(self, index: int):
+    def delete(self, index: int) -> None:
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         self.data.pop(index)
         self._storage.save(
@@ -73,7 +75,7 @@ class AccountService:
             path=self._setting.data.accounts_path,
         )
 
-    def load(self):
+    def load(self) -> None:
         if not self._setting.data.accounts_path:
             self._setting.set(accounts_path=get_default_accounts_path())
 
@@ -84,7 +86,7 @@ class AccountService:
             ),
         )
 
-    def _generate_name(self, name: str | None):
+    def _generate_name(self, name: str | None) -> str:
         name_suffix: str = "1"
         if name is None:
             name = "Generated Profile"
@@ -98,7 +100,7 @@ class AccountService:
 
         return name
 
-    def validate_name(self, name: str):
+    def validate_name(self, name: str) -> int:
         found_names = 0
         for account in self._current_accounts or []:
             if account.profile_name == name:

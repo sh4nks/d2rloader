@@ -30,7 +30,7 @@ class StorageService:
         type: StorageType,
         adapter: TypeAdapter[Any] | None = None,
         path: str | None = None,
-    ):
+    ) -> Any:
         settings = self._get_path(type, path)
         try:
             content = settings.read_text("UTF8")
@@ -51,13 +51,13 @@ class StorageService:
         type: StorageType,
         adapter: TypeAdapter[Any] | None = None,
         path: str | None = None,
-    ):
+    ) -> None:
         settings = self._get_path(type, path)
         os.makedirs(os.path.dirname(settings), exist_ok=True)
         with open(settings, "wb") as fp:
             fp.write(self.get_storage_content_json(content, type, adapter))
 
-    def _get_path(self, type: StorageType, path: str | None = None):
+    def _get_path(self, type: StorageType, path: str | None = None) -> pathlib.Path:
         if path is not None or type == StorageType.Plugin and path is not None:
             settings = pathlib.Path(path)
         elif type == StorageType.Setting:
@@ -70,7 +70,7 @@ class StorageService:
 
     def get_storage_content_json(
         self, content: Any, type: StorageType, adapter: TypeAdapter[Any] | None = None
-    ):
+    ) -> bytes:
         if type == StorageType.Plugin and adapter is not None:
             return adapter.dump_json(content, indent=4)
         elif type == StorageType.Plugin and adapter is None:

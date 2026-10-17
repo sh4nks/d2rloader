@@ -43,16 +43,16 @@ class ProcessManager(QObject):
         self.handle: HandleManager = HandleManager(self._state.settings.data)
         self.threadpool: QThreadPool = QThreadPool()
 
-    def kill(self, pid: int):
+    def kill(self, pid: int) -> None:
         kill_process_by_pid(pid)
 
-    def start(self, account: Account):
+    def start(self, account: Account) -> None:
         worker = Worker(self._start_instance, account)
         worker.signals.error.connect(self._handle_worker_error)
         worker.signals.success.connect(self._handle_worker_success)
         self.threadpool.start(worker)
 
-    def find_active_instances(self, accounts: list[Account]):
+    def find_active_instances(self, accounts: list[Account]) -> dict[int, Account]:
         instances: dict[int, Account] = {}
         for account in accounts:
             title = WINDOW_TITLE_FORMAT.format(
@@ -64,7 +64,9 @@ class ProcessManager(QObject):
                 instances[pid] = account
         return instances
 
-    def _handle_worker_error(self, err: tuple[ProcessingError | Exception, str]):
+    def _handle_worker_error(
+        self, err: tuple[ProcessingError | Exception, str]
+    ) -> None:
         if isinstance(err[0], ProcessingError):
             msg, *_ = err[0].args
         else:
@@ -72,11 +74,11 @@ class ProcessManager(QObject):
         logger.error(f"Could not start instance due to: {err}")
         self.process_error.emit(None, msg)
 
-    def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
+    def _handle_worker_success(self, result: tuple[bool, Account | None, int]) -> None:
         logger.success("Instance started successfully")
         self.process_finished.emit(result[0], result[1], result[2])
 
-    def _start_instance(self, account: Account):
+    def _start_instance(self, account: Account) -> tuple[bool, Account, int]:
         game_path = Account.game_path_account(self._state.settings.data, account)
         cmd = os.path.join(game_path, "D2R.exe")
         if account.auth_method == AuthMethod.Steam:
@@ -118,7 +120,7 @@ class ProcessManager(QObject):
 
         raise ProcessingError("No PID returned")
 
-    def _process_auth_token(self, account: Account, params: list[str]):
+    def _process_auth_token(self, account: Account, params: list[str]) -> None:
         if account.token is None:
             raise ProcessingError(
                 "Token authentication is selected but no token was provided."
@@ -132,7 +134,7 @@ class ProcessManager(QObject):
         update_web_token_value(protected_token)
         params.extend(["-uid", "osi"])
 
-    def _process_auth_password(self, account: Account, params: list[str]):
+    def _process_auth_password(self, account: Account, params: list[str]) -> None:
         if not account.password:
             raise ProcessingError(
                 "Password authentication is selected but no password was provided."
@@ -149,7 +151,7 @@ class ProcessManager(QObject):
             ]
         )
 
-    def _get_steam_path(self):
+    def _get_steam_path(self) -> str:
         steam_installdir = get_steam_path()
         if steam_installdir is None:
             raise ProcessingError("Couldn't find steam installation directory.")
@@ -161,7 +163,9 @@ class ProcessManager(QObject):
             )
         return steam_exe
 
-    def _handle_instance_start(self, account: Account, pid: int):
+    def _handle_instance_start(
+        self, account: Account, pid: int
+    ) -> tuple[bool, Account, int]:
         logger.trace(f"process id: {pid}")
         sleep(1)  # give D2R a chance to start
         change_window_title(account, pid)
@@ -197,7 +201,7 @@ class ProcessManager(QObject):
             f"Instance closed or killed - pid {pid} doesn't exist anymore"
         )
 
-    def _log_params(self, params: list[str]):
+    def _log_params(self, params: list[str]) -> list[str]:
         try:
             idx = params.index("-password")
             params[idx + 1] = "*****"
@@ -214,7 +218,7 @@ class HandleManager:
     def __init__(self, settings: Setting) -> None:
         self.settings: Setting = settings
 
-    def search(self):
+    def search(self) -> dict[str, str] | None:
         handle_search_args = [
             "-accepteula",
             "-a",
@@ -225,7 +229,7 @@ class HandleManager:
         ]
         if not self.settings.handle_path:
             logger.error("HANDLE_PATH not set!")
-            return
+            return None
 
         cmd = [self.settings.handle_path, *handle_search_args]
         output = subprocess.run(
@@ -236,7 +240,7 @@ class HandleManager:
             return None
         return matches.groupdict()
 
-    def kill(self, silent: bool = False):
+    def kill(self, silent: bool = False) -> bool:
         process = self.search()
 
         if (

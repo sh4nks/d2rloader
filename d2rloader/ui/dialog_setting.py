@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 from collections.abc import Callable
-from typing import Final
+from typing import cast, Final
 
 from loguru import logger
 from PySide6 import QtWidgets
@@ -42,7 +42,7 @@ from d2rloader.ui.utils import init_widget
 class SettingDialogWidget(QDialog):
     """A dialog to add a new address to the addressbook."""
 
-    def __init__(self, parent: QWidget | None, setting: Setting):
+    def __init__(self, parent: QWidget | None, setting: Setting) -> None:
         super().__init__(parent)
         # self.setFixedHeight(350)
         self.setFixedWidth(530)
@@ -202,7 +202,7 @@ class SettingDialogWidget(QDialog):
         self.advanced_settings.clicked.connect(self.show_advanced_settings)
 
     @property
-    def data(self):
+    def data(self) -> Setting:
         self.setting.theme = self.style_combobox.itemText(
             self.style_combobox.currentIndex()
         )
@@ -216,7 +216,7 @@ class SettingDialogWidget(QDialog):
         self.setting.protonpath = self.protonpath_default.text()
         return self.setting
 
-    def show_advanced_settings(self):
+    def show_advanced_settings(self) -> None:
         if not self.advanced_settings.isChecked():
             self.advanced_settings.setChecked(False)
             self.advanced_frame.hide()
@@ -225,7 +225,7 @@ class SettingDialogWidget(QDialog):
             self.advanced_frame.show()
 
     @Slot(str, QPushButton)
-    def select_directory(self, setting_key: str, button: QPushButton):
+    def select_directory(self, setting_key: str, button: QPushButton) -> None:
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.Directory)
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
@@ -235,7 +235,9 @@ class SettingDialogWidget(QDialog):
             setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
     @Slot(str, QPushButton, str)
-    def select_file(self, setting_key: str, button: QPushButton, file_filter: str):
+    def select_file(
+        self, setting_key: str, button: QPushButton, file_filter: str
+    ) -> None:
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
@@ -246,10 +248,10 @@ class SettingDialogWidget(QDialog):
             setattr(self.setting, setting_key, dialog.selectedFiles()[0])
 
     def _get_setting_value(self, setting_key: str) -> str:
-        return getattr(self.setting, setting_key)
+        return cast(str, getattr(self.setting, setting_key))
 
     @Slot()
-    def change_style(self, style_name: str | None = None):
+    def change_style(self, style_name: str | None = None) -> None:
         if style_name is not None and QtWidgets.QApplication.instance() is not None:
             QtWidgets.QApplication.instance().setStyle(QStyleFactory.create(style_name))  # pyright: ignore
 
@@ -271,7 +273,7 @@ class SettingDialogWidget(QDialog):
 class DownloadHandleWidget(QHBoxLayout):
     def __init__(
         self, setting: Setting, filechooser: Callable[[str, QPushButton, str], None]
-    ):
+    ) -> None:
         super().__init__()
         self.HANDLE_DOWNLOAD_FILE: str = os.path.join(
             CONFIG_HANDLE_DIR, HANDLE_URL_FILENAME
@@ -305,7 +307,7 @@ class DownloadHandleWidget(QHBoxLayout):
         self.addWidget(self.handle_path_button, 1)
         self.addWidget(self.download_button)
 
-    def download_handle(self):
+    def download_handle(self) -> None:
         self.handle_path_button.setDisabled(True)
         self.download_button.setDisabled(True)
 
@@ -328,7 +330,7 @@ class DownloadHandleWidget(QHBoxLayout):
         logger.info(f"Saving to '{self.file.fileName()}'")
         self.send_request()
 
-    def send_request(self):
+    def send_request(self) -> None:
         request = QNetworkRequest(HANDLE_URL)
         if not self.file.open(QIODevice.OpenModeFlag.WriteOnly):
             error = self.file.errorString()
@@ -342,7 +344,7 @@ class DownloadHandleWidget(QHBoxLayout):
         self.reply.errorOccurred.connect(self.on_error)
 
     @Slot(QNetworkReply)
-    def on_finished(self):
+    def on_finished(self) -> None:
         if self.reply:
             self.reply.deleteLater()
 
@@ -356,25 +358,25 @@ class DownloadHandleWidget(QHBoxLayout):
         self.download_button.setDisabled(False)
 
     @Slot(QNetworkReply.NetworkError)
-    def on_error(self, code: QNetworkReply.NetworkError):
+    def on_error(self, code: QNetworkReply.NetworkError) -> None:
         """Show a message if an error happen"""
         logger.error(f"Couldn't download handle64.exe: {code}")
 
     @Slot()
-    def on_ready_read(self):
+    def on_ready_read(self) -> None:
         """Get available bytes and store them into the file"""
         if self.reply:
             if self.reply.error() == QNetworkReply.NetworkError.NoError:
                 self.file.write(self.reply.readAll())
 
     @Slot(int, int)
-    def on_progress(self, bytesReceived: int, bytesTotal: int):
+    def on_progress(self, bytesReceived: int, bytesTotal: int) -> None:
         """Update progress bar"""
         logger.info(
             f"Downloading handle.exe - {bytesReceived / 1000} kb of "
             f"{bytesTotal or 0 / 1000} kb recieved"
         )
 
-    def set_handle_path(self, path: str):
+    def set_handle_path(self, path: str) -> None:
         self.setting.handle_path = path
         self.handle_path_button.setText(self.setting.handle_path)

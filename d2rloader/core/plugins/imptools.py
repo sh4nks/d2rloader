@@ -26,6 +26,7 @@ This code was included to make packaging easier on Linux.
 """
 
 from pathlib import Path
+from types import ModuleType
 from typing import Literal
 
 
@@ -34,7 +35,7 @@ def import_path(
     name: str | None = None,
     notfound: Literal["error", "ignore"] = "error",
     reload: bool = False,
-):
+) -> ModuleType | None:
     """
     Import a module from any path on the filesystem.
 

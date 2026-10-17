@@ -7,17 +7,17 @@ from pydantic import BaseModel, Field
 from d2rloader.constants import CONFIG_BASE_DIR, CONFIG_PLUGINS_DIR
 
 
-def get_default_wineprefix():
+def get_default_wineprefix() -> str:
     if sys.platform == "linux":
         return os.path.join(CONFIG_BASE_DIR, "wineprefixes")
     return ""
 
 
-def get_default_accounts_path():
+def get_default_accounts_path() -> str:
     return os.path.join(CONFIG_BASE_DIR, "accounts.json")
 
 
-def get_default_plugins_path():
+def get_default_plugins_path() -> str:
     return CONFIG_PLUGINS_DIR
 
 

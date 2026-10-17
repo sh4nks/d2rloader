@@ -1,7 +1,6 @@
 import os
 import shutil
 import sys
-from typing import cast
 
 from loguru import logger
 
@@ -11,12 +10,12 @@ from d2rloader.models.setting import Setting
 
 
 class GameSetting:
-    def __init__(self, settings: Setting, account: Account):
+    def __init__(self, settings: Setting, account: Account) -> None:
         self.settings: Setting = settings
         self.account: Account = account
 
     @property
-    def saved_game_folder(self):
+    def saved_game_folder(self) -> str:
         if sys.platform == "linux":
             wineprefix = Account.wineprefix_account(self.settings, self.account)
             path = os.path.join(
@@ -34,21 +33,21 @@ class GameSetting:
         if not path:
             return ""
 
-        return os.path.join(cast(str, path), "Diablo II Resurrected")
+        return os.path.join(path, "Diablo II Resurrected")
 
     @property
-    def current_game_settings(self):
+    def current_game_settings(self) -> str:
         return os.path.join(self.saved_game_folder, "Settings.json")
 
     @property
-    def account_game_settings(self):
+    def account_game_settings(self) -> str:
         settings_filename = f"settings.{self.account.profile_normalized}.json"
         return os.path.join(CONFIG_GAME_SETTINGS_DIR, settings_filename)
 
-    def _get_basename(self, path: str):
+    def _get_basename(self, path: str) -> str:
         return os.path.basename(path)
 
-    def set_account_game_settings(self):
+    def set_account_game_settings(self) -> None:
         if not self.account.game_settings:
             return
         elif not os.path.exists(self.account.game_settings):
@@ -70,7 +69,9 @@ class GameSetting:
         logger.debug(f"Copying game settings to {self.current_game_settings}")
         shutil.copy2(self.account.game_settings, self.current_game_settings)
 
-    def copy_current_settings(self, overwrite_ok: bool = False):
+    def copy_current_settings(
+        self, overwrite_ok: bool = False
+    ) -> tuple[str, bool] | tuple[None, None]:
         """Returns a tuple containing the destination path and if the path exists"""
         if not self.account.profile_name:
             logger.error("Please choose a profile name first")
@@ -94,8 +95,8 @@ class GameSetting:
 
 
 class GameSettingsService:
-    def __init__(self, settings: Setting):
+    def __init__(self, settings: Setting) -> None:
         self.settings: Setting = settings
 
-    def get_game_settings(self, account: Account):
+    def get_game_settings(self, account: Account) -> GameSetting:
         return GameSetting(self.settings, account)

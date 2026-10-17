@@ -35,7 +35,7 @@ class AccountDialogWidget(QDialog):
 
     def __init__(
         self, parent: QWidget, d2rloader: D2RLoaderState, account: Account | None = None
-    ):
+    ) -> None:
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader
         if account is None:
@@ -161,7 +161,7 @@ class AccountDialogWidget(QDialog):
         self.button_box.rejected.connect(self.reject)
 
     @property
-    def data(self):
+    def data(self) -> Account:
         return Account(
             profile_name=self.profile_name.text(),
             email=self.email.text(),
@@ -182,9 +182,9 @@ class AccountDialogWidget(QDialog):
         )
 
     @Slot()
-    def change_profile_name(self):
+    def change_profile_name(self) -> None:
         name = self.profile_name.text()
-        sender: QLineEdit = self.sender()  # pyright: ignore[reportAssignmentType]
+        sender = cast(QLineEdit, self.sender())
 
         error = False
         if len(name) < 1:  # minimum 1 characters
@@ -207,13 +207,13 @@ class AccountDialogWidget(QDialog):
         sender.setStyleSheet(f"QLineEdit {{ background-color: {color} }}")
 
     @Slot()
-    def change_password_token_widget(self, activated: str | None = None):
+    def change_password_token_widget(self, activated: str | None = None) -> None:
         if activated is None or AuthMethod.from_name(activated) is None:
             return
 
 
 class PasswordWidget(QHBoxLayout):
-    def __init__(self, password: str):
+    def __init__(self, password: str) -> None:
         super().__init__()
         self.setSpacing(6)
         self.password: QLineEdit = QLineEdit(f"{password}")
@@ -234,7 +234,7 @@ class PasswordWidget(QHBoxLayout):
 
 
 class GamePathWidget(QHBoxLayout):
-    def __init__(self, game_path: str | None, default_game_path: str):
+    def __init__(self, game_path: str | None, default_game_path: str) -> None:
         super().__init__()
         self.setSpacing(6)
         self.game_path: QLineEdit = QLineEdit(game_path or "")
@@ -250,7 +250,7 @@ class GamePathWidget(QHBoxLayout):
         self.addWidget(self.select_game_path)
 
     @Slot()
-    def select_directory(self):
+    def select_directory(self) -> None:
         directory = QFileDialog.getExistingDirectory(
             self.widget(),
             "Select Game Path",
@@ -262,7 +262,7 @@ class GamePathWidget(QHBoxLayout):
 
 
 class GameSettingWidget(QHBoxLayout):
-    def __init__(self, account: Account, game_settings: GameSetting):
+    def __init__(self, account: Account, game_settings: GameSetting) -> None:
         super().__init__()
         self.setSpacing(6)
         self.game_settings: GameSetting = game_settings
@@ -281,13 +281,13 @@ class GameSettingWidget(QHBoxLayout):
         self.addWidget(self.select_game_settings, 1)
         self.addWidget(self.copy_game_settings)
 
-    def _get_display_value(self):
+    def _get_display_value(self) -> str:
         if self.value:
             return os.path.basename(self.value)
         return "Select..."
 
     @Slot()
-    def copy_settings(self):
+    def copy_settings(self) -> None:
         dst_path, exists = self.game_settings.copy_current_settings()
 
         if dst_path is None and exists is None:
@@ -309,7 +309,7 @@ class GameSettingWidget(QHBoxLayout):
         self.select_game_settings.setText(self._get_display_value())
 
     @Slot()
-    def select_settings(self):
+    def select_settings(self) -> None:
         filename, _ = QFileDialog.getOpenFileName(
             self.widget(), "Select Game Settings", CONFIG_GAME_SETTINGS_DIR
         )
@@ -319,7 +319,7 @@ class GameSettingWidget(QHBoxLayout):
             self.select_game_settings.setText(self._get_display_value())
 
 
-def list_game_settings():
+def list_game_settings() -> list[str]:
     settings: list[str] = []
     if os.path.exists(CONFIG_GAME_SETTINGS_DIR):
         settings = os.listdir(CONFIG_GAME_SETTINGS_DIR)

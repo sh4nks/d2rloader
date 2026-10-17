@@ -5,16 +5,16 @@ from d2rloader.ui.main import D2RLoaderUI
 
 
 class D2RLoader:
-    def __init__(self):
+    def __init__(self) -> None:
         self.state: D2RLoaderState = D2RLoaderState()
         self.ui: D2RLoaderUI = D2RLoaderUI(self.state)
 
-    def run(self):
+    def run(self) -> None:
         logger.trace(f"{self.state}")
         self.ui.run()
 
 
-def main():
+def main() -> None:
     app = D2RLoader()
     app.run()
 

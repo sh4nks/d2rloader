@@ -77,7 +77,9 @@ class RequestType(enum.Enum):
 class InfoTabsWidget(QTabWidget):
     refresh: Signal = Signal()
 
-    def __init__(self, d2rloader: D2RLoaderState, parent: QWidget | None = None):
+    def __init__(
+        self, d2rloader: D2RLoaderState, parent: QWidget | None = None
+    ) -> None:
         """Initialize the InfoTabsWidget."""
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader
@@ -104,7 +106,7 @@ class InfoTabsWidget(QTabWidget):
         self.setFixedHeight(250)
 
     @Slot()
-    def update_info(self):
+    def update_info(self) -> None:
         # self.tzinfo.process(TEST_DATA_TZINFO)
         # self.dcinfo.process(TEST_DATA_DCLONE)
         logger.info("Refreshing TZ/DC Info...")
@@ -114,7 +116,7 @@ class InfoTabsWidget(QTabWidget):
             self.send_request(URI_TZ_INFO, RequestType.TZ)
             self.send_request(URI_DC_INFO, RequestType.DC)
 
-    def send_request(self, url: str, type: RequestType):
+    def send_request(self, url: str, type: RequestType) -> None:
         request = QNetworkRequest(url)
         if type == RequestType.ALL:
             request.setHeader(
@@ -138,7 +140,7 @@ class InfoTabsWidget(QTabWidget):
         reply.errorOccurred.connect(self.on_error)
 
     @Slot(QNetworkReply, RequestType)
-    def on_finished(self, reply: QNetworkReply, type: RequestType):
+    def on_finished(self, reply: QNetworkReply, type: RequestType) -> None:
         response = reply.readAll()
 
         status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
@@ -161,13 +163,13 @@ class InfoTabsWidget(QTabWidget):
         reply.deleteLater()
 
     @Slot(QNetworkReply.NetworkError)
-    def on_error(self, code: QNetworkReply.NetworkError):
+    def on_error(self, code: QNetworkReply.NetworkError) -> None:
         """Show a message if an error happen"""
         logger.error(f"Couldn't fetch data from API: {code}")
 
 
 class TZInfoWidget(QWidget):
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the TZInfoWidget."""
         super().__init__(parent)
 
@@ -182,7 +184,7 @@ class TZInfoWidget(QWidget):
         )
         self.setLayout(layout)
 
-    def process(self, info: TZInfo):
+    def process(self, info: TZInfo) -> None:
         current_tz = info.get("current", None)
         next_tz = info.get("next", None)
 
@@ -237,7 +239,7 @@ class DCInfoWidget(QWidget):
         "krHardcoreRotw": {"index": 5, "mode": "Hardcore", "ladder": 0, "nonLadder": 0},
     }
 
-    def __init__(self, parent: QWidget, d2rloader: D2RLoaderState):
+    def __init__(self, parent: QWidget, d2rloader: D2RLoaderState) -> None:
         """Initialize the DCInfoWidget."""
         super().__init__(parent)
         self.d2rloader: D2RLoaderState = d2rloader
@@ -274,7 +276,7 @@ class DCInfoWidget(QWidget):
         self.setLayout(layout)
 
     @Slot()
-    def rotw_toggle(self, checked: Qt.CheckState):
+    def rotw_toggle(self, checked: Qt.CheckState) -> None:
         if checked == Qt.CheckState.Checked:
             self.d2rloader.settings.set(rotw=True)
         else:
@@ -282,22 +284,22 @@ class DCInfoWidget(QWidget):
 
         self._create_rows(self.d2rloader.settings.data.rotw)
 
-    def process(self, info: DCloneInfo):
+    def process(self, info: DCloneInfo) -> None:
         self._fill_row_data(info)
         self._create_rows(self.d2rloader.settings.data.rotw)
 
-    def _fill_row_data(self, info: DCloneInfo):
+    def _fill_row_data(self, info: DCloneInfo) -> None:
         for key, value in info.items():
             self._process_item(key, value)
 
-    def _create_rows(self, rotw: bool | None = None):
+    def _create_rows(self, rotw: bool | None = None) -> None:
         self.table.setRowCount(0)
         for key, value in self.row_data.items():
             if not rotw and "Rotw" in key or rotw and "Rotw" not in key:
                 continue
             self.create_row(key[:2], value)
 
-    def _process_item(self, key: str, value: dict[str, int]):
+    def _process_item(self, key: str, value: dict[str, int]) -> None:
         region = key[:2]
 
         if region not in self.region_mapping:
@@ -320,7 +322,7 @@ class DCInfoWidget(QWidget):
         row_key = region + mode + addon
         self.row_data[row_key][ladder_type] = value.get("status", 0)
 
-    def create_row(self, region: str, item: dict[str, int | str]):
+    def create_row(self, region: str, item: dict[str, int | str]) -> None:
         row_index = int(item["index"])
 
         region_item = QTableWidgetItem(f"{self.region_mapping[region]}")
@@ -348,7 +350,7 @@ class DCInfoWidget(QWidget):
 class ApplicationOutputWidget(QWidget):
     output: Signal = Signal(str)
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the ApplicationOutputWidget."""
         super().__init__(parent)
 
@@ -361,5 +363,5 @@ class ApplicationOutputWidget(QWidget):
         layout.addWidget(self.out)
         self.setLayout(layout)
 
-    def _update(self, msg: str):
+    def _update(self, msg: str) -> None:
         self.out.append(msg.strip("\n").strip("\t").strip("\r"))

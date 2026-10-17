@@ -20,7 +20,7 @@ class D2RLoaderState:
     process_manager: ProcessManager | None = None
     network_manager: QNetworkAccessManager | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.storage: StorageService = StorageService()
         self.settings: SettingService = SettingService(self.storage)
         self._setup_logger()
@@ -34,17 +34,17 @@ class D2RLoaderState:
     def __repr__(self) -> str:
         return f"D2RLoaderState - Settings: {self.settings.data}, Accounts: {self.accounts.data}"
 
-    def register_process_manager(self, parent: QObject):
+    def register_process_manager(self, parent: QObject) -> None:
         self.process_manager = ProcessManager(parent, self)
 
-    def register_network_manager(self, parent: QObject):
+    def register_network_manager(self, parent: QObject) -> None:
         self.network_manager = QNetworkAccessManager(parent)
 
-    def register_plugin_manager(self):
+    def register_plugin_manager(self) -> PluginManager:
         pm = register_plugins(self.settings.data.plugins_path)
         return pm
 
-    def _setup_logger(self):
+    def _setup_logger(self) -> None:
         log_level = self.settings.data.log_level or "INFO"
 
         if self.settings.data.log_file:

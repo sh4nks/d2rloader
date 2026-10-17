@@ -18,7 +18,7 @@ from .markers import hookspec
 @hookspec
 def d2rloader_mainwindow_plugin_menu(
     d2rloader: "D2RLoaderState", parent: QObject, menu: QMenuBar
-):
+) -> None:
     """Hook for adding a new entry to the QMenu item.
 
     A new Section 'Plugins' will be created if it doesn't exist and you plugin will be
@@ -27,10 +27,10 @@ def d2rloader_mainwindow_plugin_menu(
 
 
 @hookspec
-def d2rloader_main_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget):
+def d2rloader_main_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget) -> None:
     """Hook for extending the main tabbar"""
 
 
 @hookspec
-def d2rloader_info_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget):
+def d2rloader_info_tabbar(d2rloader: "D2RLoaderState", tabbar: QTabWidget) -> None:
     """Hook for extending the info tabbar"""

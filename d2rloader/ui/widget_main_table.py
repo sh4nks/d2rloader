@@ -37,7 +37,7 @@ class D2RLoaderTableWidget(QWidget):
     _process: QProcess | None = None
     _processes: dict[str, tuple[bool, int]] = {}
 
-    def __init__(self, d2rloader: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState) -> None:
         super().__init__()
         self.d2rloader: D2RLoaderState = d2rloader
 
@@ -53,7 +53,7 @@ class D2RLoaderTableWidget(QWidget):
         self.create_table_entries()
         self.find_active_instances()
 
-    def create_table(self):
+    def create_table(self) -> QTableWidget:
         table = QTableWidget()
         table.setColumnCount(len(self._columns))
         table.setHorizontalHeaderLabels(self._columns)
@@ -66,7 +66,7 @@ class D2RLoaderTableWidget(QWidget):
         table.itemDoubleClicked.connect(self.double_clicked_row)
         return table
 
-    def create_toolbar(self):
+    def create_toolbar(self) -> QWidget:
         toolbar_widget = QWidget()
         toolbar_layout = QHBoxLayout()
         toolbar_layout.setContentsMargins(create_margins(0, 0, 0, 0))
@@ -105,7 +105,7 @@ class D2RLoaderTableWidget(QWidget):
             self.table.selectRow(row_index)
 
     @Slot()
-    def add_entry(self):
+    def add_entry(self) -> None:
         add_dialog = AccountDialogWidget(self, self.d2rloader)
 
         if add_dialog.exec():
@@ -113,7 +113,7 @@ class D2RLoaderTableWidget(QWidget):
             self.d2rloader.accounts.add(add_dialog.data)
 
     @Slot()
-    def clone_entry(self):
+    def clone_entry(self) -> None:
         if len(self.table.selectedIndexes()) == 0:
             return
 
@@ -127,7 +127,7 @@ class D2RLoaderTableWidget(QWidget):
         self.add_row(self.d2rloader.accounts.get(cloned_idx))
 
     @Slot()
-    def delete_entry(self):
+    def delete_entry(self) -> None:
         if len(self.table.selectedIndexes()) == 0:
             return
 
@@ -136,16 +136,16 @@ class D2RLoaderTableWidget(QWidget):
         self._items -= 1
         self.d2rloader.accounts.delete(row_index)
 
-    def double_clicked_row(self, _: QTableWidgetItem):
+    def double_clicked_row(self, _: QTableWidgetItem) -> None:
         self.edit_entry()
 
-    def create_table_entries(self, data: list[Account] | None = None):
+    def create_table_entries(self, data: list[Account] | None = None) -> None:
         data = self.d2rloader.accounts.data if not data else data
 
         for item in data:
             self.add_row(item)
 
-    def create_row(self, row: int, item: Account | None = None):
+    def create_row(self, row: int, item: Account | None = None) -> None:
         if item is None:
             return
 
@@ -205,16 +205,18 @@ class D2RLoaderTableWidget(QWidget):
         self.table.setItem(row, 5, action_item)
         self.table.setCellWidget(row, 5, start_stop_btn)
 
-    def add_row(self, item: Account | None = None):
+    def add_row(self, item: Account | None = None) -> None:
         self.create_row(self._items, item)
         self._items += 1
 
-    def reload_table(self):
+    def reload_table(self) -> None:
         self.table.setRowCount(0)
         self._items = 0
         self.create_table_entries()
 
-    def clicked_start_stop_button(self, row_index: int, button: QPushButton | None):
+    def clicked_start_stop_button(
+        self, row_index: int, button: QPushButton | None
+    ) -> None:
         account = self.d2rloader.accounts.get(row_index)
         if account is None:
             logger.error(f"Accout not found for row_index {row_index}")
@@ -228,7 +230,9 @@ class D2RLoaderTableWidget(QWidget):
 
         self.table.selectRow(row_index)
 
-    def change_buttons_state(self, activeButton: QPushButton, new_state: str = "start"):
+    def change_buttons_state(
+        self, activeButton: QPushButton, new_state: str = "start"
+    ) -> None:
         if new_state == "start":
             activeButton.setDisabled(False)
             activeButton.setChecked(False)
@@ -248,7 +252,7 @@ class D2RLoaderTableWidget(QWidget):
                 button.setChecked(False)
 
     @Slot()
-    def change_auth_method(self, activated: str | None = None):
+    def change_auth_method(self, activated: str | None = None) -> None:
         method = AuthMethod.from_name(activated or "")
         if activated is None or method is None:
             return
@@ -257,7 +261,7 @@ class D2RLoaderTableWidget(QWidget):
         self.d2rloader.accounts.update(row_index, auth_method=method)
 
     @Slot()
-    def change_region(self, activated: str | None = None):
+    def change_region(self, activated: str | None = None) -> None:
         reg = Region.from_name(activated or "")
         if activated is None or reg is None:
             return
@@ -265,13 +269,13 @@ class D2RLoaderTableWidget(QWidget):
         row_index = self.table.selectedIndexes()[0].row()
         self.d2rloader.accounts.update(row_index, region=reg)
 
-    def change_parameters(self, item: QTableWidgetItem):
+    def change_parameters(self, item: QTableWidgetItem) -> None:
         if self._columns[item.column()] == "Launch Parameters":
             account = self.d2rloader.accounts.get(item.row())
             if account is not None and account.params != item.text():
                 self.d2rloader.accounts.update(item.row(), params=item.text())
 
-    def find_active_instances(self):
+    def find_active_instances(self) -> None:
         if self.d2rloader.process_manager is None:
             logger.error("ProcessManager not registered!")
             return
@@ -289,7 +293,7 @@ class D2RLoaderTableWidget(QWidget):
                     continue
                 button.setText("Running")
 
-    def process_start(self, account: Account, button: QPushButton):
+    def process_start(self, account: Account, button: QPushButton) -> None:
         if self.d2rloader.process_manager is None:
             logger.error("ProcessManager not registered!")
             return
@@ -318,7 +322,7 @@ class D2RLoaderTableWidget(QWidget):
         )
         self.d2rloader.process_manager.start(account)
 
-    def process_kill(self, account: Account, button: QPushButton):
+    def process_kill(self, account: Account, button: QPushButton) -> None:
         pid = None
         try:
             pid = self._processes[account.id][1]
@@ -343,7 +347,7 @@ class D2RLoaderTableWidget(QWidget):
     @Slot()
     def process_finished(
         self, button: QPushButton, logged_in: bool, account: Account | None, pid: int
-    ):
+    ) -> None:
         if not account:
             button.setText("Start")
             button.setDisabled(False)
@@ -358,6 +362,6 @@ class D2RLoaderTableWidget(QWidget):
         self._processes[account.id] = (logged_in, pid)
 
     @Slot()
-    def process_error(self, button: QPushButton, account: Account, msg: str):
+    def process_error(self, button: QPushButton, account: Account, msg: str) -> None:
         show_error_dialog(self, msg)
         self.change_buttons_state(button, "start")

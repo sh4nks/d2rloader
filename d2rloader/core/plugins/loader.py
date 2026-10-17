@@ -13,7 +13,7 @@ class PluginError(Exception):
 
 
 class PluginFilesystemLoader:
-    def __init__(self, manager: PluginManager, path: str | None = None):
+    def __init__(self, manager: PluginManager, path: str | None = None) -> None:
         self.manager: PluginManager = manager
         self.loaded_plugins: list[str] = []
 
@@ -25,7 +25,7 @@ class PluginFilesystemLoader:
             logger.info(f"Loading plugins from: {path}")
             self.load_plugins(path)
 
-    def load_plugins(self, path: str):
+    def load_plugins(self, path: str) -> None:
         for item in os.listdir(path):
             plugin_path = os.path.join(path, item)
             plugin_info_path = os.path.join(plugin_path, "plugin.json")
@@ -52,7 +52,7 @@ class PluginFilesystemLoader:
             logger.debug(f"Loaded plugin '{item}'")
             self.manager.register(plugin)
 
-    def _validate_plugin(self, plugin_path: str, plugin_info_path: str):
+    def _validate_plugin(self, plugin_path: str, plugin_info_path: str) -> str | None:
         if not os.path.exists(plugin_info_path):
             logger.error(
                 f"Plugin metadata 'plugin.json' doesn't exist for plugin {plugin_info_path}"
@@ -97,7 +97,7 @@ class PluginFilesystemLoader:
         return plugin_package_path
 
 
-def register_plugins(path: str | None = None):
+def register_plugins(path: str | None = None) -> PluginManager:
     pm = PluginManager("d2rloader")
     pm.add_hookspecs(hookspec)
     pm.load_setuptools_entrypoints("d2rloader.plugins")

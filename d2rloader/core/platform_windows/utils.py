@@ -10,11 +10,11 @@ from d2rloader.core.exception import ProcessingError
 from d2rloader.models.account import Account
 
 
-def change_window_title(account: Account, pid: int):
+def change_window_title(account: Account, pid: int) -> None:
     win32gui.EnumWindows(_window_title_callback, account)
 
 
-def _window_title_callback(hwnd: int, account: Account):
+def _window_title_callback(hwnd: int, account: Account) -> None:
     title = win32gui.GetWindowText(hwnd)
 
     if title == D2R_PROCESS_TITLE:
@@ -25,7 +25,7 @@ def _window_title_callback(hwnd: int, account: Account):
         win32gui.SetWindowText(hwnd, window_title)  # pyright: ignore
 
 
-def get_window_by_title(title: str):
+def get_window_by_title(title: str) -> int:
     hwnd = win32gui.FindWindow(None, title)
 
     pid = -1
@@ -35,7 +35,7 @@ def get_window_by_title(title: str):
     return pid
 
 
-def kill_process_by_pid(pid: int):
+def kill_process_by_pid(pid: int) -> None:
     try:
         handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, 0, pid)
         win32api.TerminateProcess(handle, 0)
@@ -44,14 +44,14 @@ def kill_process_by_pid(pid: int):
         raise ProcessingError(f"Couldn't kill pid {pid}") from e
 
 
-def get_window_size(hwnd: int):
+def get_window_size(hwnd: int) -> tuple[int, int]:
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     width = right - left
     height = bottom - top
     return (width, height)
 
 
-def send_key():
+def send_key() -> None:
     shell = win32com.client.Dispatch("WScript.Shell")
     shell.SendKeys("{ENTER}", 0)
 

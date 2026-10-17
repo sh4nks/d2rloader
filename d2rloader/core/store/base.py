@@ -12,7 +12,7 @@ class BaseService[T: "BaseModel"]:
 
     def __init__(
         self, storage: StorageService, adapter: TypeAdapter[T], path: str | None = None
-    ):
+    ) -> None:
         self.storage_adapter: TypeAdapter[T] = adapter
         self.storage: StorageService = storage
         self.path: str | None = path
@@ -22,7 +22,7 @@ class BaseService[T: "BaseModel"]:
     def data(self) -> list[T]:
         return self._state or []
 
-    def update(self, index: int, **fields: Any):
+    def update(self, index: int, **fields: Any) -> None:
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         item = self.data[index]
 
@@ -32,13 +32,15 @@ class BaseService[T: "BaseModel"]:
 
         self.add(item, index)
 
-    def get(self, index: int):
+    def get(self, index: int) -> T | None:
         try:
             return self.data[index]
         except IndexError:
             return None
 
-    def add(self, item: T | None, index: int | None = None, commit: bool = True):
+    def add(
+        self, item: T | None, index: int | None = None, commit: bool = True
+    ) -> None:
         if item is None:
             return
 
@@ -59,7 +61,7 @@ class BaseService[T: "BaseModel"]:
                 path=self.path,
             )
 
-    def delete(self, index: int):
+    def delete(self, index: int) -> None:
         # Unpack[T] not possible - see: https://github.com/python/typing/issues/1399
         self.data.pop(index)
         self.storage.save(
@@ -69,7 +71,7 @@ class BaseService[T: "BaseModel"]:
             path=self.path,
         )
 
-    def load(self):
+    def load(self) -> None:
         self._state = cast(
             list[T],
             self.storage.load(

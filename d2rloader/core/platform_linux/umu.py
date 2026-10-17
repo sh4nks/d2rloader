@@ -63,7 +63,7 @@ class UmuManager:
         self._state: D2RLoaderState = state
 
     @property
-    def steam(self):
+    def steam(self) -> Path:
         steam_path = which("steam")
         if steam_path is None:
             logger.error("Couldn't find 'steam'. Did you forget to install 'steam'?")
@@ -71,7 +71,7 @@ class UmuManager:
         return Path(steam_path)
 
     @property
-    def umu_run(self):
+    def umu_run(self) -> Path:
         umu_path = which("umu-run")
         if umu_path is None:
             logger.error(
@@ -80,29 +80,29 @@ class UmuManager:
             raise ProcessingError("umu-run not found in PATH!")
         return Path(umu_path)
 
-    def get_wineprefix_account(self, account: Account):
+    def get_wineprefix_account(self, account: Account) -> Path:
         return Account.wineprefix_account(
             self._state.settings.data,
             account,
         )
 
-    def get_game_path_account(self, account: Account):
+    def get_game_path_account(self, account: Account) -> str:
         return Account.game_path_account(self._state.settings.data, account)
 
-    def get_protonpath_account(self, account: Account):
+    def get_protonpath_account(self, account: Account) -> str:
         if account.protonpath:
             return account.protonpath
         if self._state.settings.data.protonpath:
             return self._state.settings.data.protonpath
         return "UMU-Latest"
 
-    def get_start_script_log_path(self, account: Account):
+    def get_start_script_log_path(self, account: Account) -> Path:
         return Path(self.get_wineprefix_account(account), "umu.log")
 
-    def get_start_script_path(self, account: Account):
+    def get_start_script_path(self, account: Account) -> Path:
         return Path(self.get_wineprefix_account(account), "start.sh")
 
-    def start(self, account: Account):
+    def start(self, account: Account) -> int | None:
         game_settings = self._state.game_settings.get_game_settings(account)
         params: list[str] = ["-address", account.region.value]
         if account.auth_method == AuthMethod.Password:
@@ -135,7 +135,7 @@ class UmuManager:
         else:
             return self._start(account, game_settings, params)
 
-    def _update_web_token_value(self, account: Account):
+    def _update_web_token_value(self, account: Account) -> bytes:
         logger.debug(f"Updating WEB_TOKEN value for account: {account.profile_name}")
 
         if account.token is None:
@@ -143,18 +143,18 @@ class UmuManager:
 
         self._check_d2rreg()
 
-        cmd = [
+        cmd: list[Path | str] = [
             self.umu_run,
             f"{CONFIG_BASE_DIR}/d2rreg.exe",
             "--update-token",
             account.token,
         ]
         output = run_wine_cmd(cmd, self.get_wineprefix_account(account))
-        logger.trace(f"_update_web_token_value output stderr: {output.stderr}")
-        logger.trace(f"_update_web_token_value output stdout: {output.stdout}")
+        logger.trace(f"_update_web_token_value output stderr: {output.stderr!r}")
+        logger.trace(f"_update_web_token_value output stdout: {output.stdout!r}")
         return output.stdout
 
-    def _check_d2rreg(self):
+    def _check_d2rreg(self) -> None:
         if (
             not os.path.exists(os.path.join(CONFIG_BASE_DIR, "d2rreg.exe"))
             or self._state.settings.data.d2rreg_version != D2RREG_VERSION
@@ -169,7 +169,7 @@ class UmuManager:
                 f"d2rreg.exe saved to {os.path.join(CONFIG_BASE_DIR, 'd2rreg.exe')}"
             )
 
-    def _render_start_script(self, account: Account, params: list[str]):
+    def _render_start_script(self, account: Account, params: list[str]) -> str:
         logger.debug(f"Using WINEPREFIX: {self.get_wineprefix_account(account)}")
         logger.debug(f"Using PROTONPATH: {self.get_protonpath_account(account)}")
         logger.debug(f"Using GAME_PATH: {self.get_game_path_account(account)}")
@@ -183,14 +183,16 @@ class UmuManager:
             PARAMS=" ".join(params),
         )
 
-    def _start_steam(self, game_settings: GameSetting, params: list[str]):
+    def _start_steam(self, game_settings: GameSetting, params: list[str]) -> int:
         game_settings.set_account_game_settings()
         steam_cmd = [self.steam.as_posix(), "-applaunch", "2536520", *params]
         logger.info(f"Launching instance: {' '.join(steam_cmd)}")
         proc = subprocess.Popen(steam_cmd)
         return proc.pid
 
-    def _start(self, account: Account, game_settings: GameSetting, params: list[str]):
+    def _start(
+        self, account: Account, game_settings: GameSetting, params: list[str]
+    ) -> int | None:
         if self._create_start_script(account, params):
             try:
                 with open(self.get_start_script_log_path(account), "w") as logfile:
@@ -208,17 +210,18 @@ class UmuManager:
                     f"Error occured during executing {self.get_start_script_path(account)}",
                     e,
                 ) from e
+        return None
 
     def _create_start_script(
         self, account: Account, params: list[str], force: bool = True
-    ):
+    ) -> bool:
         if (
             not force
             and self.get_wineprefix_account(account).exists()
             and self.get_start_script_path(account).exists()
         ):
             logger.warning("Wineprefix already exists!")
-            return
+            return False
         else:
             os.makedirs(self.get_wineprefix_account(account), exist_ok=True)
 
@@ -228,7 +231,7 @@ class UmuManager:
             f.write(self._render_start_script(account, params))
         return True
 
-    def _log_params(self, params: list[str]):
+    def _log_params(self, params: list[str]) -> str:
         log_params = params.copy()
         try:
             idx_pw = log_params.index("-password")

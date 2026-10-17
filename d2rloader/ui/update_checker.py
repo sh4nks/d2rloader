@@ -26,7 +26,9 @@ def parse_version_str(version_string: str) -> tuple[int, ...]:
     return tuple(map(int, version_string.split(".")))
 
 
-def compare_versions(current_version_str: str, latest_version_str: str):
+def compare_versions(
+    current_version_str: str, latest_version_str: str
+) -> tuple[str, bool]:
     # Compare versions as tuples of integers for accuracy (e.g., 1.10 > 1.2)
     current_version = parse_version_str(current_version_str)
     latest_version = parse_version_str(latest_version_str)
@@ -35,10 +37,10 @@ def compare_versions(current_version_str: str, latest_version_str: str):
 
 
 class UpdateChecker:
-    def __init__(self, d2rloader: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState) -> None:
         self.d2rloader: D2RLoaderState = d2rloader
 
-    def check_update(self):
+    def check_update(self) -> None:
         if (
             not self.d2rloader.settings.data.check_update
             or self.d2rloader.network_manager is None
@@ -54,7 +56,7 @@ class UpdateChecker:
         reply.finished.connect(functools.partial(self.on_finished, reply))
         reply.errorOccurred.connect(self.on_error)
 
-    def process_response(self, reply: dict[Any, Any]):
+    def process_response(self, reply: dict[Any, Any]) -> None:
         interval = timedelta(minutes=15)  # check every 15mins
         now = datetime.now(UTC)
         if self.d2rloader.settings.data.last_update_check is None:
@@ -93,7 +95,7 @@ class UpdateChecker:
             logger.info("No updates available!")
 
     @Slot(QNetworkReply)
-    def on_finished(self, reply: QNetworkReply):
+    def on_finished(self, reply: QNetworkReply) -> None:
         response = reply.readAll()
 
         status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
@@ -108,6 +110,6 @@ class UpdateChecker:
         reply.deleteLater()
 
     @Slot(QNetworkReply.NetworkError)
-    def on_error(self, code: QNetworkReply.NetworkError):
+    def on_error(self, code: QNetworkReply.NetworkError) -> None:
         """Show a message if an error happen"""
         logger.error(f"Couldn't fetch data from API: {code}")

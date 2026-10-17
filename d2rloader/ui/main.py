@@ -41,7 +41,7 @@ from .widget_info import InfoTabsWidget
 
 
 class MainWidget(QWidget):
-    def __init__(self, d2rloader: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState) -> None:
         super().__init__()
         self.d2rloader: D2RLoaderState = d2rloader
         main_layout = QGridLayout(self)
@@ -62,17 +62,17 @@ class MainWidget(QWidget):
 
         self._register_logger_output_panel()
 
-    def create_table_layout(self):
+    def create_table_layout(self) -> QVBoxLayout:
         table_layout = QVBoxLayout()
         table_layout.addWidget(self.main_tab_widget)
         return table_layout
 
-    def create_console_layout(self):
+    def create_console_layout(self) -> QVBoxLayout:
         console_layout = QVBoxLayout()
         console_layout.addWidget(self.info_tab_widget)
         return console_layout
 
-    def _register_logger_output_panel(self):
+    def _register_logger_output_panel(self) -> None:
         fmt = "{time:YYYY-MM-DD HH:mm:ss} | <level>{level: <8}</level> - <level>{message}</level>"
         logger.add(
             self.info_tab_widget.application_output.output.emit,
@@ -82,7 +82,7 @@ class MainWidget(QWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, d2rloader: D2RLoaderState):
+    def __init__(self, d2rloader: D2RLoaderState) -> None:
         super().__init__()
         self.d2rloader: D2RLoaderState = d2rloader
         self.d2rloader.register_process_manager(self)
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         )
 
     @Slot()
-    def open_about(self):
+    def open_about(self) -> None:
         version_string = importlib.metadata.version("d2rloader")
         python_version = (
             f"{sys.version_info.major}.{sys.version_info.minor}."
@@ -155,7 +155,7 @@ class MainWindow(QMainWindow):
         QMessageBox.about(self, "About", about_content)
 
     @Slot()
-    def open_settings(self):
+    def open_settings(self) -> None:
         settings_dialog = SettingDialogWidget(self, self.d2rloader.settings.data)
         prev_accounts_path = self.d2rloader.settings.data.accounts_path
         if settings_dialog.exec():
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
                 self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
-    def open_file(self):
+    def open_file(self) -> None:
         filename, _ = QFileDialog.getOpenFileName(self)
         if not filename:
             return
@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
         self.main_widget.main_tab_widget.d2rloader_table.reload_table()
 
     @Slot()
-    def save_file(self):
+    def save_file(self) -> None:
         filename, _ = QFileDialog.getSaveFileName(self)
         if not filename:
             return
@@ -192,7 +192,7 @@ class D2RLoaderUI:
         if d2rloader is not None:
             self.init_ui(d2rloader)
 
-    def init_ui(self, d2rloader: D2RLoaderState):
+    def init_ui(self, d2rloader: D2RLoaderState) -> None:
         self.ui_app = QApplication(sys.argv)
         self.ui_app.setApplicationName("D2RLoader")
         self.ui_app.setApplicationVersion(importlib.metadata.version("d2rloader"))
@@ -212,7 +212,7 @@ class D2RLoaderUI:
         self.ui = MainWindow(d2rloader)
         self.ui.resize(800, 600)
 
-    def run(self):
+    def run(self) -> None:
         if self.ui is None or self.ui_app is None:
             raise Exception("UI has not been initialized.")
         self.ui.show()

@@ -3,7 +3,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMessageBox, QSizePolicy, QWidget
 
 
-def class_name(o: QWidget):
+def class_name(o: QWidget) -> str:
     return str(o.metaObject().className())
 
 
@@ -19,7 +19,7 @@ def create_margins(
     right: int | None = None,
     top: int | None = None,
     bottom: int | None = None,
-):
+) -> QMargins:
     margin = QMargins()
     if left is not None:
         margin.setLeft(left)
@@ -43,7 +43,7 @@ def create_action(parent: QObject, text: str, slot: object) -> QAction:
     return action
 
 
-def create_toolbar_spacer():
+def create_toolbar_spacer() -> QWidget:
     spacer = QWidget()
     spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
     return spacer

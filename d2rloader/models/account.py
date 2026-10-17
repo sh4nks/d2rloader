@@ -17,7 +17,7 @@ class Region(enum.Enum):
     China = "cn.actual.battlenet.com.cn"  # no idea which address
 
     @classmethod
-    def from_name(cls, name: str):
+    def from_name(cls, name: str) -> "Region | None":
         for key, value in cls.__members__.items():
             if name == key:
                 return value
@@ -30,7 +30,7 @@ class AuthMethod(enum.Enum):
     Steam = "steam"
 
     @classmethod
-    def from_name(cls, name: str):
+    def from_name(cls, name: str) -> "AuthMethod | None":
         for key, value in cls.__members__.items():
             if name == key:
                 return value
@@ -51,29 +51,29 @@ class Account(BaseModel):
     game_path: str | None = Field(default=None)
 
     @property
-    def id(self):
+    def id(self) -> str:
         if self.profile_name is not None:
             return self.profile_normalized
         return self.email_normalized
 
     @property
-    def displayname(self):
+    def displayname(self) -> str:
         if self.profile_name is None or self.profile_name == "":
             return self.email
         return self.profile_name
 
     @property
-    def email_normalized(self):
+    def email_normalized(self) -> str:
         return _normalize_str(self.email)
 
     @property
-    def profile_normalized(self):
+    def profile_normalized(self) -> str:
         if self.profile_name:
             return _normalize_str(self.profile_name)
         return ""
 
     @classmethod
-    def wineprefix_account(cls, settings: Setting, account: "Account"):
+    def wineprefix_account(cls, settings: Setting, account: "Account") -> Path:
         if account.auth_method == AuthMethod.Steam:
             return Path(Path.home(), ".steam/steam/steamapps/compatdata/2536520/pfx/")
         if account.profile_normalized:
@@ -87,13 +87,13 @@ class Account(BaseModel):
         )
 
     @classmethod
-    def game_path_account(cls, settings: Setting, account: "Account"):
+    def game_path_account(cls, settings: Setting, account: "Account") -> str:
         if account.game_path:
             return account.game_path
         return settings.game_path
 
     @classmethod
-    def default_account(cls):
+    def default_account(cls) -> "Account":
         return Account(
             profile_name=None,
             email="",
@@ -107,10 +107,10 @@ class Account(BaseModel):
         )
 
 
-def _normalize_str(s: str, delim: str = "-"):
+def _normalize_str(s: str, delim: str = "-") -> str:
     text = unidecode.unidecode(s)
     result: list[str] = []
     for word in _punct_re.split(text.lower()):
         if word:
             result.append(word)
-    return str(delim.join(result))
+    return delim.join(result)

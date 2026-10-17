@@ -32,13 +32,13 @@ class ProcessManager(QObject):
         self.threadpool = QThreadPool()
         self.threadpool: QThreadPool = QThreadPool()
 
-    def start(self, account: Account):
+    def start(self, account: Account) -> None:
         worker = Worker(self._start_instance, account)
         worker.signals.error.connect(self._handle_worker_error)
         worker.signals.success.connect(self._handle_worker_success)
         self.threadpool.start(worker)
 
-    def kill(self, pid: int):
+    def kill(self, pid: int) -> None:
         logger.info(f"Killing instance with pid: {pid}")
         parent = psutil.Process(pid)
         for child in parent.children(recursive=True):
@@ -68,17 +68,17 @@ class ProcessManager(QObject):
 
         return instances
 
-    def _handle_worker_error(self, err: tuple[Exception, str]):
+    def _handle_worker_error(self, err: tuple[Exception, str]) -> None:
         logger.debug(err)
         msg, *_ = err[0].args
         logger.error(f"Could not start instance due to: {msg}")
         self.process_error.emit(None, msg)
 
-    def _handle_worker_success(self, result: tuple[bool, Account | None, int]):
+    def _handle_worker_success(self, result: tuple[bool, Account | None, int]) -> None:
         logger.debug(f"Instance started: {result}")
         self.process_finished.emit(result[0], result[1], result[2])
 
-    def _start_instance(self, account: Account):
+    def _start_instance(self, account: Account) -> tuple[None, Account, int | None]:
         game_path = Account.game_path_account(self._state.settings.data, account)
         if not Path(game_path, "D2R.exe").exists():
             raise ProcessingError(f"Could not find 'D2R.exe' in '{game_path}'")
@@ -90,7 +90,7 @@ class ProcessManager(QObject):
 
         return None, account, pid
 
-    def _is_d2r_started(self, parent_pid: int):
+    def _is_d2r_started(self, parent_pid: int) -> bool:
         parent = psutil.Process(parent_pid)
         pid = None
         timeout = 30  # abort after 30 seconds
@@ -111,7 +111,7 @@ class ProcessManager(QObject):
 
     def _get_d2r_exe_pid(
         self, parent_pid: int | None, process: psutil.Process | None = None
-    ):
+    ) -> psutil.Process | None:
         if parent_pid is None and process is None:
             return None
 
@@ -130,7 +130,7 @@ class ProcessManager(QObject):
                 return child
         return None
 
-    def _rename_window_title(self, pid: int, account: Account):
+    def _rename_window_title(self, pid: int, account: Account) -> None:
         # Once Wine Wayland is stable enough to be mainstream we gotta switch to the
         # method below
         process = self._get_d2r_exe_pid(pid)
@@ -144,7 +144,7 @@ class ProcessManager(QObject):
         sleep(1)
         set_window_title(process.pid, window_title)
 
-    def _rename_window_title_wine(self, pid: int, account: Account):
+    def _rename_window_title_wine(self, pid: int, account: Account) -> None:
         process = self._get_d2r_exe_pid(pid)
         if process is None:
             logger.error(f"Couldn't set window title for pid {pid}. No process found.")
@@ -153,7 +153,7 @@ class ProcessManager(QObject):
         window_title = WINDOW_TITLE_FORMAT.format(
             account.displayname, account.region.value
         )
-        cmd = [
+        cmd: list[Path | str] = [
             self.umu_manager.umu_run,
             f"{CONFIG_BASE_DIR}/d2rreg.exe",
             "--rename-window",
@@ -163,4 +163,4 @@ class ProcessManager(QObject):
         output = run_wine_cmd(
             cmd, Account.wineprefix_account(self._state.settings.data, account)
         )
-        logger.trace(f"_rename_window_title_wine output stdout: {output.stdout}")
+        logger.trace(f"_rename_window_title_wine output stdout: {output.stdout!r}")
