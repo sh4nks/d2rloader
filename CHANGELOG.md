@@ -11,7 +11,7 @@ Released April 17rd, 2026
 - linux: Fix default Proton version if PROTONPATH has not been set (UMU-Latest) ([#28](https://github.com/sh4nks/d2rloader/issues/28))
 - windows: Fix a possible permission error when making a backup of Settings.json (-> Settings.json.bak)
 
-**Full Changelog**: [v1.6.1...v1.6.2](https://github.com/sh4nks/d2rloader/compare/v1.6.0...v1.6.1)
+**Full Changelog**: [v1.6.1...v1.6.2](https://github.com/sh4nks/d2rloader/compare/v1.6.1...v1.6.2)
 
 
 ## Version 1.6.1

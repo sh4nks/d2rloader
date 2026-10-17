@@ -43,7 +43,8 @@ jobs:
           replacesArtifacts: true
 
   release-appimage:
-    runs-on: ubuntu-latest
+    # The bundled Qt xcb libraries are copied from the runner, so its glibc sets the minimum glibc of the AppImage
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -55,9 +56,28 @@ jobs:
         run: |
           pip install python-appimage
 
+      - name: Install Qt xcb platform plugin dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 \
+            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
+            libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 \
+            libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xkb1
+
+      - name: Stage Qt xcb platform plugin dependencies next to the PySide6 Qt libraries
+        run: |
+          QT_LIB_DIR=appimage-extra/opt/python3.13/lib/python3.13/site-packages/PySide6/Qt/lib
+          mkdir -p "$QT_LIB_DIR"
+          for lib in libxkbcommon.so.0 libxkbcommon-x11.so.0 libxcb-cursor.so.0 \
+            libxcb-icccm.so.4 libxcb-image.so.0 libxcb-keysyms.so.1 libxcb-randr.so.0 \
+            libxcb-render.so.0 libxcb-render-util.so.0 libxcb-shape.so.0 libxcb-shm.so.0 \
+            libxcb-sync.so.1 libxcb-util.so.1 libxcb-xfixes.so.0 libxcb-xkb.so.1; do
+            cp -L "/usr/lib/x86_64-linux-gnu/$lib" "$QT_LIB_DIR/"
+          done
+
       - name: Build D2RLoader.AppImage
         run: |
-          python -m python_appimage build app -p 3.13 ./resources/appimage/
+          python -m python_appimage build app -p 3.13 ./resources/appimage/ -x appimage-extra/opt
           mv D2RLoader-x86_64.AppImage D2RLoader.AppImage
 
       - name: Add AppImage to Release
