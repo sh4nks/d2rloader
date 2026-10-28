@@ -442,7 +442,7 @@ wheels = [
 
 [[package]]
 name = "d2rloader"
-version = "1.6.2"
+version = "1.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "loguru" },

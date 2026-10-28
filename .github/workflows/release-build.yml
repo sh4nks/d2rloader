@@ -1,93 +1,150 @@
-name: Release - Build PyInstaller Package and AppImage
+name: Release
 
+# Pushing a tag "v<version>" builds the Windows package and the AppImage and
+# publishes them as a GitHub release. A tag with a suffix (e.g. v1.7.0-pre) is
+# published as a pre-release. Manual runs only build and upload the artifacts.
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.13"
 
 jobs:
-  release-windows:
-    runs-on: windows-latest
-
+  check:
+    name: Check release metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install the latest version of uv and set the python version
-        uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: 3.13
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Make PyInstaller Package
-        run: uv run --group windows pyinstaller resources/D2RLoader.spec --noconfirm
-
-      - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.6
-        with:
-          type: "zip"
-          filename: "D2RLoader.windows.zip"
-          path: "./dist/D2RLoader/*"
-
-      - name: Add release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "D2RLoader.windows.zip"
-          artifactErrorsFailBuild: true
-          allowUpdates: true
-          generateReleaseNotes: false
-          omitBody: true
-          omitBodyDuringUpdate: true
-          omitDraftDuringUpdate: true
-          replacesArtifacts: true
-
-  release-appimage:
-    # The bundled Qt xcb libraries are copied from the runner, so its glibc sets the minimum glibc of the AppImage
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
-
-      - name: Install python-appimage builder
+      - name: Read the project version
+        id: version
         run: |
-          pip install python-appimage
+          version="$(uv version --short)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            case "$GITHUB_REF_NAME" in
+              "v$version") echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+              "v$version"-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;;
+              *)
+                echo "::error::Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
+                exit 1
+                ;;
+            esac
+          fi
+
+      - name: Check that the changelog has notes for this version
+        run: uv run --no-project python resources/release_notes.py
+
+      - name: Check that the AppStream release list matches the changelog
+        run: |
+          uv run --no-project python resources/generate_appdata_releases.py \
+            --output-file resources/d2rloader.appdata.xml
+          git diff --exit-code resources/d2rloader.appdata.xml \
+            || { echo "::error::resources/d2rloader.appdata.xml is outdated, run 'make appdata-releases'"; exit 1; }
+
+  windows:
+    name: Build Windows package
+    needs: check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build with PyInstaller
+        run: uv run --locked --group windows pyinstaller resources/D2RLoader.spec --noconfirm
+
+      - name: Archive
+        run: 7z a -tzip D2RLoader.windows.zip ./dist/D2RLoader/*
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows
+          path: D2RLoader.windows.zip
+          if-no-files-found: error
+
+  appimage:
+    name: Build AppImage
+    needs: check
+    # The Qt xcb libraries are copied from the runner into the AppImage, so the
+    # runner's glibc sets the minimum glibc the AppImage runs on. Keep the
+    # oldest Ubuntu GitHub still offers.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Qt xcb platform plugin dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 \
-            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
-            libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 \
-            libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xkb1
+          sudo apt-get install -y --no-install-recommends \
+            libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render0 \
+            libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
+            libxcb-util1 libxcb-xfixes0 libxcb-xkb1
 
-      - name: Stage Qt xcb platform plugin dependencies next to the PySide6 Qt libraries
-        run: |
-          QT_LIB_DIR=appimage-extra/opt/python3.13/lib/python3.13/site-packages/PySide6/Qt/lib
-          mkdir -p "$QT_LIB_DIR"
-          for lib in libxkbcommon.so.0 libxkbcommon-x11.so.0 libxcb-cursor.so.0 \
-            libxcb-icccm.so.4 libxcb-image.so.0 libxcb-keysyms.so.1 libxcb-randr.so.0 \
-            libxcb-render.so.0 libxcb-render-util.so.0 libxcb-shape.so.0 libxcb-shm.so.0 \
-            libxcb-sync.so.1 libxcb-util.so.1 libxcb-xfixes.so.0 libxcb-xkb.so.1; do
-            cp -L "/usr/lib/x86_64-linux-gnu/$lib" "$QT_LIB_DIR/"
-          done
+      - name: Build and smoke test the AppImage
+        run: resources/appimage/build.sh
 
-      - name: Build D2RLoader.AppImage
-        run: |
-          python -m python_appimage build app -p 3.13 ./resources/appimage/ -x appimage-extra/opt
-          mv D2RLoader-x86_64.AppImage D2RLoader.AppImage
-
-      - name: Add AppImage to Release
-        uses: ncipollo/release-action@v1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          artifacts: "*.AppImage"
-          artifactErrorsFailBuild: true
-          allowUpdates: true
-          generateReleaseNotes: false
-          omitBody: true
-          omitBodyDuringUpdate: true
-          omitDraftDuringUpdate: true
-          replacesArtifacts: true
+          name: appimage
+          path: dist/D2RLoader.AppImage
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub release
+    if: github.ref_type == 'tag'
+    needs: [check, windows, appimage]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Write checksums and release notes
+        run: |
+          (cd assets && sha256sum -- * > SHA256SUMS)
+          python3 resources/release_notes.py "${{ needs.check.outputs.version }}" > notes.md
+          cat assets/SHA256SUMS notes.md
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          PRERELEASE: ${{ needs.check.outputs.prerelease }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" assets/* --clobber
+            gh release edit "$TAG" --notes-file notes.md --prerelease="$PRERELEASE"
+          else
+            gh release create "$TAG" assets/* --verify-tag --title "$TAG" \
+              --notes-file notes.md --prerelease="$PRERELEASE"
+          fi
