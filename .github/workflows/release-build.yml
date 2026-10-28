@@ -96,6 +96,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      # The xcb libraries get bundled into the AppImage. libegl1 and libgl1 are
+      # only needed on the runner so that the smoke test can import PySide6, as
+      # Qt expects them on the host and the AppImage does not bundle them.
       - name: Install Qt xcb platform plugin dependencies
         run: |
           sudo apt-get update
@@ -103,7 +106,7 @@ jobs:
             libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
             libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render0 \
             libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
-            libxcb-util1 libxcb-xfixes0 libxcb-xkb1
+            libxcb-util1 libxcb-xfixes0 libxcb-xkb1 libegl1 libgl1
 
       - name: Build and smoke test the AppImage
         run: resources/appimage/build.sh
