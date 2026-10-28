@@ -4,7 +4,7 @@ Here you can see the full list of changes between each release.
 
 ## Version 1.7.0
 
-Unreleased
+Released October 28th, 2026 
 
 ### Added
 

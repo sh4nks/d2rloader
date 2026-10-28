@@ -30,6 +30,48 @@
 
   <content_rating type="oars-1.0" />
   <releases>
+    <release version="1.7.0" date="2026-10-28">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>Add option in <code>Profile/Account Settings -&gt; Game Path</code> to use a different D2R installation for this profile. If left empty, the Game Path from <code>File -&gt; Settings</code> is used. (#35)</li>
+        </ul>
+        <p>Fixed</p>
+        <ul>
+          <li>windows: Fix <code>d2rloader.exe</code> failing to start when a different OpenSSL version is installed in <code>System32</code>. D2RLoader now uses the Windows-native TLS backend instead of the bundled OpenSSL. (#29) UNTESTED</li>
+          <li>linux: Fix a crash on startup when <code>wmctrl</code> is not installed. We are showing a warning now instead. (#39)</li>
+          <li>linux: Fix the AppImage not starting on systems where the libraries needed by Qt's xcb platform plugin (e.g. <code>libxcb-cursor</code>) are not installed</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.6.2" date="2026-04-17">
+      <description>
+        <p>Fixed</p>
+        <ul>
+          <li>linux: Fix default Proton version if PROTONPATH has not been set (UMU-Latest) (#28)</li>
+          <li>windows: Fix a possible permission error when making a backup of Settings.json (-&gt; Settings.json.bak)</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.6.1" date="2026-04-14">
+      <description>
+        <p>Fixed</p>
+        <ul>
+          <li>linux: Fix populating PROTONPATH in File -&gt; Settings. (#26)</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.6.0" date="2026-04-13">
+      <description>
+        <p>Added</p>
+        <p>This is a release which only contains Linux-related things.</p>
+        <p>Recently, Valve's Proton version got updated and it contains a bug which prevents one to maximize Windowed D2R instances (i.e. double click on title bar). I found out however, that GE-Proton allows one to resize D2R Windows freely... so I implemented those settings. See the UMU-Launcher README for a list of possible values.</p>
+        <ul>
+          <li>linux: Add option in <code>File -&gt; Settings -&gt; PROTONPATH</code> to set a default Proton version for all profiles.</li>
+          <li>linux: Add option in <code>Profile/Account Settings -&gt; PROTONPATH</code> to use a different Proton version for this profile.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.5.2" date="2026-03-04">
       <description>
         <p>Fixed</p>
@@ -165,8 +207,8 @@
         <p>Added</p>
         <ul>
           <li>Windows: Game Settings Switcher - Custom game settings for each profile</li>
-          <li>Windows: Download and set up <code>handle.exe</code> via a button (Account Settings -> Download)</li>
-          <li>Added Advanced Settings (File -> Settings) - Configure the D2Emu Token, Log Settings and the WINEPREFIX from within the App</li>
+          <li>Windows: Download and set up <code>handle.exe</code> via a button (Account Settings -&gt; Download)</li>
+          <li>Added Advanced Settings (File -&gt; Settings) - Configure the D2Emu Token, Log Settings and the WINEPREFIX from within the App</li>
         </ul>
         <p>Fixed/Improved</p>
         <ul>
