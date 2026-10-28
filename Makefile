@@ -1,4 +1,4 @@
-.PHONY: clean build format run help
+.PHONY: clean build appimage release-notes appdata-releases format run help
 .DEFAULT_GOAL := help
 
 help: ## Displays this help message.
@@ -10,6 +10,9 @@ run: ## Runs the development server with the development config
 appdata-releases: ## Update appdata releases section
 	python resources/generate_appdata_releases.py --output-file resources/d2rloader.appdata.xml
 
+release-notes: ## Print the changelog section of the current version
+	python resources/release_notes.py
+
 format: ## Sorts the imports and reformats the code
 	# sort imports / remove unused
 	uv run ruff check --fix --select I
@@ -20,6 +23,9 @@ format: ## Sorts the imports and reformats the code
 build: ## Creates distribution packages (bdist_wheel, sdist)
 	uv sync --group build
 	uv build
+
+appimage: ## Builds dist/D2RLoader.AppImage from the current checkout
+	resources/appimage/build.sh
 
 clean: ## Remove unwanted stuff such as __pycache__, etc...
 	find . -name '*.pyc' -exec rm -f {} +

@@ -22,7 +22,7 @@ env:
 jobs:
   check:
     name: Check release metadata
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       version: ${{ steps.version.outputs.version }}
       prerelease: ${{ steps.version.outputs.prerelease }}
@@ -121,7 +121,7 @@ jobs:
     name: Publish GitHub release
     if: github.ref_type == 'tag'
     needs: [check, windows, appimage]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     steps:
