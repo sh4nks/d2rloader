@@ -30,6 +30,15 @@
 
   <content_rating type="oars-1.0" />
   <releases>
+    <release version="1.7.1" date="2026-10-30">
+      <description>
+        <p>Fixed</p>
+        <ul>
+          <li>Fix <code>Settings</code> menu not opening due to Qt being upgraded earlier</li>
+          <li>linux: Fix AppImage build. See appimage.github.io#4912.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.7.0" date="2026-10-28">
       <description>
         <p>Added</p>

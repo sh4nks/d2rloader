@@ -2,6 +2,18 @@
 
 Here you can see the full list of changes between each release.
 
+## Version 1.7.1
+
+Released October 30th, 2026
+
+### Fixed
+
+- Fix ``Settings`` menu not opening due to Qt being upgraded earlier
+- linux: Fix AppImage build. See [appimage.github.io#4912](https://github.com/AppImage/appimage.github.io/pull/4912#issuecomment-6479915277).
+
+**Full Changelog**: [v1.7.0...v1.7.1](https://github.com/sh4nks/d2rloader/compare/v1.7.0...v1.7.1)
+
+
 ## Version 1.7.0
 
 Released October 28th, 2026 

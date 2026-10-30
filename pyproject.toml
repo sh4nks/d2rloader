@@ -1,11 +1,11 @@
 [project]
 name = "d2rloader"
-version = "1.7.0"
+version = "1.7.1"
 dependencies = [
   "loguru>=0.7.3",
   "pluggy>=1.7.0",
   "psutil>=7.2.2",
-  "pydantic>=2.14.1",
+  "pydantic>=2.14.2",
   "PySide6>=6.12.0",
   "pywin32>=312; platform_system == 'Windows'",
   "unidecode>=1.4.0",
