@@ -262,7 +262,7 @@ class SettingDialogWidget(QDialog):
             return result
 
         default_style_name = parent.style().objectName().lower()
-        for style in QStyleFactory:
+        for style in QStyleFactory.keys():
             if style.lower() == default_style_name:
                 result.insert(0, style)
             else:
