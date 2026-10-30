@@ -8,6 +8,15 @@
 # links against (libxcb-cursor, libxcb-icccm, ...). Those are copied from the
 # build host into the bundled Qt lib directory, which is why the host's glibc
 # sets the minimum glibc of the resulting AppImage.
+#
+# python-appimage assembles the AppDir from an --appimage-extract of its base
+# Python AppImage. Since type2-runtime 8f39b89 that extraction creates every
+# directory with mode 0700, which appimagetool then packs as is. Such an
+# AppImage still runs via FUSE, which does not enforce permissions, but not
+# where the squashfs is kernel-mounted and run as another user, e.g. inside
+# firejail ("AppRun: Permission denied"). So the AppDir is made world-readable
+# before packaging, and the smoke test checks the modes stored in the AppImage
+# with unsquashfs (squashfs-tools), since --appimage-extract would not show them.
 set -euo pipefail
 
 PYTHON_VERSION="${PYTHON_VERSION:-3.13}"
@@ -19,6 +28,7 @@ BUILD_DIR="$ROOT/build/appimage"
 APP_DIR="$BUILD_DIR/d2rloader"
 EXTRA_DIR="$BUILD_DIR/extra"
 QT_LIB_DIR="$EXTRA_DIR/opt/python$PYTHON_VERSION/lib/python$PYTHON_VERSION/site-packages/PySide6/Qt/lib"
+APPDIR_OUT="$BUILD_DIR/D2RLoader-$ARCH"
 OUTPUT="$ROOT/dist/D2RLoader.AppImage"
 
 QT_XCB_LIBS=(
@@ -45,6 +55,13 @@ find_library() {
   ldconfig -p | awk -v lib="$1" '$1 == lib && !found { print $NF; found = 1 }'
 }
 
+run_python() {
+  uv run --locked --only-group linux --project "$ROOT" python "$@"
+}
+
+command -v unsquashfs > /dev/null \
+  || { echo "error: unsquashfs (squashfs-tools) is required for the smoke test" >&2; exit 1; }
+
 log "Preparing $BUILD_DIR"
 rm -rf "$BUILD_DIR"
 mkdir -p "$APP_DIR" "$QT_LIB_DIR" "$(dirname "$OUTPUT")"
@@ -69,21 +86,34 @@ for lib in "${QT_XCB_LIBS[@]}"; do
   cp -L "$path" "$QT_LIB_DIR/"
 done
 
-log "Building AppImage with python-appimage"
+log "Building AppDir with python-appimage"
 (
   cd "$BUILD_DIR"
-  uv run --locked --only-group linux --project "$ROOT" \
-    python -m python_appimage build app \
+  run_python -m python_appimage build app \
     --python-version "$PYTHON_VERSION" \
+    --no-packaging \
     "$APP_DIR" \
     --extra-data "$EXTRA_DIR/opt"
 )
-mv "$BUILD_DIR/D2RLoader-$ARCH.AppImage" "$OUTPUT"
+
+log "Making $APPDIR_OUT world-readable"
+chmod -R a+rX "$APPDIR_OUT"
+
+log "Packaging $APPDIR_OUT with appimagetool"
+run_python -c 'import sys; from python_appimage.appimage import build_appimage; build_appimage(sys.argv[1], destination=sys.argv[2])' \
+  "$APPDIR_OUT" "$OUTPUT"
 
 log "Smoke testing $OUTPUT"
 (
   cd "$BUILD_DIR"
-  "$OUTPUT" --appimage-extract > /dev/null
+  rm -rf squashfs-root
+  unsquashfs -no-progress -d squashfs-root -offset "$("$OUTPUT" --appimage-offset)" "$OUTPUT" > /dev/null
+  not_world_readable="$(find squashfs-root ! -perm -o=r -o -type d ! -perm -o=x)"
+  if [ -n "$not_world_readable" ]; then
+    echo "error: not world-readable inside the AppImage:" >&2
+    echo "$not_world_readable" >&2
+    exit 1
+  fi
   bundled_version="$(
     squashfs-root/usr/bin/python"$PYTHON_VERSION" -I -c \
       'import importlib.metadata, d2rloader.app; print(importlib.metadata.version("d2rloader"))'
